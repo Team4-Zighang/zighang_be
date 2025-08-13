@@ -3,6 +3,7 @@ package com.zighang.core.presentation.controller
 import com.zighang.core.exception.DomainException
 import com.zighang.core.presentation.RestResponse
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

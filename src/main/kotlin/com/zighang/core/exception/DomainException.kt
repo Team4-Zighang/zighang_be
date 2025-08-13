@@ -7,14 +7,16 @@ class DomainException(
     override val message: String,
 ): RuntimeException(message){
 
-    private var httpStatus: HttpStatus? = null
-    private var code: String? = null
+    var httpStatus: HttpStatus? = null
+        private set
+    var code: String? = null
+        private set
 
     constructor(message: String, httpStatus: HttpStatus): this(message) {
         this.httpStatus = httpStatus
     }
 
-    constructor(message: String, baseErrorCode: BaseErrorCode<*>): this(baseErrorCode.name()){
+    constructor(baseErrorCode: BaseErrorCode<*>): this(baseErrorCode.name()){
         this.httpStatus = baseErrorCode.getHttpStatus()
         this.code = baseErrorCode.name()
     }
