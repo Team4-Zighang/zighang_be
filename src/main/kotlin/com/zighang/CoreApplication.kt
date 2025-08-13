@@ -1,4 +1,4 @@
-package com.zighang.core
+package com.zighang
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
