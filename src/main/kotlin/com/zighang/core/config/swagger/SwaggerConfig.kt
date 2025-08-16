@@ -76,8 +76,8 @@ class SwaggerConfig(
             errorCodes.forEach { baseErrorCode  ->
                 val holder = ExampleHolder(
                     holder = getSwaggerExample(baseErrorCode),
-                    code = baseErrorCode.getHttpStatus().value(),
-                    name = baseErrorCode.name()
+                    code = baseErrorCode.httpStatus.value(),
+                    name = baseErrorCode.name
                 )
                 exampleHolders.add(holder)
             }
@@ -91,7 +91,7 @@ class SwaggerConfig(
     private fun getSwaggerExample(baseErrorCode: BaseErrorCode<*>): Example {
 
         val errorResponse = ErrorResponse.createSwaggerResponse(
-            baseErrorCode.getHttpStatus().value(),
+            baseErrorCode.httpStatus.value(),
             baseErrorCode.toException()
         )
 
