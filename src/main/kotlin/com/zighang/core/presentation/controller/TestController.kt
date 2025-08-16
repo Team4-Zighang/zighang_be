@@ -1,5 +1,6 @@
 package com.zighang.core.presentation.controller
 
+import com.zighang.core.config.swagger.ApiErrorCode
 import com.zighang.core.exception.DomainException
 import com.zighang.core.presentation.RestResponse
 import org.springframework.http.ResponseEntity
