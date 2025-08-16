@@ -4,11 +4,11 @@ import org.springframework.http.HttpStatus
 
 interface BaseErrorCode<T: Exception> {
 
-    fun name(): String;
+    val name: String;
 
-    fun getMessage() : String;
+    val message: String;
 
-    fun getHttpStatus(): HttpStatus;
+    val httpStatus: HttpStatus;
 
     fun toException(): T;
 }

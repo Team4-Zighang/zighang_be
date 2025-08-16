@@ -16,8 +16,8 @@ class DomainException(
         this.httpStatus = httpStatus
     }
 
-    constructor(baseErrorCode: BaseErrorCode<*>): this(baseErrorCode.name()){
-        this.httpStatus = baseErrorCode.getHttpStatus()
-        this.code = baseErrorCode.name()
+    constructor(baseErrorCode: BaseErrorCode<*>): this(baseErrorCode.name){
+        this.httpStatus = baseErrorCode.httpStatus
+        this.code = baseErrorCode.name
     }
 }
