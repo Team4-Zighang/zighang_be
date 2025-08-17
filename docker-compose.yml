@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  server:
+    image: "${NCP_CONTAINER_REGISTRY}/core:${GITHUB_SHA}"
+    container_name: core
+    environment:
+      TZ: Asia/Seoul
+    ports:
+      - '8080:8080'
+    depends_on:
+      - redis
+    networks:
+      - core-network
+  redis:
+    image: redis:6.0.9
+    container_name: core-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    networks:
+      - core-network
+
+volumes:
+  redis-data:
+
+networks:
+  capstone-backend-network:
+    driver: bridge
