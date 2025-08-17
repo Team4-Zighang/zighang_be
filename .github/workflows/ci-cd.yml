@@ -64,6 +64,18 @@ jobs:
       - name: Docker Compose 파일 NCP 서버로 전송
         run: scp -o StrictHostKeyChecking=no -P ${{ secrets.NCP_PORT }} docker-compose.yml ${{ secrets.NCP_USERNAME }}@${{ secrets.NCP_HOST }}:./
 
+      - name: Copy application.yml to server
+        run: |
+          scp -P ${{ secrets.NCP_PORT }} -o StrictHostKeyChecking=no \
+            src/main/resources/secret/application.yml \
+            ${{ secrets.NCP_USERNAME }}@${{ secrets.NCP_HOST }}:/root/application.yml
+
+      - name: Copy application-main.yml to server
+        run: |
+          scp -P ${{ secrets.NCP_PORT }} -o StrictHostKeyChecking=no \
+            src/main/resources/secret/application-main.yml \
+            ${{ secrets.NCP_USERNAME }}@${{ secrets.NCP_HOST }}:/root/application-main.yml
+
       - name: Deploy to main
         if: contains(github.ref, 'main')
         uses: appleboy/ssh-action@master

@@ -4,8 +4,11 @@ services:
   server:
     image: "${NCP_CONTAINER_REGISTRY}/core:${GITHUB_SHA}"
     container_name: core
+    volumes:
+      - /root/application.yml:/config/application.yml:ro
     environment:
       TZ: Asia/Seoul
+      SPRING_CONFIG_ADDITIONAL_LOCATION: "file:/config/"
     ports:
       - '8080:8080'
     depends_on:
