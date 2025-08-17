@@ -26,5 +26,5 @@ volumes:
   redis-data:
 
 networks:
-  capstone-backend-network:
+  core-network:
     driver: bridge
