@@ -6,9 +6,11 @@ services:
     container_name: core
     volumes:
       - /root/application.yml:/config/application.yml:ro
+      - /root/app/application-main.yml:/config/application-main.yml:ro
     environment:
       TZ: Asia/Seoul
       SPRING_CONFIG_ADDITIONAL_LOCATION: "file:/config/"
+      SPRING_PROFILES_ACTIVE: "main"
     ports:
       - '8080:8080'
     depends_on:
