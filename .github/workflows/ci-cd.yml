@@ -59,8 +59,8 @@ jobs:
       - name: Docker Compose 파일 NCP 서버로 전송
         run: scp -o StrictHostKeyChecking=no -P ${{ secrets.NCP_PORT }} docker-compose.yml ${{ secrets.NCP_USERNAME }}@${{ secrets.NCP_HOST }}:./
 
-      - name: NCP 접속 후 이미지 다운로드 및 배포
-        if: success()
+      - name: Deploy to main
+        if: contains(github.ref, 'main')
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.NCP_HOST }}
