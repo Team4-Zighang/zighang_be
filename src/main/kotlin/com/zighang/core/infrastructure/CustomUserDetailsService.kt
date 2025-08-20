@@ -1,5 +1,6 @@
-package com.zighang.core.infrastructure.filter
+package com.zighang.core.infrastructure
 
+import com.zighang.core.infrastructure.CustomUserDetails
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 

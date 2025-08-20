@@ -1,4 +1,4 @@
-package com.zighang.core.infrastructure.filter
+package com.zighang.core.infrastructure
 
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority

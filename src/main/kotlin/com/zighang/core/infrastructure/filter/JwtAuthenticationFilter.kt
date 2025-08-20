@@ -1,5 +1,6 @@
 package com.zighang.core.infrastructure.filter
 
+import com.zighang.core.infrastructure.CustomUserDetailsService
 import com.zighang.core.jwt.TokenService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
