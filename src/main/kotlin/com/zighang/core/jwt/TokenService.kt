@@ -14,9 +14,14 @@ class TokenService(
     val AUDIENCE = jwtProperties.audience
     val SECRET_KEY = Keys.hmacShaKeyFor(jwtProperties.secretKey.toByteArray(Charsets.UTF_8))
     val ACCESS_TOKEN_EXPIRATION = jwtProperties.accessTokenExpiration
+    val REFRESH_TOKEN_EXPIRATION = jwtProperties.refreshTokenExpiration
 
     fun provideAccessToken(userId: Long, role: String): String {
         return createToken(userId, role, ACCESS_TOKEN_EXPIRATION, Type.ACCESS)
+    }
+
+    fun provideRefreshToken(userId: Long, role: String): String {
+        return createToken(userId, role, REFRESH_TOKEN_EXPIRATION, Type.REFRESH)
     }
 
     fun getMemberIdFromToken(token: String): Long {
@@ -46,7 +51,7 @@ class TokenService(
             .audience().add(AUDIENCE).and()
             .subject(userId.toString())
             .claim("type", type.name)
-            .claim("role", role)
+            .claim("Role", role)
             .issuedAt(Date())
             .expiration(expiryDate)
             .signWith(SECRET_KEY)

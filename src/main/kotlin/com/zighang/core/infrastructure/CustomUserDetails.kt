@@ -14,7 +14,7 @@ class CustomUserDetails(
     }
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         return mutableListOf(SimpleGrantedAuthority("ROLE_ADMIN"))
-//        return mutableListOf(SimpleGrantedAuthority("ROLE_${member.role.name}"))
+//        return mutableListOf(SimpleGrantedAuthority("ROLE_${member.Role.name}"))
     }
 
     override fun getPassword(): String {

@@ -42,14 +42,12 @@ class CustomOAuth2UserService(
         val existingMember = memberRepository.findByEmail(email)
 
         if(existingMember != null) {
-            println("name = ${existingMember.name} 로그인 완료")
             return CustomOAuth2User(userDto)
         } else {
             val newMember = Member.create(
                 name, email, profileImage
             )
             memberRepository.save(newMember)
-            println("name = ${newMember.name} 가입 완료")
         }
 
         return CustomOAuth2User(userDto)
