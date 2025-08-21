@@ -4,6 +4,8 @@ import com.zighang.core.oauth.CustomOAuth2User
 import com.zighang.core.oauth.dto.KaKaoResponse
 import com.zighang.core.oauth.dto.UserDto
 import com.zighang.core.oauth.exception.OAuth2ErrorCode
+import com.zighang.member.entity.Member
+import com.zighang.member.repository.MemberRepository
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
 import org.springframework.security.oauth2.core.user.OAuth2User
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CustomOAuth2UserService(
-    // TODO : MemberRepository 채워넣기
+    private val memberRepository: MemberRepository
 ) : DefaultOAuth2UserService() {
 
     override fun loadUser(oAuth2UserRequest: OAuth2UserRequest) : CustomOAuth2User {
@@ -23,7 +25,6 @@ class CustomOAuth2UserService(
             else -> throw OAuth2ErrorCode.OAUTH2_PROVIDER_ERROR.toException()
         }
 
-        // TODO : 이메일로 유저 찾아서 없으면 가입시키고, 있으면 로그인 진행
         val email = oAuth2UserResponse.getEmail()
         val name = oAuth2UserResponse.getName()
         val profileImage = oAuth2UserResponse.getProfileImage()
@@ -37,6 +38,19 @@ class CustomOAuth2UserService(
             profileImage = profileImage,
             userId = username.toLong()
         )
+
+        val existingMember = memberRepository.findByEmail(email)
+
+        if(existingMember != null) {
+            println("name = ${existingMember.name} 로그인 완료")
+            return CustomOAuth2User(userDto)
+        } else {
+            val newMember = Member.create(
+                name, email, profileImage
+            )
+            memberRepository.save(newMember)
+            println("name = ${newMember.name} 가입 완료")
+        }
 
         return CustomOAuth2User(userDto)
     }
