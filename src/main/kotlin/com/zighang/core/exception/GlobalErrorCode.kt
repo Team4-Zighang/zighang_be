@@ -13,6 +13,6 @@ enum class GlobalErrorCode(
 
 
     override fun toException(): DomainException {
-        return DomainException(message)
+        return DomainException(this)
     }
 }

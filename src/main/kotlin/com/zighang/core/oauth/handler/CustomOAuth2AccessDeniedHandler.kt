@@ -6,7 +6,6 @@ import com.zighang.core.presentation.ErrorResponse
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.web.access.AccessDeniedHandler
@@ -26,16 +25,15 @@ class CustomOAuth2AccessDeniedHandler(
         if(response.isCommitted) return;
 
 
-        val httpStatusForResponse = OAuth2ErrorCode.OAUTH2_UNAUTHORIZED_ERROR.httpStatus
-        val customErrorCodeName = "ACCESS_DENIED_ERROR"
-        val customErrorMessage = "해당 자원에 접근할 권한이 없습니다."
+        val httpStatusForResponse = OAuth2ErrorCode.OAUTH2_UNAUTHORIZED_ERROR
 
         val errorResponse = ErrorResponse(
-            statusCode = HttpStatus.FORBIDDEN.value(),
-            code = customErrorCodeName,
-            message = customErrorMessage,
+            statusCode = httpStatusForResponse.httpStatus.value(),
+            code = httpStatusForResponse.httpStatus.name,
+            message = httpStatusForResponse.message,
         )
-        response.status = httpStatusForResponse.value() // 403 Forbidden
+
+        response.status = httpStatusForResponse.httpStatus.value()
         response.contentType = MediaType.APPLICATION_JSON_VALUE
         response.characterEncoding = Charsets.UTF_8.name()
 

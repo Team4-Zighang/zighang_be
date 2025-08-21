@@ -13,9 +13,9 @@ enum class OAuth2ErrorCode (
     IS_NOT_OAUTH2_USER(HttpStatus.INTERNAL_SERVER_ERROR, "oAuth2 사용자가 아닙니다."),
     CANNOT_FIND_EMAIL_IN_KAKAO(HttpStatus.NOT_FOUND, "카카오 이메일 정보를 찾을 수 없습니다."),
     CANNOT_FIND_NICKNAME_IN_KAKAO(HttpStatus.NOT_FOUND, "카카오 닉네임 정보를 찾을 수 없습니다."),
-    OAUTH2_UNAUTHORIZED_ERROR(HttpStatus.FORBIDDEN, "인증이 완료되지 않았습니다.");
+    OAUTH2_UNAUTHORIZED_ERROR(HttpStatus.FORBIDDEN, "해당 자원에 접근할 권한이 없습니다.");
 
     override fun toException(): DomainException {
-        return DomainException(message)
+        return DomainException(this)
     }
 }
