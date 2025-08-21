@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.web.access.AccessDeniedHandler
+import org.springframework.stereotype.Component
 
+@Component
 class CustomOAuth2AccessDeniedHandler(
     private val objectMapper : ObjectMapper
 ) : AccessDeniedHandler {
@@ -23,7 +25,6 @@ class CustomOAuth2AccessDeniedHandler(
     ) {
 
         if(response.isCommitted) return;
-
 
         val httpStatusForResponse = OAuth2ErrorCode.OAUTH2_UNAUTHORIZED_ERROR
 

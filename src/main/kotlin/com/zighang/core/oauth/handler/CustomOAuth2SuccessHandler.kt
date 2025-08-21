@@ -4,12 +4,16 @@ import com.zighang.core.oauth.CustomOAuth2User
 import com.zighang.core.oauth.exception.OAuth2ErrorCode
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
+import org.springframework.stereotype.Component
 
+@Component
 class CustomOAuth2SuccessHandler(
     // token, repository, redirectUrl
-    private val redirectUrl : String
+    @Value("\${oauth2.redirect-url}")
+    private val redirectUrl: String,
 ) : SimpleUrlAuthenticationSuccessHandler() {
 
     override fun onAuthenticationSuccess(
@@ -24,7 +28,5 @@ class CustomOAuth2SuccessHandler(
         }
 
         // token 설정 해주기
-
-        response?.sendRedirect(redirectUrl)
     }
 }
