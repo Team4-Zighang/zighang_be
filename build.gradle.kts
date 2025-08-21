@@ -29,6 +29,18 @@ dependencies {
     // swagger
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 
+    //security
+    implementation("org.springframework.boot:spring-boot-starter-security")
+
+    //jwt
+    implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+    implementation("io.jsonwebtoken:jjwt-impl:0.12.6")
+    implementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
+    // redis
+    implementation("org.springframework.boot:spring-boot-starter-data-redis:3.3.10")
+    implementation("org.redisson:redisson:3.44.0")
+
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
