@@ -9,7 +9,10 @@ enum class GlobalErrorCode(
 ) : BaseErrorCode<DomainException> {
 
     // 예시 에러 코드
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 오류가 발생했습니다.");
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 오류가 발생했습니다."),
+    INVALID_REFRESH_TOKEN(HttpStatus.FORBIDDEN, "유효한 리프레쉬 토큰이 아닙니다."),
+    NOT_EXIST_MEMBER(HttpStatus.BAD_REQUEST, "해당 멤버가 존재하지 않습니다.");
+
 
 
     override fun toException(): DomainException {
