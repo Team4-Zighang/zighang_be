@@ -18,6 +18,10 @@ class Member (
 
     @Column(name = "profile_image_url")
     var profileImageUrl: String?,
+
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    var role: Role,
 ) : BaseEntity() {
 
     companion object {
@@ -25,11 +29,13 @@ class Member (
             name: String,
             email: String,
             profileImageUrl: String?,
+            role: Role = Role.GUEST,
         ): Member {
             return Member(
                 name = name,
                 email = email,
                 profileImageUrl = profileImageUrl ?: "",
+                role = role
             )
         }
     }
