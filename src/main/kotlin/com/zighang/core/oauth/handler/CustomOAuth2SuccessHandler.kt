@@ -36,18 +36,18 @@ class CustomOAuth2SuccessHandler(
         }
 
         val userId = principal.getUserId()
-        val role = principal.authorities.firstOrNull()?.authority
-        val accessToken = tokenService.provideAccessToken(userId, role ?: "GUEST")
-        val refreshToken = tokenService.provideRefreshToken(userId, role ?: "GUEST")
-
         val existingMember = memberRepository.findByEmail(principal.getEmail())
+        val roleName = (existingMember?.role ?: com.zighang.member.entity.Role.GUEST).name
+        val accessToken = tokenService.provideAccessToken(userId, roleName)
+        val refreshToken = tokenService.provideRefreshToken(userId, roleName)
+
 
         val tokenDto = existingMember?.let {
             TokenResponseDto(
                 accessToken = accessToken,
                 refreshToken = refreshToken,
                 name = it.name,
-                role = it.role,
+                role = roleName,
             )
         }
 
