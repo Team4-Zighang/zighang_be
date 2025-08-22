@@ -24,7 +24,7 @@ class JwtAuthenticationFilter(
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val excludedPaths = listOf(
-            "/v1/auth", "/v1/oauth", "/swagger", "/v3/api-docs", "/api-docs"
+            "/swagger", "/v3/api-docs", "/api-docs", "/oauth2/**", "/login/oauth2/**"
         )
         return excludedPaths.any { path ->
             request.requestURI.startsWith(path) || request.requestURI == path

@@ -1,6 +1,7 @@
 package com.zighang.core.oauth.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.zighang.core.exception.DomainException
 import com.zighang.core.jwt.TokenService
 import com.zighang.core.oauth.CustomOAuth2User
 import com.zighang.core.oauth.dto.TokenResponseDto
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
+import org.springframework.web.util.UriComponentsBuilder
 
 @Component
 class CustomOAuth2SuccessHandler(
@@ -21,7 +23,6 @@ class CustomOAuth2SuccessHandler(
     private val memberRepository: MemberRepository,
     @Value("\${oauth2.redirect-url}")
     private val redirectUrl: String,
-    private val objectMapper: ObjectMapper
 ) : SimpleUrlAuthenticationSuccessHandler() {
 
     override fun onAuthenticationSuccess(
@@ -35,27 +36,18 @@ class CustomOAuth2SuccessHandler(
             throw OAuth2ErrorCode.IS_NOT_OAUTH2_USER.toException()
         }
 
-        val userId = principal.getUserId()
         val existingMember = memberRepository.findByEmail(principal.getEmail())
+        val userId = principal.getUserId()
+        println(userId)
         val roleName = (existingMember?.role ?: com.zighang.member.entity.Role.GUEST).name
         val accessToken = tokenService.provideAccessToken(userId, roleName)
         val refreshToken = tokenService.provideRefreshToken(userId, roleName)
 
+        val targetUrl = UriComponentsBuilder.fromUriString(redirectUrl)
+            .queryParam("accessToken", accessToken)
+            .queryParam("refreshToken", refreshToken)
+            .build().toUriString()
 
-        val tokenDto = existingMember?.let {
-            TokenResponseDto(
-                accessToken = accessToken,
-                refreshToken = refreshToken,
-                name = it.name,
-                role = roleName,
-            )
-        }
-
-        response?.apply {
-            status = HttpStatus.OK.value()
-            contentType = MediaType.APPLICATION_JSON_VALUE
-            characterEncoding = Charsets.UTF_8.name()
-            writer.write(objectMapper.writeValueAsString(tokenDto))
-        }
+        super.getRedirectStrategy().sendRedirect(request, response, targetUrl)
     }
 }
