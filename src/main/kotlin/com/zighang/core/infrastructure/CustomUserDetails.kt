@@ -16,10 +16,10 @@ class CustomUserDetails(
     }
 
     override fun getPassword(): String {
-        TODO("Not yet implemented")
+        return "";
     }
 
     override fun getUsername(): String {
-        TODO("Not yet implemented")
+        return member.name
     }
 }

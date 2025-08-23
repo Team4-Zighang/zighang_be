@@ -8,7 +8,6 @@ import com.zighang.member.entity.Member
 import com.zighang.member.repository.MemberRepository
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest
-import org.springframework.security.oauth2.core.user.OAuth2User
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,6 +16,7 @@ class CustomOAuth2UserService(
 ) : DefaultOAuth2UserService() {
 
     override fun loadUser(oAuth2UserRequest: OAuth2UserRequest) : CustomOAuth2User {
+        println("loadUser 실행")
         val oAuth2User = super.loadUser(oAuth2UserRequest)
 
         val registrationId = oAuth2UserRequest.clientRegistration.registrationId
@@ -30,26 +30,34 @@ class CustomOAuth2UserService(
         val profileImage = oAuth2UserResponse.getProfileImage()
         val username = oAuth2UserResponse.getProviderId()
 
-        val userDto = UserDto(
-            registrationId = registrationId,
-            name = name,
-            username = username,
-            email = email,
-            profileImage = profileImage,
-            userId = username.toLong()
-        )
-
         val existingMember = memberRepository.findByEmail(email)
 
         if(existingMember != null) {
-            return CustomOAuth2User(userDto)
+            return CustomOAuth2User(
+                UserDto(
+                    registrationId = registrationId,
+                    name = name,
+                    username = username,
+                    email = email,
+                    profileImage = profileImage,
+                    userId = existingMember.id
+                )
+            )
         } else {
             val newMember = Member.create(
                 name, email, profileImage
             )
             memberRepository.save(newMember)
+            return CustomOAuth2User(
+                UserDto(
+                    registrationId = registrationId,
+                    name = name,
+                    username = username,
+                    email = email,
+                    profileImage = profileImage,
+                    userId = newMember.id
+                )
+            )
         }
-
-        return CustomOAuth2User(userDto)
     }
 }
