@@ -1,6 +1,7 @@
 package com.zighang.member.entity
 
 import com.zighang.core.infrastructure.jpa.shared.BaseEntity
+import com.zighang.member.entity.value.Role
 import jakarta.persistence.*
 
 @Entity
@@ -9,6 +10,9 @@ class Member (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0L,
+
+    @Column(name = "onboarding_id", nullable = true)
+    var onboardingId: Long?,
 
     @Column(name = "name", nullable = false)
     var name: String,
@@ -35,8 +39,16 @@ class Member (
                 name = name,
                 email = email,
                 profileImageUrl = profileImageUrl ?: "",
-                role = role
+                role = role,
+                onboardingId = null
             )
         }
+    }
+
+    fun completeOnboarding(
+        onboarding: Onboarding,
+    ) {
+        this.onboardingId = onboarding.id
+        this.role = Role.MEMBER
     }
 }
