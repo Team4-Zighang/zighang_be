@@ -44,8 +44,6 @@ class CustomOAuth2SuccessHandler(
             .queryParam("refreshToken", refreshToken)
             .build().toUriString()
 
-        println(accessToken)
-
         super.getRedirectStrategy().sendRedirect(request, response, targetUrl)
     }
 }
