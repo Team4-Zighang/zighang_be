@@ -1,17 +1,13 @@
 package com.zighang.core.oauth.handler
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.zighang.core.exception.DomainException
 import com.zighang.core.jwt.TokenService
 import com.zighang.core.oauth.CustomOAuth2User
-import com.zighang.core.oauth.dto.TokenResponseDto
 import com.zighang.core.oauth.exception.OAuth2ErrorCode
+import com.zighang.member.entity.value.Role
 import com.zighang.member.repository.MemberRepository
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import org.springframework.stereotype.Component
@@ -39,7 +35,7 @@ class CustomOAuth2SuccessHandler(
         val existingMember = memberRepository.findByEmail(principal.getEmail())
         val userId = principal.getUserId()
         println(userId)
-        val roleName = (existingMember?.role ?: com.zighang.member.entity.Role.GUEST).name
+        val roleName = (existingMember?.role ?: Role.GUEST).name
         val accessToken = tokenService.provideAccessToken(userId, roleName)
         val refreshToken = tokenService.provideRefreshToken(userId, roleName)
 
