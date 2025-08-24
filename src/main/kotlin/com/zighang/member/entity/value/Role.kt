@@ -1,4 +1,4 @@
-package com.zighang.member.entity
+package com.zighang.member.entity.value
 
 enum class Role {
     GUEST,
