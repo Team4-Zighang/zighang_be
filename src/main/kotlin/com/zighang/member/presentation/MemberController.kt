@@ -3,6 +3,7 @@ package com.zighang.member.presentation
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.RestResponse
 import com.zighang.member.dto.request.OnboardingRequest
+import com.zighang.member.dto.request.SchoolRequest
 import com.zighang.member.entity.Member
 import com.zighang.member.facade.MemberFacade
 import com.zighang.member.repository.MemberRepository
@@ -39,6 +40,14 @@ class MemberController(
     fun createMember(@AuthenticationPrincipal member: CustomUserDetails,
                      @RequestBody onboardingRequest: OnboardingRequest) : ResponseEntity<RestResponse<Boolean>> {
         memberFacade.onboarding(member, onboardingRequest)
+        return ResponseEntity.ok(RestResponse(true))
+    }
+
+    @PostMapping("/school")
+    @Operation(summary = "학교정보 입력", description = "upsertSchoolInfo")
+    fun upsertSchoolInfo(@AuthenticationPrincipal member: CustomUserDetails,
+                         @RequestBody schoolRequest: SchoolRequest) : ResponseEntity<RestResponse<Boolean>> {
+        memberFacade.upsertSchoolInfo(member, schoolRequest)
         return ResponseEntity.ok(RestResponse(true))
     }
 }

@@ -3,6 +3,7 @@ package com.zighang.member.service
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.member.dto.request.OnboardingRequest
+import com.zighang.member.dto.request.SchoolRequest
 import com.zighang.member.entity.Onboarding
 import com.zighang.member.repository.OnboardingRepository
 import org.springframework.data.repository.findByIdOrNull
@@ -37,12 +38,20 @@ class OnboardingService(
 
     @Transactional
     fun updateOnboarding(onboarding: Onboarding, onboardingRequest: OnboardingRequest) {
-        onboarding.update(
+        onboarding.updateCharacter(
             onboardingRequest.characterName,
             onboardingRequest.companyType,
             onboardingRequest.workType,
             onboardingRequest.viewOfJob,
             onboardingRequest.empType
+        )
+    }
+
+    @Transactional
+    fun upsertSchool(onboarding: Onboarding, schoolRequest: SchoolRequest) {
+        onboarding.updateEducationInfo(
+            schoolRequest.school,
+            schoolRequest.major
         )
     }
 }
