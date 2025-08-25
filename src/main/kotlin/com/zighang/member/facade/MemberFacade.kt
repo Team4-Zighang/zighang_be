@@ -2,6 +2,7 @@ package com.zighang.member.facade
 
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.member.dto.request.OnboardingRequest
+import com.zighang.member.dto.request.SchoolRequest
 import com.zighang.member.service.MemberService
 import com.zighang.member.service.OnboardingService
 import org.springframework.stereotype.Component
@@ -20,5 +21,11 @@ class MemberFacade(
             ?: onboardingService.createOnboarding(onboardingRequest).also { o ->
                 memberService.completeOnboarding(member, o)
             }
+    }
+
+    fun upsertSchoolInfo(customUserDetails: CustomUserDetails, schoolRequest: SchoolRequest) {
+        val member = memberService.getById(customUserDetails.getId())
+        member.onboardingId
+            ?.let { onboardingService.getById(it).also { o -> onboardingService.upsertSchool(o, schoolRequest) } }
     }
 }

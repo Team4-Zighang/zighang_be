@@ -29,7 +29,15 @@ class Onboarding (
 
     @Enumerated(EnumType.STRING)
     @Column(name = "emp_type", nullable = false)
-    var empType : EmpType
+    var empType : EmpType,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "school")
+    var school: School?,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "major")
+    var major: Major?
 ) : BaseEntity() {
     companion object {
         fun create(
@@ -44,12 +52,14 @@ class Onboarding (
                 companyType = companyType,
                 workType = workType,
                 viewOfJob = viewOfJob,
-                empType = empType
+                empType = empType,
+                school = null,
+                major = null
             )
         }
     }
 
-    fun update(
+    fun updateCharacter(
         characterName: CharacterName,
         companyType : CompanyType,
         workType: WorkType,
@@ -61,5 +71,13 @@ class Onboarding (
         this.workType = workType
         this.viewOfJob = viewOfJob
         this.empType = empType
+    }
+
+    fun updateEducationInfo(
+        school: School,
+        major: Major
+    ) {
+        this.school = school
+        this.major = major
     }
 }
