@@ -9,10 +9,7 @@ import com.zighang.memo.service.MemoService
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/memo")
@@ -31,5 +28,17 @@ class MemoController(
               memoService.saveMemo(customUserDetails, memoCreateRequest)
           )
       )
+    }
+
+    @GetMapping("/{postingId}")
+    override fun getMemo(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @PathVariable postingId: Long,
+    ): ResponseEntity<RestResponse<String?>> {
+        return ResponseEntity.ok(
+            RestResponse<String?> (
+                memoService.getMemo(customUserDetails, postingId)
+            )
+        )
     }
 }

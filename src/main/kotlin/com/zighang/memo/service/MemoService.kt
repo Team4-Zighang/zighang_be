@@ -17,8 +17,9 @@ class MemoService(
     private val memoRepository: MemoRepository,
     private val jobPostingRepository: JobPostingRepository,
 ) {
-
-    public fun saveMemo(customUserDetails: CustomUserDetails, request: MemoCreateRequest) : MemoCreateResponse{
+    
+    // 추후 스크랩 추가시 스크랩 자동으로 되는 로직 추가해야함
+    fun saveMemo(customUserDetails: CustomUserDetails, request: MemoCreateRequest) : MemoCreateResponse{
 
         jobPostingRepository.findByIdOrNull(request.postingId)
             ?: throw MemoErrorCode.NOT_EXIST_POSTING.toException();
@@ -35,9 +36,12 @@ class MemoService(
             return MemoCreateResponse.create(savedMemo.id!!, "메모 저장이 완료되었습니다.")
         }
     }
-
-    public fun getMemo(memoId: Long): Memo? {
-        return memoRepository.findByIdOrNull(memoId)
+    
+    
+    // 공고당 메모 조회
+    fun getMemo(customUserDetails: CustomUserDetails, postingId: Long): String? {
+        val savedMemo = memoRepository.findByPostingIdAndMemberId(postingId, getMemberId(customUserDetails))
+        return savedMemo?.memoContent
     }
 
     private fun getMemberId(customUserDetails: CustomUserDetails): Long {

@@ -7,6 +7,7 @@ import com.zighang.memo.dto.response.MemoCreateResponse
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 
 interface MemoSwagger {
@@ -20,4 +21,14 @@ interface MemoSwagger {
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
         @RequestBody memoCreateRequest: MemoCreateRequest,
     ) : ResponseEntity<RestResponse<MemoCreateResponse>>
+
+    @Operation(
+        summary = "해당 공고에 대한 메모 보기",
+        description = "해당 공고에 저장한 메모를 봅니다.<br>공고에 메모를 작성하지 않은 경우 null이 리턴됩니다.",
+        operationId = "/memo/{postingId}",
+    )
+    fun getMemo(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @PathVariable postingId: Long,
+    ): ResponseEntity<RestResponse<String?>>
 }
