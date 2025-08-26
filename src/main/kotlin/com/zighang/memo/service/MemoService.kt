@@ -2,8 +2,6 @@ package com.zighang.memo.service
 
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.jobposting.repository.JobPostingRepository
-import com.zighang.logger
-import com.zighang.member.repository.MemberRepository
 import com.zighang.memo.dto.request.MemoCreateRequest
 import com.zighang.memo.dto.response.MemoCreateResponse
 import com.zighang.memo.entity.Memo
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service
 @Slf4j
 class MemoService(
     private val memoRepository: MemoRepository,
-    private val memberRepository: MemberRepository,
     private val jobPostingRepository: JobPostingRepository,
 ) {
 
@@ -28,14 +25,12 @@ class MemoService(
 
         val memberId = getMemberId(customUserDetails)
 
-        val existingMemo = memoRepository.findByPostingIdAndMemberId(request.postingId, memberId)
-
-        if (existingMemo != null) {
-            existingMemo.update(request.content)
-            memoRepository.save(existingMemo)
-            return MemoCreateResponse.create(existingMemo.id!!, "메모 업데이트가 완료되었습니다.")
-        } else {
-            val newMemo: Memo = Memo.create(request.postingId, memberId, request.content);
+        memoRepository.findByPostingIdAndMemberId(request.postingId, memberId)?.let{
+            it.update(request.content)
+            memoRepository.save(it)
+            return MemoCreateResponse.create(it.id!!, "메모 업데이트가 완료되었습니다.")
+        } ?: run {
+            val newMemo: Memo = Memo.create(request.postingId, memberId, request.content)
             val savedMemo: Memo = memoRepository.save(newMemo)
             return MemoCreateResponse.create(savedMemo.id!!, "메모 저장이 완료되었습니다.")
         }
