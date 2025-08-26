@@ -33,7 +33,7 @@ data class OnboardingRequest(
             "    ULSAN(울산),\n" +
             "    SEJONG(세종),\n" +
             "    GANGWON(강원),\n" +
-            "    GYEONGNAM(경),\n" +
+            "    GYEONGNAM(경남),\n" +
             "    GYEONGBUK(경북),\n" +
             "    JEONNAM(전남),\n" +
             "    JEONBUK(전북),\n" +
