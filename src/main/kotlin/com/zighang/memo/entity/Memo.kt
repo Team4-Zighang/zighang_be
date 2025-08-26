@@ -3,7 +3,16 @@ package com.zighang.memo.entity
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "memo")
+@Table(
+    name = "memo",
+    uniqueConstraints = [
+        UniqueConstraint(
+            // 멤버는 공고당 1개의 메모 작성 가능
+            name = "uk_posting_member",
+            columnNames = arrayOf("posting_id", "member_id")
+        )
+    ]
+)
 class Memo(
 
     @Id

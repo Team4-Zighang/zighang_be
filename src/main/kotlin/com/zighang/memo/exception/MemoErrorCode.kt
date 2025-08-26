@@ -12,6 +12,6 @@ enum class MemoErrorCode(
     NOT_EXIST_POSTING(HttpStatus.NOT_FOUND, "해당 공고가 존재하지 않습니다.");
 
     override fun toException(): DomainException {
-        throw DomainException(this)
+        return DomainException(this)
     }
 }
