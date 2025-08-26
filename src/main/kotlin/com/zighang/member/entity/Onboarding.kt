@@ -11,55 +11,59 @@ class Onboarding (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0L,
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "character_name", nullable = false)
-    var characterName : CharacterName,
+    @Column(name = "job_category", nullable = false)
+    var jobCategory : String,
+
+    @Column(name = "job_role", nullable = false)
+    var jobRole : String,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "company_type", nullable = false)
-    var companyType : CompanyType,
+    @Column(name = "career_year", nullable = false)
+    var careerYear : CareerYear,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "work_type", nullable = false)
-    var workType : WorkType,
+    @Column(name = "region", nullable = false)
+    var region : Region,
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "view_of_job", nullable = false)
-    var viewOfJob : ViewOfJob,
+    @Column(name = "school", nullable = false)
+    var school : String,
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "emp_type", nullable = false)
-    var empType : EmpType
+    @Column(name = "target_company", nullable = false)
+    var targetCompany : String,
 ) : BaseEntity() {
     companion object {
         fun create(
-            characterName: CharacterName,
-            companyType : CompanyType,
-            workType: WorkType,
-            viewOfJob: ViewOfJob,
-            empType : EmpType
+            jobCategory: String,
+            jobRole: String,
+            careerYear: CareerYear,
+            region: Region,
+            school: String,
+            targetCompany: String
         ): Onboarding {
             return Onboarding(
-                characterName = characterName,
-                companyType = companyType,
-                workType = workType,
-                viewOfJob = viewOfJob,
-                empType = empType
+                jobCategory = jobCategory,
+                jobRole = jobRole,
+                careerYear = careerYear,
+                region = region,
+                school = school,
+                targetCompany = targetCompany
             )
         }
     }
 
     fun update(
-        characterName: CharacterName,
-        companyType : CompanyType,
-        workType: WorkType,
-        viewOfJob: ViewOfJob,
-        empType : EmpType
+        jobCategory: String,
+        jobRole: String,
+        careerYear: CareerYear,
+        region: Region,
+        school: String,
+        targetCompany: String
     ) {
-        this.characterName = characterName
-        this.companyType = companyType
-        this.workType = workType
-        this.viewOfJob = viewOfJob
-        this.empType = empType
+        this.jobCategory = jobCategory
+        this.jobRole = jobRole
+        this.careerYear = careerYear
+        this.region = region
+        this.school = school
+        this.targetCompany = targetCompany
     }
 }

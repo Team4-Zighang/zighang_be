@@ -16,11 +16,12 @@ class OnboardingService(
     @Transactional
     fun createOnboarding(onboardingRequest: OnboardingRequest) : Onboarding {
         val onboarding = Onboarding.create(
-            onboardingRequest.characterName,
-            onboardingRequest.companyType,
-            onboardingRequest.workType,
-            onboardingRequest.viewOfJob,
-            onboardingRequest.empType
+            onboardingRequest.jobCategory,
+            onboardingRequest.jobRole,
+            onboardingRequest.careerYear,
+            onboardingRequest.region,
+            onboardingRequest.school,
+            onboardingRequest.targetCompany
         )
         return onboardingRepository.save(onboarding)
     }
@@ -38,11 +39,12 @@ class OnboardingService(
     @Transactional
     fun updateOnboarding(onboarding: Onboarding, onboardingRequest: OnboardingRequest) {
         onboarding.update(
-            onboardingRequest.characterName,
-            onboardingRequest.companyType,
-            onboardingRequest.workType,
-            onboardingRequest.viewOfJob,
-            onboardingRequest.empType
+            onboardingRequest.jobCategory,
+            onboardingRequest.jobRole,
+            onboardingRequest.careerYear,
+            onboardingRequest.region,
+            onboardingRequest.school,
+            onboardingRequest.targetCompany
         )
     }
 }
