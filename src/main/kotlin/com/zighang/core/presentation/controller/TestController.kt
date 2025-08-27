@@ -3,6 +3,7 @@ package com.zighang.core.presentation.controller
 import com.zighang.core.application.ObjectStorageService
 import com.zighang.core.clova.application.ClovaChatService
 import com.zighang.core.clova.dto.ChatRequest
+import com.zighang.core.clova.dto.ChatResponse
 import com.zighang.core.config.swagger.ApiErrorCode
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
@@ -57,7 +58,7 @@ class TestController(
     @PostMapping("/clova")
     fun chatWithClova(
         @RequestBody chatRequest: ChatRequest
-    ) : ResponseEntity<RestResponse<String>> {
+    ) : ResponseEntity<RestResponse<ChatResponse?>> {
         return ResponseEntity.ok(
             RestResponse(clovaChatService.getChat(chatRequest))
         )
