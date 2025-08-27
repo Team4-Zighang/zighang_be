@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class ClovaResponseMapper(objectMapper: ObjectMapper?) :
-    AbstractObjectMapper<ChatResponse?>(objectMapper!!) {
-    fun toJobDescriptionDto(json: String?): ChatResponse? {
+class ClovaResponseMapper(objectMapper: ObjectMapper) :
+    AbstractObjectMapper<ChatResponse?>(objectMapper) {
+    fun toJobDescriptionDto(json: String?): ChatResponse {
         return parse<ChatResponse>(json, ChatResponse::class.java)
     }
 }

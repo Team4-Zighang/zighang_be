@@ -9,7 +9,6 @@ import java.util.List
 
 
 @Component
-@RequiredArgsConstructor
 class ClovaChatCompletionCaller(
     private val clovaFeignClient: ClovaFeignClient
 ) {
@@ -17,7 +16,7 @@ class ClovaChatCompletionCaller(
         systemMessage: String?, userMessage: String?
     ): String {
         val clovaStudioRequest: ClovaStudioRequest = ClovaStudioRequest(
-            List.of(
+            listOf(
                 ClovaMessage.createSystemMessage(systemMessage!!),
                 ClovaMessage.createUserMessage(userMessage!!)
             ),
