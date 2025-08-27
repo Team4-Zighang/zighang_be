@@ -1,6 +1,8 @@
 package com.zighang.core.presentation.controller
 
 import com.zighang.core.application.ObjectStorageService
+import com.zighang.core.clova.application.ClovaChatService
+import com.zighang.core.clova.dto.ChatRequest
 import com.zighang.core.config.swagger.ApiErrorCode
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
@@ -14,7 +16,8 @@ import org.springframework.web.multipart.MultipartFile
 @RestController()
 @RequestMapping("/test")
 class TestController(
-    private val objectStorageService: ObjectStorageService
+    private val objectStorageService: ObjectStorageService,
+    private val clovaChatService: ClovaChatService
 ) {
     
     @GetMapping("/hello")
@@ -48,6 +51,15 @@ class TestController(
     ) : ResponseEntity<RestResponse<Unit>> {
         return ResponseEntity.ok(
             RestResponse(objectStorageService.deleteFile(url))
+        )
+    }
+
+    @PostMapping("/clova")
+    fun chatWithClova(
+        @RequestBody chatRequest: ChatRequest
+    ) : ResponseEntity<RestResponse<String>> {
+        return ResponseEntity.ok(
+            RestResponse(clovaChatService.getChat(chatRequest))
         )
     }
 }
