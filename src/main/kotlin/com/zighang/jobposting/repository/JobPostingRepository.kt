@@ -1,4 +1,9 @@
 package com.zighang.jobposting.repository
 
-class JobPostingRepository {
+import com.zighang.jobposting.entity.JobPosting
+import org.springframework.data.repository.CrudRepository
+import org.springframework.stereotype.Repository
+
+@Repository
+interface JobPostingRepository : CrudRepository<JobPosting, Long> {
 }
