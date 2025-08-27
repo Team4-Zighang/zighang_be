@@ -71,7 +71,7 @@ dependencies {
 }
 
 ext {
-    set("springCloudVersion", "2022.0.3")
+    set("springCloudVersion", "2024.0.0")
 }
 
 dependencyManagement {
