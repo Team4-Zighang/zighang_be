@@ -52,6 +52,9 @@ dependencies {
     // mysql
     runtimeOnly("mysql:mysql-connector-java:8.0.33")
 
+    // cloud storage
+    implementation ("com.amazonaws:aws-java-sdk-s3:1.12.281")
+    implementation ("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
 
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

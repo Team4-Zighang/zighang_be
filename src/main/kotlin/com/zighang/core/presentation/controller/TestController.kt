@@ -1,18 +1,21 @@
 package com.zighang.core.presentation.controller
 
+import com.zighang.core.application.ObjectStorageService
 import com.zighang.core.config.swagger.ApiErrorCode
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.core.presentation.RestResponse
+import org.apache.http.entity.ContentType.MULTIPART_FORM_DATA
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.MethodArgumentNotValidException
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController()
 @RequestMapping("/test")
-class TestController {
+class TestController(
+    private val objectStorageService: ObjectStorageService
+) {
     
     @GetMapping("/hello")
     fun getHello(): ResponseEntity<RestResponse<String>> {
@@ -23,5 +26,28 @@ class TestController {
     @ApiErrorCode(value = [GlobalErrorCode::class])
     fun getError(): ResponseEntity<RestResponse<String>> {
         throw DomainException("error")
+    }
+
+    @PostMapping(
+        value = ["/file"],
+        consumes = [MediaType.MULTIPART_FORM_DATA_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun uploadFile(
+        @RequestPart file: MultipartFile,
+        @RequestParam id: Long
+    ) : ResponseEntity<RestResponse<String>> {
+        return ResponseEntity.ok(
+            RestResponse(objectStorageService.uploadResumeFile(file, id))
+        )
+    }
+
+    @DeleteMapping("/file")
+    fun uploadFile(
+        @RequestParam url: String
+    ) : ResponseEntity<RestResponse<Unit>> {
+        return ResponseEntity.ok(
+            RestResponse(objectStorageService.deleteFile(url))
+        )
     }
 }
