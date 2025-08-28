@@ -1,0 +1,23 @@
+package com.zighang.core.config.rabbitmq
+
+import org.springframework.amqp.core.Message
+import org.springframework.amqp.rabbit.core.RabbitTemplate
+import org.springframework.amqp.rabbit.retry.MessageRecoverer
+import org.springframework.stereotype.Component
+
+@Component
+class CustomErrorMessageRecover(
+    private val rabbitTemplate: RabbitTemplate,
+) : MessageRecoverer {
+
+    // DLQ 핸들링시 DLQ에 입력 되는 데이터 형식 정리
+    override fun recover(message: Message, cause: Throwable) {
+
+        val errorMessage = mapOf(
+            "error" to cause.message,
+            "originalQueue" to message.messageProperties.consumerQueue
+        )
+
+        rabbitTemplate.convertAndSend("dlq.exchange", "dlq.routingkey", errorMessage)
+    }
+}
