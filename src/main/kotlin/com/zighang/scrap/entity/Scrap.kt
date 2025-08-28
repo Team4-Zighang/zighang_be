@@ -8,7 +8,7 @@ import jakarta.persistence.*
 class Scrap(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0L,
+    var id: Long = 0L,
 
     @Column(name = "posting_id")
     var jobPostingId: Long,
@@ -16,10 +16,10 @@ class Scrap(
     @Column(name = "member_id")
     val memberId : Long,
 
-    @Column(name = "resume_url")
+    @Column(name = "resume_url", length = 1024)
     var resumeUrl : String?,
 
-    @Column(name = "portfolio_url")
+    @Column(name = "portfolio_url", length = 1024)
     var portfolioUrl : String?
 ) : BaseEntity() {
     companion object {
