@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.jpa") version "2.1.0"
-    id("org.springframework.boot") version "3.5.4"
+    id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -56,6 +56,9 @@ dependencies {
     implementation ("com.amazonaws:aws-java-sdk-s3:1.12.281")
     implementation ("org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE")
 
+    // feign client
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -64,6 +67,16 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+ext {
+    set("springCloudVersion", "2024.0.0")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+    }
 }
 
 kotlin {
