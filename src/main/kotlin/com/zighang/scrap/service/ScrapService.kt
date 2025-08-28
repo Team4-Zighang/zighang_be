@@ -29,11 +29,17 @@ class ScrapService(
     private val objectStorageService: ObjectStorageService
 ) {
     @Transactional
-    fun upsert(customUserDetails: CustomUserDetails, upsertScrapRequest: UpsertScrapRequest) : Scrap? {
+    fun upsert(customUserDetails: CustomUserDetails, upsertScrapRequest: UpsertScrapRequest) {
         jobPostingRepository.findById(upsertScrapRequest.jobPostingId)
             .orElseThrow{DomainException(GlobalErrorCode.NOT_EXIST_JOB_POSTING)}
-        return upsertScrapRequest.scrapId?.let {
-            scrapId -> getById(scrapId).apply {
+        upsertScrapRequest.scrapId?.let {
+            scrapId ->
+            val memberId = customUserDetails.getId()
+            getById(scrapId).also {
+                if (it.memberId != memberId){
+                    throw DomainException(GlobalErrorCode.NOT_EXIST_SCRAP)
+                }
+            }.apply {
                 jobPostingId = upsertScrapRequest.jobPostingId
                 resumeUrl = upsertScrapRequest.resumeUrl
                 portfolioUrl = upsertScrapRequest.portfolioUrl
@@ -52,12 +58,22 @@ class ScrapService(
 
     @Transactional(readOnly = true)
     fun getScrap(page : Int, size : Int, customUserDetails: CustomUserDetails) : Page<DashboardResponse> {
-        val scrapList = scrapRepository.findAllByMemberId(customUserDetails.getId())
-        val dashboardList = scrapList.map { s ->
-            val posting = jobPostingRepository.findById(s.jobPostingId).get()
-            val memoId = memoRepository.findByPostingIdAndMemberId(s.jobPostingId, customUserDetails.getId())?.id
+        val pageable = PageRequest.of(page, size)
+        val memberId = customUserDetails.getId()
+        val scrapPage = scrapRepository.findAllByMemberId(memberId, pageable)
+        val postingMap = jobPostingRepository.findAllById(
+            scrapPage.content.map { it.jobPostingId }.toSet()
+        ).associateBy { it.id!! }
+        val postingIds = postingMap.keys
+        val memoMap = memoRepository.findAllByPostingIdInAndMemberId(postingIds, memberId)
+            .associateBy { it.postingId }
+        val dashboards = scrapPage.content.map { s ->
+            val posting = postingMap[s.jobPostingId]
+                ?: throw DomainException(GlobalErrorCode.NOT_EXIST_JOB_POSTING)
 
+            val memoId = memoMap[s.jobPostingId]?.id
             val jobPostingResponse = JobPostingResponse.create(posting)
+
             val resumeFileResponse = FileResponse.create(
                 s.resumeUrl,
                 objectStorageService.extractOriginalFilenameFromS3(s.resumeUrl)
@@ -75,7 +91,7 @@ class ScrapService(
                 portfolioFileResponse
             )
         }
-        return PageImpl(dashboardList, PageRequest.of(page, size), dashboardList.size.toLong())
+        return PageImpl(dashboards, pageable, scrapPage.totalElements)
     }
 
     @Transactional(readOnly = true)
