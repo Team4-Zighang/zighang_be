@@ -10,6 +10,8 @@ import io.jsonwebtoken.io.IOException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 
@@ -89,4 +91,14 @@ class ObjectStorageService(
         require(idx != -1) { throw IllegalArgumentException("잘못된 URL 형식입니다: $url") }
         return url.substring(idx + 5)
     }
+
+    fun extractOriginalFilenameFromS3(s3KeyOrUrl: String?): String? =
+        s3KeyOrUrl
+            ?.substringAfterLast('/')   // 마지막 세그먼트
+            ?.substringBefore('?')      // 쿼리 제거
+            ?.substringAfter('_')       // uuid_ 다음 부분(없으면 원문 그대로)
+            ?.let {
+                runCatching { URLDecoder.decode(it, StandardCharsets.UTF_8) }.getOrNull() ?: it
+            }
+
 }
