@@ -38,7 +38,7 @@ data class JobPostingResponse(
             if (date == null) return null
             val today = LocalDate.now()
             val targetDate = date.toLocalDate()
-            return ChronoUnit.DAYS.between(today, targetDate)*-1
+            return ChronoUnit.DAYS.between(today, targetDate)
         }
     }
 
