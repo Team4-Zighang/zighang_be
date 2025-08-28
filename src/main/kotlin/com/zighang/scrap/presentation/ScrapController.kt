@@ -19,7 +19,7 @@ class ScrapController(
     private val scrapService: ScrapService
 ) : ScrapSwagger{
 
-    @PostMapping("/{postingId}")
+    @PostMapping
     override fun doScrap(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
         @RequestBody upsertScrapRequest: UpsertScrapRequest
