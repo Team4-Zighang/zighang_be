@@ -5,6 +5,7 @@ import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.jobposting.repository.JobPostingRepository
+import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
@@ -65,7 +66,9 @@ class ScrapService(
             scrapPage.content.map { it.jobPostingId }.toSet()
         ).associateBy { it.id!! }
         val postingIds = postingMap.keys
-        val memoMap = memoRepository.findAllByPostingIdInAndMemberId(postingIds, memberId)
+        val memoMap : Map<Long, Memo> =
+            if (postingIds.isEmpty()) emptyMap()
+            else memoRepository.findAllByPostingIdInAndMemberId(postingIds, memberId)
             .associateBy { it.postingId }
         val dashboards = scrapPage.content.map { s ->
             val posting = postingMap[s.jobPostingId]
