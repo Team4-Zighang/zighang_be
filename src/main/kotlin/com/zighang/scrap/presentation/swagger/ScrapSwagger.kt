@@ -3,9 +3,11 @@ package com.zighang.scrap.presentation.swagger
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.PageResponse
 import com.zighang.core.presentation.RestResponse
+import com.zighang.scrap.dto.request.ScrapDeleteRequest
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import io.swagger.v3.oas.annotations.Operation
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PathVariable
@@ -33,4 +35,10 @@ interface ScrapSwagger {
         @RequestParam(name = "page", defaultValue = "1") page : Int,
         @RequestParam(name = "size", defaultValue = "10") size : Int,
     ) : ResponseEntity<PageResponse<DashboardResponse>>
+
+    @Operation(summary = "스크랩 삭제", description = "스크랩 식별자를 통해 스크랩을 삭제합니다.")
+    fun deleteScraps(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @RequestBody @Valid request: ScrapDeleteRequest
+    )
 }

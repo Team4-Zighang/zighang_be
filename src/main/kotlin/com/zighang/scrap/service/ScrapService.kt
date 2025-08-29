@@ -110,6 +110,11 @@ class ScrapService(
         return PageImpl(dashboards, pageable, scrapPage.totalElements)
     }
 
+    @Transactional
+    fun scrapDeleteService(idList: List<Long>){
+        deleteByIdList(idList)
+    }
+
     @Transactional(readOnly = true)
     fun getById(id : Long) = findById(id) ?: throw DomainException(GlobalErrorCode.NOT_EXIST_SCRAP)
 
@@ -118,4 +123,7 @@ class ScrapService(
 
     @Transactional
     fun save(scrap: Scrap) = scrapRepository.save(scrap)
+
+    @Transactional
+    fun deleteByIdList(idList: List<Long>) = scrapRepository.deleteAllById(idList)
 }
