@@ -2,7 +2,7 @@ package com.zighang.scrap.dto.response
 
 data class JobPostingAnalysisDto(
 
-    val qualification: String,
+    val qualification: String = "",
 
-    val preferentialTreatment: String,
+    val preferentialTreatment: String = "",
 )

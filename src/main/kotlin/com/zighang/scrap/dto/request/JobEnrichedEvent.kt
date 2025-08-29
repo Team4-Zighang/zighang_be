@@ -4,7 +4,7 @@ import com.zighang.scrap.dto.response.JobPostingAnalysisDto
 
 data class JobEnrichedEvent(
 
-    val id : Long = 0L,
+    val id : Long,
 
     val jobPostingAnalysisDto: JobPostingAnalysisDto,
 )

@@ -23,6 +23,8 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionSynchronization
+import org.springframework.transaction.support.TransactionSynchronizationManager
 
 @Service
 @Slf4j
@@ -33,15 +35,24 @@ class ScrapService(
     private val objectStorageService: ObjectStorageService,
     private val jobAnalysisEventProducer: JobAnalysisEventProducer
 ) {
+
     @Transactional
     fun upsert(customUserDetails: CustomUserDetails, upsertScrapRequest: UpsertScrapRequest) {
         val jobPosting = jobPostingRepository.findById(upsertScrapRequest.jobPostingId)
             .orElseThrow{DomainException(GlobalErrorCode.NOT_EXIST_JOB_POSTING)}
 
         // 우대사항 / 자격 요건 중 둘중 하나라도 null 인 경우 publish
-        if(isAnalysisNeed(jobPosting)) {
-            jobAnalysisEventProducer.publishAnalysis(
-                JobScrapedEvent(upsertScrapRequest.jobPostingId, jobPosting.ocrData)
+        if (isAnalysisNeed(jobPosting) && !jobPosting.ocrData.isNullOrBlank()) {
+            TransactionSynchronizationManager.registerSynchronization(
+                object : TransactionSynchronization {
+                    override fun afterCommit() {
+                        val event = JobScrapedEvent(
+                            id = jobPosting.id!!,
+                            ocrData = jobPosting.ocrData
+                        )
+                        jobAnalysisEventProducer.publishAnalysis(event)
+                    }
+                }
             )
         }
 
@@ -114,7 +125,17 @@ class ScrapService(
     }
 
     @Transactional
-    fun scrapDeleteService(idList: List<Long>){
+    fun scrapDeleteService(customUserDetails: CustomUserDetails, idList: List<Long>){
+        val memberId = customUserDetails.getId()
+        val scraps = scrapRepository.findAllById(idList)
+
+        // 소유권 검증
+        scraps.forEach { scrap ->
+            if (scrap.memberId != memberId) {
+                throw DomainException(GlobalErrorCode.NOT_EXIST_SCRAP)
+            }
+        }
+
         deleteByIdList(idList)
     }
 

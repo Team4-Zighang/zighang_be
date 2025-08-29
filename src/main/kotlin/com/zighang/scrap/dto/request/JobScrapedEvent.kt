@@ -1,7 +1,12 @@
 package com.zighang.scrap.dto.request
 
-data class JobScrapedEvent (
-    val id: Long = 0,
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 
-    val ocrData: String = "",
+data class JobScrapedEvent (
+    @field:NotNull
+    val id: Long,
+
+    @field:NotBlank
+    val ocrData: String,
 )

@@ -54,7 +54,7 @@ class ScrapController(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
         @RequestBody @Valid request: ScrapDeleteRequest
     ) {
-        scrapService.scrapDeleteService(request.idList)
+        scrapService.scrapDeleteService(customUserDetails, request.idList)
     }
 
 }
