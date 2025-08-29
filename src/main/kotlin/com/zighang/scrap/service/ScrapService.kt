@@ -1,10 +1,10 @@
 package com.zighang.scrap.service
 
 import com.zighang.core.application.ObjectStorageService
-import com.zighang.core.config.rabbitmq.config.RabbitProperties
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.core.infrastructure.CustomUserDetails
+import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
@@ -17,7 +17,6 @@ import com.zighang.scrap.entity.Scrap
 import com.zighang.scrap.infrastructure.JobAnalysisEventProducer
 import com.zighang.scrap.repository.ScrapRepository
 import lombok.extern.slf4j.Slf4j
-import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -40,7 +39,7 @@ class ScrapService(
             .orElseThrow{DomainException(GlobalErrorCode.NOT_EXIST_JOB_POSTING)}
 
         // 우대사항 / 자격 요건 중 둘중 하나라도 null 인 경우 publish
-        if(jobPosting.qualification.isNullOrBlank() || jobPosting.preferentialTreatment.isNullOrBlank()) {
+        if(isAnalysisNeed(jobPosting)) {
             jobAnalysisEventProducer.publishAnalysis(
                 JobScrapedEvent(upsertScrapRequest.jobPostingId, jobPosting.ocrData)
             )
@@ -108,6 +107,10 @@ class ScrapService(
             )
         }
         return PageImpl(dashboards, pageable, scrapPage.totalElements)
+    }
+
+    private fun isAnalysisNeed(jobPosting: JobPosting) : Boolean {
+        return jobPosting.qualification.isNullOrBlank() || jobPosting.preferentialTreatment.isNullOrBlank()
     }
 
     @Transactional
