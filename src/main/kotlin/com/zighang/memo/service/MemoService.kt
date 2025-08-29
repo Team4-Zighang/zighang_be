@@ -1,17 +1,14 @@
 package com.zighang.memo.service
 
 import com.zighang.core.infrastructure.CustomUserDetails
-import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.dto.request.MemoCreateRequest
 import com.zighang.memo.dto.response.MemoCreateResponse
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.exception.MemoErrorCode
 import com.zighang.memo.repository.MemoRepository
-import com.zighang.scrap.dto.request.JobScrapedEvent
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.entity.Scrap
-import com.zighang.scrap.infrastructure.JobAnalysisEventProducer
 import com.zighang.scrap.repository.ScrapRepository
 import com.zighang.scrap.service.ScrapService
 import jakarta.transaction.Transactional
