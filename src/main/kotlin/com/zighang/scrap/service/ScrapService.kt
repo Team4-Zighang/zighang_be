@@ -8,11 +8,13 @@ import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
+import com.zighang.scrap.dto.request.JobScrapedEvent
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.dto.response.FileResponse
 import com.zighang.scrap.dto.response.JobPostingResponse
 import com.zighang.scrap.entity.Scrap
+import com.zighang.scrap.infrastructure.JobAnalysisEventProducer
 import com.zighang.scrap.repository.ScrapRepository
 import lombok.extern.slf4j.Slf4j
 import org.springframework.amqp.rabbit.core.RabbitTemplate
@@ -30,8 +32,7 @@ class ScrapService(
     private val jobPostingRepository: JobPostingRepository,
     private val memoRepository: MemoRepository,
     private val objectStorageService: ObjectStorageService,
-    private val rabbitProperties: RabbitProperties,
-    private val rabbitTemplate: RabbitTemplate,
+    private val jobAnalysisEventProducer: JobAnalysisEventProducer
 ) {
     @Transactional
     fun upsert(customUserDetails: CustomUserDetails, upsertScrapRequest: UpsertScrapRequest) {
@@ -39,8 +40,10 @@ class ScrapService(
             .orElseThrow{DomainException(GlobalErrorCode.NOT_EXIST_JOB_POSTING)}
 
         // 우대사항 / 자격 요건 중 둘중 하나라도 null 인 경우 publish
-        if(jobPosting.qualification.isBlank() || jobPosting.preferentialTreatment.isBlank()) {
-            rabbitTemplate.convertAndSend(rabbitProperties.scraped.exchange, rabbitProperties.scraped.routingKey, jobPosting)
+        if(jobPosting.qualification.isNullOrBlank() || jobPosting.preferentialTreatment.isNullOrBlank()) {
+            jobAnalysisEventProducer.publishAnalysis(
+                JobScrapedEvent(upsertScrapRequest.jobPostingId, jobPosting.ocrData)
+            )
         }
 
         upsertScrapRequest.scrapId?.let {
