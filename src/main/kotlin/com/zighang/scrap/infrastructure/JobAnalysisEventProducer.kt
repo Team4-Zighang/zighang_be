@@ -13,8 +13,8 @@ class JobAnalysisEventProducer(
 ) {
     fun publishAnalysis(event: JobScrapedEvent) {
         rabbitTemplate.convertAndSend(
-            rabbitProperties.scraped.exchange,
-            rabbitProperties.scraped.routingKey,
+            rabbitProperties.analysis.exchange,
+            rabbitProperties.analysis.routingKey,
             event
         )
     }

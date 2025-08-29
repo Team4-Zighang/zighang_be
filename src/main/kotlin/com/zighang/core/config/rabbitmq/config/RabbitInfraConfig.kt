@@ -40,18 +40,18 @@ class RabbitInfraConfig(
 
     // 자격요건 / 우대사항 to Clova Queue
     @Bean
-    fun jobScrapedQueue(): Queue {
+    fun jobAnalysisQueue(): Queue {
         return Queue(
-            rabbitProperties.scraped.name, true, false, false, getDLQArgs()
+            rabbitProperties.analysis.name, true, false, false, getDLQArgs()
         )
     }
 
     @Bean
-    fun jobScrapedExchange(): DirectExchange = DirectExchange(rabbitProperties.scraped.exchange)
+    fun jobAnalysisExchange(): DirectExchange = DirectExchange(rabbitProperties.analysis.exchange)
 
     @Bean
-    fun jobScrapedBinding() : Binding =
-        BindingBuilder.bind(jobScrapedQueue()).to(jobScrapedExchange()).with(rabbitProperties.scraped.routingKey)
+    fun jobAnalysisBinding() : Binding =
+        BindingBuilder.bind(jobAnalysisQueue()).to(jobAnalysisExchange()).with(rabbitProperties.analysis.routingKey)
 
     // clova to update DB Queue
     @Bean

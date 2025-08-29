@@ -12,10 +12,10 @@ data class RabbitProperties(
     val test: TestQueue = TestQueue(),
 
     @NestedConfigurationProperty
-    val scraped: ScrapedQueue = ScrapedQueue(),
+    val analysis: AnalysisQueue = AnalysisQueue(),
 
     @NestedConfigurationProperty
-    val enriched: enrichedQueue
+    val enriched: EnrichedQueue
 )
 
 data class DeadLetterQueue(
@@ -30,13 +30,13 @@ data class TestQueue(
     val routingKey: String = ""
 )
 
-data class ScrapedQueue(
+data class AnalysisQueue(
     val name: String = "",
     val exchange: String = "",
     val routingKey: String = ""
 )
 
-data class enrichedQueue(
+data class EnrichedQueue(
     val name: String = "",
     val exchange: String = "",
     val routingKey: String = ""

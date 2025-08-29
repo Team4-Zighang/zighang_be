@@ -18,7 +18,7 @@ class AIReqeustWorker(
 
     private val log = LoggerFactory.getLogger(AIReqeustWorker::class.java)
 
-    @RabbitListener(queues= ["\${mq.scraped.name}"])
+    @RabbitListener(queues= ["\${mq.analysis.name}"])
     fun jobPostingToClova(event : JobScrapedEvent) {
         log.info("analysis consumer : $event")
 
