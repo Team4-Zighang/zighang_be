@@ -1,14 +1,15 @@
 package com.zighang.core.config.rabbitmq
 
 import com.zighang.core.clova.dto.ClovaStudioRequest
-import com.zighang.core.exception.GlobalErrorCode
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Component
 
 @Component
-class TestWorker() {
+class TestWorker(
+    private val rabbitProperties: RabbitProperties
+) {
 
-    @RabbitListener(queues = ["test.queue"])
+    @RabbitListener(queues = ["\${mq.test.name}"])
     fun testHandleEvent(event: ClovaStudioRequest) {
         println("TestWorker: received $event")
         
@@ -16,7 +17,7 @@ class TestWorker() {
 //        throw GlobalErrorCode.INTERNAL_SERVER_ERROR.toException();
     }
 
-    @RabbitListener(queues = ["dlq.queue"])
+    @RabbitListener(queues = ["\${dlq.test.name}"])
     fun handleErrorTest(errorEvent: Map<String, Any>) {
         println("dlq.Queue: received $errorEvent")
     }

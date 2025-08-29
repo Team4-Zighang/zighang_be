@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class TestEventPublisher(
-    private val rabbitTemplate: RabbitTemplate
+    private val rabbitTemplate: RabbitTemplate,
+    private val rabbitProperties: RabbitProperties
 ) {
 
     fun testPublisher(event: ChatRequest) {
@@ -20,7 +21,11 @@ class TestEventPublisher(
             512
         )
 
-        rabbitTemplate.convertAndSend("test.exchange", "test.routingKey", clovaStudioRequest)
+        rabbitTemplate.convertAndSend(
+            rabbitProperties.test.exchange,
+            rabbitProperties.test.routingKey,
+            clovaStudioRequest
+        )
         println("publish test : $clovaStudioRequest")
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component
 @Component
 class CustomErrorMessageRecover(
     private val rabbitTemplate: RabbitTemplate,
+    private val rabbitProperties: RabbitProperties
 ) : MessageRecoverer {
 
     // DLQ 핸들링시 DLQ에 입력 되는 데이터 형식 정리
@@ -18,6 +19,10 @@ class CustomErrorMessageRecover(
             "originalQueue" to message.messageProperties.consumerQueue
         )
 
-        rabbitTemplate.convertAndSend("dlq.exchange", "dlq.routingkey", errorMessage)
+        rabbitTemplate.convertAndSend(
+            rabbitProperties.dlq.exchange,
+            rabbitProperties.dlq.routingKey,
+            errorMessage
+        )
     }
 }
