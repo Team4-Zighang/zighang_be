@@ -14,9 +14,14 @@ class CustomErrorMessageRecover(
     // DLQ 핸들링시 DLQ에 입력 되는 데이터 형식 정리
     override fun recover(message: Message, cause: Throwable) {
 
+        val props = message.messageProperties
+
         val errorMessage = mapOf(
-            "error" to cause.message,
-            "originalQueue" to message.messageProperties.consumerQueue
+            "error" to (cause.message ?: cause.javaClass.name),
+            "errorType" to cause.javaClass.name,
+            "originalQueue" to props.consumerQueue,
+            "originalRoutingKey" to props.receivedRoutingKey,
+            "headers" to props.headers,
         )
 
         rabbitTemplate.convertAndSend(

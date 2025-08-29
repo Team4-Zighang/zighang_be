@@ -17,7 +17,7 @@ class TestWorker(
 //        throw GlobalErrorCode.INTERNAL_SERVER_ERROR.toException();
     }
 
-    @RabbitListener(queues = ["\${dlq.test.name}"])
+    @RabbitListener(queues = ["\${mq.dlq.name}"])
     fun handleErrorTest(errorEvent: Map<String, Any>) {
         println("dlq.Queue: received $errorEvent")
     }
