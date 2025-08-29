@@ -62,7 +62,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       - name: Docker Compose 파일 NCP 서버로 전송
-        run: scp -o StrictHostKeyChecking=no -P ${{ secrets.NCP_PORT }} docker-compose.yml ${{ secrets.NCP_USERNAME }}@${{ secrets.NCP_HOST }}:./
+        run: scp -o StrictHostKeyChecking=no -P ${{ secrets.NCP_PORT }} src/main/resources/secret/docker-compose.yml ${{ secrets.NCP_USERNAME }}@${{ secrets.NCP_HOST }}:./
 
       - name: Copy application.yml to server
         run: |
