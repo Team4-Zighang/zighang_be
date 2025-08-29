@@ -1,4 +1,4 @@
-package com.zighang.core.config.rabbitmq
+package com.zighang.core.config.rabbitmq.config
 
 import org.springframework.amqp.core.Message
 import org.springframework.amqp.rabbit.core.RabbitTemplate

@@ -1,6 +1,7 @@
 package com.zighang.scrap.service
 
 import com.zighang.core.application.ObjectStorageService
+import com.zighang.core.config.rabbitmq.config.RabbitProperties
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.core.infrastructure.CustomUserDetails
@@ -14,6 +15,7 @@ import com.zighang.scrap.dto.response.JobPostingResponse
 import com.zighang.scrap.entity.Scrap
 import com.zighang.scrap.repository.ScrapRepository
 import lombok.extern.slf4j.Slf4j
+import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -27,12 +29,20 @@ class ScrapService(
     private val scrapRepository: ScrapRepository,
     private val jobPostingRepository: JobPostingRepository,
     private val memoRepository: MemoRepository,
-    private val objectStorageService: ObjectStorageService
+    private val objectStorageService: ObjectStorageService,
+    private val rabbitProperties: RabbitProperties,
+    private val rabbitTemplate: RabbitTemplate,
 ) {
     @Transactional
     fun upsert(customUserDetails: CustomUserDetails, upsertScrapRequest: UpsertScrapRequest) {
-        jobPostingRepository.findById(upsertScrapRequest.jobPostingId)
+        val jobPosting = jobPostingRepository.findById(upsertScrapRequest.jobPostingId)
             .orElseThrow{DomainException(GlobalErrorCode.NOT_EXIST_JOB_POSTING)}
+
+        // 우대사항 / 자격 요건 중 둘중 하나라도 null 인 경우 publish
+        if(jobPosting.qualification.isBlank() || jobPosting.preferentialTreatment.isBlank()) {
+            rabbitTemplate.convertAndSend(rabbitProperties.scraped.exchange, rabbitProperties.scraped.routingKey, jobPosting)
+        }
+
         upsertScrapRequest.scrapId?.let {
             scrapId ->
             val memberId = customUserDetails.getId()

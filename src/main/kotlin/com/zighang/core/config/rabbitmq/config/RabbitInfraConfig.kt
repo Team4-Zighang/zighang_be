@@ -1,4 +1,4 @@
-package com.zighang.core.config.rabbitmq
+package com.zighang.core.config.rabbitmq.config
 
 import org.springframework.amqp.core.Binding
 import org.springframework.amqp.core.BindingBuilder
@@ -37,6 +37,36 @@ class RabbitInfraConfig(
     @Bean
     fun testBinding(): Binding =
         BindingBuilder.bind(testQueue()).to(testExchange()).with(rabbitProperties.test.routingKey)
+
+    // 자격요건 / 우대사항 to Clova Queue
+    @Bean
+    fun jobScrapedQueue(): Queue {
+        return Queue(
+            rabbitProperties.scraped.name, true, false, false, getDLQArgs()
+        )
+    }
+
+    @Bean
+    fun jobScrapedExchange(): DirectExchange = DirectExchange(rabbitProperties.scraped.exchange)
+
+    @Bean
+    fun jobScrapedBinding() : Binding =
+        BindingBuilder.bind(jobScrapedQueue()).to(jobScrapedExchange()).with(rabbitProperties.scraped.routingKey)
+
+    // clova to update DB Queue
+    @Bean
+    fun jobEnrichedQueue() : Queue {
+        return Queue(
+            rabbitProperties.enriched.name, true, false, false, getDLQArgs()
+        )
+    }
+
+    @Bean
+    fun jobEnrichedExchange(): DirectExchange = DirectExchange(rabbitProperties.enriched.exchange)
+
+    @Bean
+    fun jobEnrichedBinding() :Binding =
+        BindingBuilder.bind(jobEnrichedQueue()).to(jobEnrichedExchange()).with(rabbitProperties.enriched.routingKey)
 
     // dlq 에러 핸들링을 위해 사용하는 Args
     private fun getDLQArgs() : Map<String, String> {
