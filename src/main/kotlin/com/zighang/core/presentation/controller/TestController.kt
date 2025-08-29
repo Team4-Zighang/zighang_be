@@ -4,6 +4,7 @@ import com.zighang.core.application.ObjectStorageService
 import com.zighang.core.clova.application.ClovaChatService
 import com.zighang.core.clova.dto.ChatRequest
 import com.zighang.core.clova.dto.ChatResponse
+import com.zighang.core.config.rabbitmq.TestEventPublisher
 import com.zighang.core.config.swagger.ApiErrorCode
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
@@ -18,7 +19,8 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping("/test")
 class TestController(
     private val objectStorageService: ObjectStorageService,
-    private val clovaChatService: ClovaChatService
+    private val clovaChatService: ClovaChatService,
+    private val testEventPublisher: TestEventPublisher
 ) {
     
     @GetMapping("/hello")
@@ -62,5 +64,12 @@ class TestController(
         return ResponseEntity.ok(
             RestResponse(clovaChatService.getChat(chatRequest))
         )
+    }
+
+    @PostMapping("/rabbit")
+    fun chatWithrabbit(
+        @RequestBody chatRequest: ChatRequest
+    ) {
+        testEventPublisher.testPublisher(chatRequest)
     }
 }

@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody
     configuration = [ClovaFeignClientConfig::class]
 )
 interface ClovaFeignClient {
-    @PostMapping("/testapp/v3/chat-completions/HCX-DASH-002")
+    @PostMapping("\${ncp.clova.endpoint.studio}")
     fun callClovaStudio(@RequestBody clovaChatRequest: ClovaStudioRequest): String
 }
