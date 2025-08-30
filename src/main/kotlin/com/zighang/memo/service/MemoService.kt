@@ -43,8 +43,6 @@ class MemoService(
                 UpsertScrapRequest(
                     jobPostingId = request.postingId,
                     scrapId = null,
-                    resumeUrl = null,
-                    portfolioUrl = null
                 )
             )
         }

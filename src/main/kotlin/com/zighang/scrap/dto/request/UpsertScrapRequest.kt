@@ -7,8 +7,4 @@ data class UpsertScrapRequest(
     val scrapId : Long?,
     @Schema(description = "공고 식별자", example = "1")
     val jobPostingId : Long,
-    @Schema(description = "이력서 url", example = "http://url")
-    val resumeUrl : String?,
-    @Schema(description = "포트폴리오 url",  example = "http://url")
-    val portfolioUrl : String?
 )

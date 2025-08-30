@@ -65,8 +65,6 @@ class ScrapService(
                 }
             }.apply {
                 jobPostingId = upsertScrapRequest.jobPostingId
-                resumeUrl = upsertScrapRequest.resumeUrl
-                portfolioUrl = upsertScrapRequest.portfolioUrl
             }.let {
                 savedScrap -> save(savedScrap)
             }
@@ -74,8 +72,8 @@ class ScrapService(
             Scrap.create(
                 upsertScrapRequest.jobPostingId,
                 customUserDetails.getId(),
-                upsertScrapRequest.resumeUrl,
-                upsertScrapRequest.portfolioUrl
+                null,
+                null
             )
         )
     }
