@@ -1,6 +1,7 @@
 package com.zighang.core.config.rabbitmq
 
 import com.zighang.core.clova.dto.ClovaStudioRequest
+import com.zighang.core.config.rabbitmq.config.RabbitProperties
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Component
 

@@ -13,7 +13,7 @@ class ClovaChatService(
 ) {
 
     fun getChat(request: ChatRequest) : ChatResponse? {
-        return clovaResponseMapper.toJobDescriptionDto(
+        return clovaResponseMapper.toJsonDto(
             clovaChatCompletionCaller.clovaChatCompletionApiCaller(
                 request.systemMessage, request.userMessage
             )

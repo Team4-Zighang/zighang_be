@@ -3,11 +3,14 @@ package com.zighang.scrap.presentation
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.PageResponse
 import com.zighang.core.presentation.RestResponse
+import com.zighang.scrap.dto.request.ScrapDeleteRequest
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.presentation.swagger.ScrapSwagger
 import com.zighang.scrap.service.ScrapService
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -45,5 +48,13 @@ class ScrapController(
         )
     }
 
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    override fun deleteScraps(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @RequestBody @Valid request: ScrapDeleteRequest
+    ) {
+        scrapService.scrapDeleteService(customUserDetails, request.idList)
+    }
 
 }

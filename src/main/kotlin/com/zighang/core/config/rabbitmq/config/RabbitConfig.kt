@@ -1,11 +1,10 @@
-package com.zighang.core.config.rabbitmq
+package com.zighang.core.config.rabbitmq.config
 
-import org.springframework.amqp.core.*
 import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
-import org.springframework.amqp.rabbit.retry.RejectAndDontRequeueRecoverer
+import org.springframework.amqp.rabbit.transaction.RabbitTransactionManager
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
 import org.springframework.amqp.support.converter.MessageConverter
 import org.springframework.context.annotation.Bean
@@ -39,7 +38,7 @@ class RabbitConfig {
         factory.setMessageConverter(messageConverter)
 
         val interceptor = RetryInterceptorBuilder.stateless()
-            .maxAttempts(1)     // 단 1회 재시도
+            .maxAttempts(2)
             .recoverer(customErrorMessageRecover) // 실패시 DLQ로 이동
             .build()
 
