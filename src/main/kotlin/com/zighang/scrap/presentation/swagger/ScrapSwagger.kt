@@ -6,9 +6,12 @@ import com.zighang.core.presentation.RestResponse
 import com.zighang.scrap.dto.request.ScrapDeleteRequest
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
+import com.zighang.scrap.dto.response.FileDeleteResponse
+import com.zighang.scrap.dto.response.FileResponse
 import com.zighang.scrap.value.FileType
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
+import org.springframework.data.repository.query.Param
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.PathVariable
@@ -54,7 +57,7 @@ interface ScrapSwagger {
         @PathVariable scrapId: Long,
         @PathVariable fileType: FileType,
         @RequestParam("file") file: MultipartFile
-    )
+    ) : ResponseEntity<RestResponse<FileResponse>>
 
     @Operation(
         summary = "스크랩에 이력서/포트폴리오 삭제",
@@ -65,6 +68,6 @@ interface ScrapSwagger {
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
         @PathVariable scrapId: Long,
         @PathVariable fileType: FileType,
-        @RequestParam("file") file: MultipartFile
-    )
+        @RequestParam fileUrl: String
+    ) : ResponseEntity<RestResponse<FileDeleteResponse>>
 }

@@ -6,12 +6,15 @@ import com.zighang.core.presentation.RestResponse
 import com.zighang.scrap.dto.request.ScrapDeleteRequest
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
+import com.zighang.scrap.dto.response.FileDeleteResponse
+import com.zighang.scrap.dto.response.FileResponse
 import com.zighang.scrap.presentation.swagger.ScrapSwagger
 import com.zighang.scrap.service.ScrapService
 import com.zighang.scrap.value.FileType
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
@@ -59,23 +62,32 @@ class ScrapController(
         scrapService.scrapDeleteService(customUserDetails, request.idList)
     }
 
-    @PostMapping("/{scrapId}/file/{fileType}")
+    @PostMapping(value = ["/{scrapId}/file/{fileType}"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     override fun fileUpload(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
         @PathVariable scrapId: Long,
         @PathVariable fileType: FileType,
-        file: MultipartFile
-    ) {
-        TODO("Not yet implemented")
+        @RequestPart(name = "file") file: MultipartFile
+    ): ResponseEntity<RestResponse<FileResponse>> {
+        return ResponseEntity.ok(
+            RestResponse<FileResponse>(
+                scrapService.uploadFile(customUserDetails, scrapId, file, fileType)
+            )
+        )
     }
 
+    @DeleteMapping("/{scrapId}/file/{fileType}")
     override fun fileDelete(
-        customUserDetails: CustomUserDetails,
-        scrapId: Long,
-        fileType: FileType,
-        file: MultipartFile
-    ) {
-        TODO("Not yet implemented")
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @PathVariable scrapId: Long,
+        @PathVariable fileType: FileType,
+        @RequestParam fileUrl: String
+    ) : ResponseEntity<RestResponse<FileDeleteResponse>>{
+        return ResponseEntity.ok(
+            RestResponse<FileDeleteResponse>(
+                scrapService.deleteFile(customUserDetails, scrapId, fileUrl, fileType)
+            )
+        )
     }
 
 }

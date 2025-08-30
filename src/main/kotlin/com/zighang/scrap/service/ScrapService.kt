@@ -167,9 +167,7 @@ class ScrapService(
         fileType: FileType
     ): FileDeleteResponse {
         val scrap = getScrapByScrapIdAndMemberId(scrapId, customUserDetails.getId())
-
-        val currentUrl = fileType.urlGetter(scrap)
-        if (currentUrl != fileUrl) {
+        if (fileType.urlGetter(scrap) != fileUrl) {
             throw DomainException(GlobalErrorCode.IS_NOT_YOUR_FILE)
         }
 
@@ -195,7 +193,7 @@ class ScrapService(
 
     @Transactional(readOnly = true)
     fun findScrapByScrapIdAndMemberId(scrapId: Long, memberId: Long)
-        = scrapRepository.findByScrapIdAndMemberId(scrapId, memberId)
+        = scrapRepository.findByIdAndMemberId(scrapId, memberId)
 
     @Transactional(readOnly = true)
     fun getScrapByScrapIdAndMemberId(scrapId: Long, memberId: Long)

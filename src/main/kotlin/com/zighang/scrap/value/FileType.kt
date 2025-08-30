@@ -13,13 +13,13 @@ enum class FileType(
 ) {
     RESUME(
         { it.resumeUrl },
-        { scrap, _ -> scrap.resumeUrl = null },
+        { scrap, url -> scrap.resumeUrl = url },
         { success, filename -> FileDeleteResponse.resumeDeleteCreate(success, filename) },
         { storage, file, scrapId -> storage.uploadResumeFile(file, scrapId) }
     ),
     PORTFOLIO(
         { it.portfolioUrl },
-        { scrap, _ -> scrap.portfolioUrl = null },
+        { scrap, url -> scrap.portfolioUrl = url },
         { success, filename -> FileDeleteResponse.portfolioDeleteCreate(success, filename) },
         { storage, file, scrapId -> storage.uploadPortpolioFile(file, scrapId) }
     )
