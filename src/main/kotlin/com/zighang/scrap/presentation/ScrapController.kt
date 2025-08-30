@@ -8,12 +8,14 @@ import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.presentation.swagger.ScrapSwagger
 import com.zighang.scrap.service.ScrapService
+import com.zighang.scrap.value.FileType
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/scrap")
@@ -55,6 +57,25 @@ class ScrapController(
         @RequestBody @Valid request: ScrapDeleteRequest
     ) {
         scrapService.scrapDeleteService(customUserDetails, request.idList)
+    }
+
+    @PostMapping("/{scrapId}/file/{fileType}")
+    override fun fileUpload(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @PathVariable scrapId: Long,
+        @PathVariable fileType: FileType,
+        file: MultipartFile
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun fileDelete(
+        customUserDetails: CustomUserDetails,
+        scrapId: Long,
+        fileType: FileType,
+        file: MultipartFile
+    ) {
+        TODO("Not yet implemented")
     }
 
 }

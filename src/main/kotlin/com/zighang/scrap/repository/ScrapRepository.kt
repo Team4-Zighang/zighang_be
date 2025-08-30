@@ -9,4 +9,6 @@ interface ScrapRepository : JpaRepository<Scrap, Long> {
     fun findAllByMemberId(memberId : Long, pageable: Pageable) : Page<Scrap>
 
     fun findByJobPostingIdAndMemberId(jobPostingId : Long, memberId : Long) : Scrap?
+
+    fun findByScrapIdAndMemberId(scorrId : Long, memberId : Long) : Scrap?
 }
