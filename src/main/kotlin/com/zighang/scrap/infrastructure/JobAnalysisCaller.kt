@@ -25,4 +25,18 @@ class JobAnalysisCaller(
 
         return clovaResponseMapper.toJsonDto(result)
     }
+
+    fun getCardJobResponse(ocrData: String) : ChatResponse {
+        val systemMessage = SystemMessageFactory.cardJobInfoMessageFactory()
+
+        require(systemMessage.isNotBlank()) { "jobAnalysis system message must not be blank" }
+        require(ocrData.isNotBlank()) { "ocrData must not be blank" }
+
+        val result = clovaChatCompletionCaller.clovaChatCompletionApiCaller(
+            SystemMessageFactory.jobAnalysisSystemMessageFactory(),
+            ocrData
+        )
+
+        return clovaResponseMapper.toJsonDto(result)
+    }
 }

@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.jpa") version "2.1.0"
+    kotlin("plugin.serialization") version "1.9.23"
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
 }
@@ -70,6 +71,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    //json
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.0")
 }
 
 ext {

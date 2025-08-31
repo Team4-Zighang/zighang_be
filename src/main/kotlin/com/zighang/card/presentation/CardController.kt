@@ -10,9 +10,7 @@ import com.zighang.memo.dto.response.MemoCreateResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/card")
@@ -25,12 +23,18 @@ class CardController(
     override fun createCardSet(@AuthenticationPrincipal customUserDetails: CustomUserDetails):
             ResponseEntity<RestResponse<CreateCardSetResponse>> {
         return ResponseEntity.ok(
-            RestResponse<CreateCardSetResponse>(
+            RestResponse(
                 cardFacade.createCard(customUserDetails)
             )
         )
     }
 
+    @GetMapping("/{cardId}")
+    override fun openCard(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @PathVariable(name = "cardId") cardId: Long) {
+
+    }
 
 
 }

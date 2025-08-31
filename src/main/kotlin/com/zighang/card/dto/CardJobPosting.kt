@@ -17,4 +17,20 @@ data class CardJobPosting(
     val academicConditions : String?,
     @Schema(description = "지역", example = "서울")
     val address : String?
-)
+) {
+    companion object {
+        fun create(
+            companyImageUrl: String?,
+            companyName: String?,
+            title: String?,
+            career: String?,
+            recruitmentType: String?,
+            academicConditions: String?,
+            address: String?
+        ) : CardJobPosting{
+            return CardJobPosting(
+                companyImageUrl, companyName, title, career, recruitmentType, academicConditions, address
+            )
+        }
+    }
+}
