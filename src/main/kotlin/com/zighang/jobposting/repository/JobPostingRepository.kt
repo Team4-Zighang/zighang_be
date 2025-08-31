@@ -3,6 +3,7 @@ package com.zighang.jobposting.repository
 import com.zighang.jobposting.entity.JobPosting
 import jakarta.transaction.Transactional
 import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -25,4 +26,38 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         @Param("qualification") qualification: String,
         @Param("preferentialTreatment") preferentialTreatment: String,
     ) : Int
+    // 1) 직무/직군 조건 + 스크랩 수 내림차순 (Top N: Pageable)
+    @Query(
+        """
+        select jp
+        from JobPosting jp
+        left join Scrap s on s.jobPostingId = jp.id
+        where (:depthOne is null or jp.depthOne = :depthOne)
+          and (:depthTwo is null or jp.depthTwo = :depthTwo)
+        group by jp
+        order by count(s.id) desc, jp.uploadDate desc, jp.id desc
+        """
+    )
+    fun findTopJobPostingsByDepths(
+        @Param("depthOne") depthOne: String?,
+        @Param("depthTwo") depthTwo: String?,
+        pageable: Pageable
+    ): List<JobPosting>
+
+    // 2) 제외할 공고를 빼고 전체에서 스크랩 순으로 (Top N: Pageable)
+    @Query(
+        """
+        select jp
+        from JobPosting jp
+        left join Scrap s on s.jobPostingId = jp.id
+        where (:excluded = false or jp.id not in :excludedIds)
+        group by jp
+        order by count(s.id) desc, jp.uploadDate desc, jp.id desc
+        """
+    )
+    fun findTopJobPostingsExcludingIds(
+        @Param("excluded") excluded: Boolean,          // excludedIds가 비었으면 false로
+        @Param("excludedIds") excludedIds: List<Long>, // 비었을 수도 있음
+        pageable: Pageable
+    ): List<JobPosting>
 }
