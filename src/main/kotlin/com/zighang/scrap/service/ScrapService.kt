@@ -11,11 +11,13 @@ import com.zighang.memo.repository.MemoRepository
 import com.zighang.scrap.dto.request.JobScrapedEvent
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
+import com.zighang.scrap.dto.response.FileDeleteResponse
 import com.zighang.scrap.dto.response.FileResponse
 import com.zighang.scrap.dto.response.JobPostingResponse
 import com.zighang.scrap.entity.Scrap
 import com.zighang.scrap.infrastructure.JobAnalysisEventProducer
 import com.zighang.scrap.repository.ScrapRepository
+import com.zighang.scrap.value.FileType
 import lombok.extern.slf4j.Slf4j
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
+import org.springframework.web.multipart.MultipartFile
 
 @Service
 @Slf4j
@@ -46,6 +49,9 @@ class ScrapService(
             TransactionSynchronizationManager.registerSynchronization(
                 object : TransactionSynchronization {
                     override fun afterCommit() {
+                        
+                        // TODO: 카드 뽑기 커밋 후 추가
+                        // 레디스로 동일 큐 내 같은 데이터 저장 안되도록 방어
                         val event = JobScrapedEvent(
                             id = jobPosting.id!!,
                             ocrData = jobPosting.ocrData
@@ -65,8 +71,6 @@ class ScrapService(
                 }
             }.apply {
                 jobPostingId = upsertScrapRequest.jobPostingId
-                resumeUrl = upsertScrapRequest.resumeUrl
-                portfolioUrl = upsertScrapRequest.portfolioUrl
             }.let {
                 savedScrap -> save(savedScrap)
             }
@@ -74,8 +78,8 @@ class ScrapService(
             Scrap.create(
                 upsertScrapRequest.jobPostingId,
                 customUserDetails.getId(),
-                upsertScrapRequest.resumeUrl,
-                upsertScrapRequest.portfolioUrl
+                null,
+                null
             )
         )
     }
@@ -139,6 +143,42 @@ class ScrapService(
         deleteByIdList(idList)
     }
 
+    @Transactional
+    fun uploadFile(
+        customUserDetails: CustomUserDetails,
+        scrapId: Long,
+        file: MultipartFile,
+        fileType: FileType
+    ): FileResponse {
+        val scrap = getScrapByScrapIdAndMemberId(scrapId, customUserDetails.getId())
+
+        val fileUrl = fileType.uploadFunction(objectStorageService, file, scrapId)
+
+        fileType.urlSetter(scrap, fileUrl)
+
+        return FileResponse.create(fileUrl, file.originalFilename)
+    }
+
+    @Transactional
+    fun deleteFile(
+        customUserDetails: CustomUserDetails,
+        scrapId: Long,
+        fileUrl: String,
+        fileType: FileType
+    ): FileDeleteResponse {
+        val scrap = getScrapByScrapIdAndMemberId(scrapId, customUserDetails.getId())
+        if (fileType.urlGetter(scrap) != fileUrl) {
+            throw DomainException(GlobalErrorCode.IS_NOT_YOUR_FILE)
+        }
+
+        objectStorageService.deleteFile(fileUrl)
+        val originalFileName = objectStorageService.extractOriginalFilenameFromS3(fileUrl)
+            ?: throw DomainException(GlobalErrorCode.CANNOT_EXTRACT_FILENAME)
+
+        fileType.urlSetter(scrap, null)
+        return fileType.responseFactory(true, originalFileName)
+    }
+
     @Transactional(readOnly = true)
     fun getById(id : Long) = findById(id) ?: throw DomainException(GlobalErrorCode.NOT_EXIST_SCRAP)
 
@@ -150,4 +190,12 @@ class ScrapService(
 
     @Transactional
     fun deleteByIdList(idList: List<Long>) = scrapRepository.deleteAllById(idList)
+
+    @Transactional(readOnly = true)
+    fun findScrapByScrapIdAndMemberId(scrapId: Long, memberId: Long)
+        = scrapRepository.findByIdAndMemberId(scrapId, memberId)
+
+    @Transactional(readOnly = true)
+    fun getScrapByScrapIdAndMemberId(scrapId: Long, memberId: Long)
+        = findScrapByScrapIdAndMemberId(scrapId, memberId) ?: throw DomainException(GlobalErrorCode.NOT_EXIST_SCRAP)
 }
