@@ -4,6 +4,7 @@ import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.member.dto.request.OnboardingRequest
 import com.zighang.member.entity.Onboarding
+import com.zighang.member.entity.value.School
 import com.zighang.member.repository.OnboardingRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -20,7 +21,7 @@ class OnboardingService(
             onboardingRequest.jobRole,
             onboardingRequest.careerYear,
             onboardingRequest.region,
-            onboardingRequest.school,
+            School.fromSchoolName(onboardingRequest.school),
             onboardingRequest.targetCompany
         )
         return onboardingRepository.save(onboarding)
@@ -43,7 +44,7 @@ class OnboardingService(
             onboardingRequest.jobRole,
             onboardingRequest.careerYear,
             onboardingRequest.region,
-            onboardingRequest.school,
+            School.fromSchoolName(onboardingRequest.school),
             onboardingRequest.targetCompany
         )
     }
