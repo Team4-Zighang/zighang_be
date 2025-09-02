@@ -40,6 +40,10 @@ enum class School(
     ;
 
     companion object{
+
+        val allSchoolNames : List<String>
+            get() = entries.map { it.schoolName }
+
         fun fromSchoolName(schoolName: String): School {
             return entries.first { it.schoolName == schoolName }
         }
