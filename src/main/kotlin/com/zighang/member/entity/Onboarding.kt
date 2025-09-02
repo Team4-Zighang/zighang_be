@@ -26,7 +26,8 @@ class Onboarding (
     var region : Region,
 
     @Column(name = "school", nullable = false)
-    var school : String,
+    @Enumerated(EnumType.STRING)
+    var school : School,
 
     @Column(name = "target_company", nullable = false)
     var targetCompany : String,
@@ -37,7 +38,7 @@ class Onboarding (
             jobRole: String,
             careerYear: CareerYear,
             region: Region,
-            school: String,
+            school: School,
             targetCompany: String
         ): Onboarding {
             return Onboarding(
@@ -56,7 +57,7 @@ class Onboarding (
         jobRole: String,
         careerYear: CareerYear,
         region: Region,
-        school: String,
+        school: School,
         targetCompany: String
     ) {
         this.jobCategory = jobCategory
