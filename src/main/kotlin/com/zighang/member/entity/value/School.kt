@@ -38,4 +38,10 @@ enum class School(
     GACHEON("가천대학교"),
     KYONGGI("경기대학교")
     ;
+
+    companion object{
+        fun fromSchoolName(schoolName: String): School {
+            return entries.first { it.schoolName == schoolName }
+        }
+    }
 }
