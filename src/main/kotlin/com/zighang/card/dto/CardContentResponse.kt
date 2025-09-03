@@ -7,7 +7,17 @@ data class CardContentResponse(
     @Schema(description = "카드 식별자", example = "1")
     val cardId : Long,
     @Schema(description = "카드 공고 정보")
-    val cardJobPosting : CardJobPosting,
+    val cardJobPosting : CardJobPosting?,
     @Schema(description = "카드 최초 공개 시각")
-    val cardOpenTime : LocalDateTime
-)
+    val cardOpenTime : LocalDateTime?
+) {
+    companion object {
+        fun from(card: CardRedis): CardContentResponse {
+            return CardContentResponse(
+                cardId = card.cardId,
+                cardJobPosting = card.cardJobPosting,
+                cardOpenTime = card.openDateTime
+            )
+        }
+    }
+}

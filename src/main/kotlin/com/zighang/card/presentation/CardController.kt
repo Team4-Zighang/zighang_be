@@ -1,12 +1,11 @@
 package com.zighang.card.presentation
 
+import com.zighang.card.dto.CardContentResponse
 import com.zighang.card.dto.CreateCardSetResponse
 import com.zighang.card.facade.CardFacade
 import com.zighang.card.presentation.swagger.CardSwagger
-import com.zighang.card.service.CardService
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.RestResponse
-import com.zighang.memo.dto.response.MemoCreateResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
@@ -32,8 +31,13 @@ class CardController(
     @GetMapping("/{cardId}")
     override fun openCard(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
-        @PathVariable(name = "cardId") cardId: Long) {
-
+        @PathVariable(name = "cardId") cardId: Long) :
+            ResponseEntity<RestResponse<CardContentResponse>> {
+        return ResponseEntity.ok(
+            RestResponse(
+                cardFacade.getCard(customUserDetails, cardId)
+            )
+        )
     }
 
 

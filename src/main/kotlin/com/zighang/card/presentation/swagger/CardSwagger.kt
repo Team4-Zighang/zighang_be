@@ -1,5 +1,6 @@
 package com.zighang.card.presentation.swagger
 
+import com.zighang.card.dto.CardContentResponse
 import com.zighang.card.dto.CreateCardSetResponse
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.RestResponse
@@ -27,5 +28,5 @@ interface CardSwagger {
     fun openCard(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
         @PathVariable(name = "cardId") cardId : Long
-    )
+    ) : ResponseEntity<RestResponse<CardContentResponse>>
 }
