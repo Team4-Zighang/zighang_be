@@ -9,7 +9,7 @@ enum class OnboardingErrorCode (
     override val message: String,
 ) : BaseErrorCode<DomainException> {
 
-    NOT_EXISTS_ONBOARDING(HttpStatus.NOT_FOUND, "온보딩 정보가 존재하지 않습니다.")
+    NOT_EXIST_ONBOARDING(HttpStatus.NOT_FOUND, "온보딩 정보가 존재하지 않습니다.")
 
     ;
 

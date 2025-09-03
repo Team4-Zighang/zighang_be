@@ -52,11 +52,13 @@ class AlumniController(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
         @RequestParam page: Int
     ) : ResponseEntity<RestResponse<PageResponse<AlumniSimiliarJobPostingResponseDto>>> {
+        val safePage = if (page < 0) 0 else page
+
         return ResponseEntity.ok(
             RestResponse<PageResponse<AlumniSimiliarJobPostingResponseDto>>(
                 PageResponse.from(
                     alumniService.getScrappedJobPostingsBySimilarUsers(
-                        customUserDetails, page
+                        customUserDetails, safePage
                     )
                 )
             )

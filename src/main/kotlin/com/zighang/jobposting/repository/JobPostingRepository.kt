@@ -63,13 +63,23 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         pageable: Pageable
     ): List<JobPosting>
 
-    @Query("""
-        SELECT j FROM JobPosting j 
-        INNER JOIN Scrap s ON j.id = s.jobPostingId
-        INNER JOIN Member m ON s.memberId = m.id
-        INNER JOIN Onboarding o ON m.onboardingId = o.id
-        WHERE o.school = :school AND o.jobRole = :jobRole
-    """)
+    @Query(
+        value = """
+            SELECT DISTINCT j FROM JobPosting j
+            INNER JOIN Scrap s ON j.id = s.jobPostingId
+            INNER JOIN Member m ON s.memberId = m.id
+            INNER JOIN Onboarding o ON m.onboardingId = o.id
+            WHERE o.school = :school AND o.jobRole = :jobRole
+            ORDER BY j.uploadDate DESC
+        """,
+        countQuery = """
+            SELECT COUNT(DISTINCT j.id) FROM JobPosting j
+            INNER JOIN Scrap s ON j.id = s.jobPostingId
+            INNER JOIN Member m ON s.memberId = m.id
+            INNER JOIN Onboarding o ON m.onboardingId = o.id
+            WHERE o.school = :school AND o.jobRole = :jobRole
+        """
+    )
     fun findAllScrappedJobPostingsBySimilarUsers(
         school: School,
         jobRole: String,

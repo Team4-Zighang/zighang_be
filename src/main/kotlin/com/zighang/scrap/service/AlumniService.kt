@@ -38,7 +38,7 @@ class AlumniService(
 
         val onboarding = member.onboardingId?.let {
             onboardingRepository.findByIdOrNull(it)
-        } ?: throw OnboardingErrorCode.NOT_EXISTS_ONBOARDING.toException()
+        } ?: throw OnboardingErrorCode.NOT_EXIST_ONBOARDING.toException()
 
         val jobPostingList = jobPostingRepository.findTop3ScrappedJobPostingsBySimilarUsers(
             onboarding.school,
@@ -62,7 +62,7 @@ class AlumniService(
 
         val onboarding = member.onboardingId?.let {
             onboardingRepository.findByIdOrNull(it)
-        } ?: throw OnboardingErrorCode.NOT_EXISTS_ONBOARDING.toException()
+        } ?: throw OnboardingErrorCode.NOT_EXIST_ONBOARDING.toException()
 
         val similarOnboardingIds = onboardingRepository.findBySchoolAndJobRole(
             onboarding.school,
@@ -71,32 +71,39 @@ class AlumniService(
 
         val similarMemberIds = memberRepository.findByOnboardingIdIn(similarOnboardingIds).map { it.id }
 
-        // 1. 유사 사용자들이 스크랩한 공고 ID 리스트 가져오기
-        val scrappedJobPostingIds = scrapRepository.findByMemberIdIn(similarMemberIds)
+        // 1. 유사 사용자들이 스크랩한 공고 ID 리스트 가져오기 (중복 유지 = 스크랩 '빈도')
+        val scrappedJobPostingIds: List<Long> = scrapRepository.findByMemberIdIn(similarMemberIds)
             .map { it.jobPostingId }
-            .toSet()
+        if (scrappedJobPostingIds.isEmpty()) return emptyList()
 
-        // 2. 공고 ID 리스트로 JobPosting 엔티티들 가져오기
-        val jobPostings = jobPostingRepository.findAllById(scrappedJobPostingIds)
+        // 2. 조회 최적화: 조회할 공고 ID만 distinct 하여 엔티티 조회
+        val jobPostingsById = jobPostingRepository.findAllById(scrappedJobPostingIds.toSet())
+            .associateBy { it.id }
 
-        // 3. 기업 이름별로 스크랩 횟수 집계
-        val companyScrapCounts = jobPostings.groupingBy { jobPosting ->
-            // JSON 문자열 파싱
-            val companyData = companyMapper.toJsonDto(jobPosting.company)
-            companyData.companyName ?: "알 수 없는 기업" // null인 경우를 대비
-        }.eachCount()
+        // 3. 공고ID -> 회사명, 회사데이터 사전 구축 (toJsonDto 중복 파싱 방지)
+        val companyNameByPostingId = mutableMapOf<Long, String>()
+        val companyDataByName = mutableMapOf<String, Company>()
+        jobPostingsById.values.forEach { jobPosting ->
+            val companyDto = companyMapper.toJsonDto(jobPosting.company)
+            val companyName = companyDto.companyName ?: "알 수 없는 기업"
+            jobPosting.id?.let { nonNullId ->
+                companyNameByPostingId[nonNullId] = companyName
+            }
+            companyDataByName.putIfAbsent(companyName, companyDto) // 동일 회사명은 대표 1건만 보관
+        }
 
-        // 4. 스크랩 횟수 기준으로 정렬하고 상위 3개만 가져오기
+        // 4. 회사명별 스크랩 빈도 집계
+        val companyScrapCounts = scrappedJobPostingIds
+            .mapNotNull { companyNameByPostingId[it] }
+            .groupingBy { it }
+            .eachCount()
+
+        // 5. 스크랩 빈도 기준으로 정렬하고 상위 3개만 DTO로 변환
         return companyScrapCounts.entries
             .sortedByDescending { it.value }
             .take(3)
             .map { (companyName) ->
-                val companyData = jobPostings.firstOrNull {
-                    companyMapper.toJsonDto(it.company).companyName == companyName
-                }?.let {
-                    companyMapper.toJsonDto(it.company)
-                } ?: Company(companyName, null)
-
+                val companyData = companyDataByName[companyName] ?: Company(companyName, null)
                 AlumniTop3CompanyResponseDto.create(companyData)
             }
     }
@@ -114,7 +121,7 @@ class AlumniService(
 
         val onboarding = member.onboardingId?.let {
             onboardingRepository.findByIdOrNull(it)
-        } ?: throw OnboardingErrorCode.NOT_EXISTS_ONBOARDING.toException()
+        } ?: throw OnboardingErrorCode.NOT_EXIST_ONBOARDING.toException()
 
         val jobPostingsPage = jobPostingRepository.findAllScrappedJobPostingsBySimilarUsers(
             onboarding.school,
