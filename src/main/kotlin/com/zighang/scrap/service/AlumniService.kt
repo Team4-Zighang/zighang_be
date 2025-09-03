@@ -1,6 +1,7 @@
 package com.zighang.scrap.service
 
 import com.zighang.core.infrastructure.CustomUserDetails
+import com.zighang.jobposting.infrastructure.CompanyMapper
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.member.entity.Member
 import com.zighang.member.entity.Onboarding
@@ -19,8 +20,8 @@ import org.springframework.stereotype.Service
 class AlumniService(
     private val memberRepository: MemberRepository,
     private val onboardingRepository: OnboardingRepository,
-    private val scrapRepository: ScrapRepository,
-    private val jobPostingRepository: JobPostingRepository
+    private val jobPostingRepository: JobPostingRepository,
+    private val companyMapper: CompanyMapper
 ) {
 
 
@@ -44,7 +45,8 @@ class AlumniService(
         )
 
         return jobPostingsPage.map { jobPosting ->
-            AlumniSimiliarJobPostingResponseDto.create(jobPosting)
+            val company = companyMapper.toJsonDto(jobPosting.company)
+            AlumniSimiliarJobPostingResponseDto.create(jobPosting, company)
         }
     }
 }

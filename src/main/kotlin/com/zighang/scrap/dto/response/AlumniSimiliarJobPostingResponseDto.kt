@@ -1,6 +1,7 @@
 package com.zighang.scrap.dto.response
 
 import com.zighang.jobposting.entity.JobPosting
+import com.zighang.jobposting.entity.value.Company
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -10,9 +11,9 @@ data class AlumniSimiliarJobPostingResponseDto(
 
     val postingTitle: String,
 
-    val companyName: String,
+    val companyName: String?,
 
-    val companyImageUrl: String,
+    val companyImageUrl: String?,
 
     // 경력 정보 저장 여부 확인 후 수정
     val career: String,
@@ -34,7 +35,8 @@ data class AlumniSimiliarJobPostingResponseDto(
     val isSaved: Boolean
 ) {
     companion object {
-        fun create(jobPosting: JobPosting): AlumniSimiliarJobPostingResponseDto {
+        fun create(jobPosting: JobPosting, company: Company): AlumniSimiliarJobPostingResponseDto {
+
             val dday: String = if (jobPosting.recruitmentEndDate == null) {
                 "상시"
             } else if(jobPosting.recruitmentEndDate.isAfter(LocalDateTime.now())) {
@@ -43,11 +45,12 @@ data class AlumniSimiliarJobPostingResponseDto(
             } else {
                 "마감"
             }
+
             return AlumniSimiliarJobPostingResponseDto(
                 jobPosting.id,
                 jobPosting.title,
-                jobPosting.company,
-                jobPosting.company,
+                company.companyName,
+                company.companyImageUrl,
                 "경력 3 ~ 10년",
                 jobPosting.recruitmentType,
                 jobPosting.education,
