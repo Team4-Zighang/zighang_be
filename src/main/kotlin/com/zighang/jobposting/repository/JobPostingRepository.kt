@@ -41,4 +41,19 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         jobRole: String,
         pageable: Pageable
     ): Page<JobPosting>
+
+    @Query("""
+        SELECT j FROM JobPosting j
+        INNER JOIN Scrap s on j.id = s.jobPostingId
+        INNER JOIN Member m ON s.memberId = m.id
+        INNER JOIN Onboarding o ON m.onboardingId = o.id
+        where o.school= :school AND o.jobRole = :jobRole
+        group by (j.id)
+        order by count(s.id) desc
+        limit 3
+    """)
+    fun findTop3ScrappedJobPostingsBySimilarUsers(
+        school: School,
+        jobRole: String,
+    ): List<JobPosting>
 }

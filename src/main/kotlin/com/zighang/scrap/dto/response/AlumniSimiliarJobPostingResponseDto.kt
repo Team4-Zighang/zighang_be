@@ -2,6 +2,7 @@ package com.zighang.scrap.dto.response
 
 import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.entity.value.Company
+import com.zighang.scrap.util.dDayFactory
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -36,16 +37,6 @@ data class AlumniSimiliarJobPostingResponseDto(
 ) {
     companion object {
         fun create(jobPosting: JobPosting, company: Company): AlumniSimiliarJobPostingResponseDto {
-
-            val dday: String = if (jobPosting.recruitmentEndDate == null) {
-                "상시"
-            } else if(jobPosting.recruitmentEndDate.isAfter(LocalDateTime.now())) {
-                val ddayCount = ChronoUnit.DAYS.between(LocalDateTime.now(), jobPosting.recruitmentEndDate)
-                "D-$ddayCount"
-            } else {
-                "마감"
-            }
-
             return AlumniSimiliarJobPostingResponseDto(
                 jobPosting.id,
                 jobPosting.title,
@@ -56,7 +47,7 @@ data class AlumniSimiliarJobPostingResponseDto(
                 jobPosting.education,
                 jobPosting.recruitmentRegion,
                 0,
-                dday,
+                dDayFactory(jobPosting),
                 false,
             )
         }
