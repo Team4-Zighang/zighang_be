@@ -11,4 +11,6 @@ interface ScrapRepository : JpaRepository<Scrap, Long> {
     fun findByJobPostingIdAndMemberId(jobPostingId : Long, memberId : Long) : Scrap?
 
     fun findByIdAndMemberId(id : Long, memberId : Long) : Scrap?
+
+    fun findByMemberIdIn(memberIdList: List<Long>): List<Scrap>
 }

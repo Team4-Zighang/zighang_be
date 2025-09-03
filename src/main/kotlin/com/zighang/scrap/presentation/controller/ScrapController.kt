@@ -1,4 +1,4 @@
-package com.zighang.scrap.presentation
+package com.zighang.scrap.presentation.controller
 
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.PageResponse

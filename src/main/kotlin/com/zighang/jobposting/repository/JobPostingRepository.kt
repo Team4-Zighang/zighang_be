@@ -1,9 +1,11 @@
 package com.zighang.jobposting.repository
 
 import com.zighang.jobposting.entity.JobPosting
+import com.zighang.member.entity.value.School
 import jakarta.transaction.Transactional
-import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -59,5 +61,43 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         @Param("excluded") excluded: Boolean,          // excludedIds가 비었으면 false로
         @Param("excludedIds") excludedIds: List<Long>, // 비었을 수도 있음
         pageable: Pageable
+    ): List<JobPosting>
+
+    @Query(
+        value = """
+            SELECT DISTINCT j FROM JobPosting j
+            INNER JOIN Scrap s ON j.id = s.jobPostingId
+            INNER JOIN Member m ON s.memberId = m.id
+            INNER JOIN Onboarding o ON m.onboardingId = o.id
+            WHERE o.school = :school AND o.jobRole = :jobRole
+            ORDER BY j.uploadDate DESC
+        """,
+        countQuery = """
+            SELECT COUNT(DISTINCT j.id) FROM JobPosting j
+            INNER JOIN Scrap s ON j.id = s.jobPostingId
+            INNER JOIN Member m ON s.memberId = m.id
+            INNER JOIN Onboarding o ON m.onboardingId = o.id
+            WHERE o.school = :school AND o.jobRole = :jobRole
+        """
+    )
+    fun findAllScrappedJobPostingsBySimilarUsers(
+        school: School,
+        jobRole: String,
+        pageable: Pageable
+    ): Page<JobPosting>
+
+    @Query("""
+        SELECT j FROM JobPosting j
+        INNER JOIN Scrap s on j.id = s.jobPostingId
+        INNER JOIN Member m ON s.memberId = m.id
+        INNER JOIN Onboarding o ON m.onboardingId = o.id
+        where o.school= :school AND o.jobRole = :jobRole
+        group by (j.id)
+        order by count(s.id) desc
+        limit 3
+    """)
+    fun findTop3ScrappedJobPostingsBySimilarUsers(
+        school: School,
+        jobRole: String,
     ): List<JobPosting>
 }
