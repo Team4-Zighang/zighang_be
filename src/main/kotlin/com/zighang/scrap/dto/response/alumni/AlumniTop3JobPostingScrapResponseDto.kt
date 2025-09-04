@@ -2,6 +2,7 @@ package com.zighang.scrap.dto.response.alumni
 
 import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.entity.value.Company
+import com.zighang.jobposting.entity.value.RankChange
 import com.zighang.scrap.util.dDayFactory
 
 data class AlumniTop3JobPostingScrapResponseDto(
@@ -25,7 +26,7 @@ data class AlumniTop3JobPostingScrapResponseDto(
 
     val changeRankValue: Int,
 
-    val changRankStatus: String?,
+    val changeRankStatus: String?,
 ) {
 
     companion object {
@@ -41,8 +42,8 @@ data class AlumniTop3JobPostingScrapResponseDto(
                 dDayFactory(jobPosting),
                 isSaved = isSaved,
                 jobPosting.currentRank - jobPosting.lastRank,
-                changRankStatus =
-                    if (jobPosting.rankChange == null) "NEW" else jobPosting.rankChange.name
+                changeRankStatus =
+                    if (jobPosting.lastRank == 0) RankChange.NEW.name else jobPosting.rankChange.name
             )
         }
     }

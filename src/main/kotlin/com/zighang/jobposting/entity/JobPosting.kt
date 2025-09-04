@@ -103,17 +103,18 @@ class JobPosting(
     @Column(name="last_rank", nullable = false)
     var lastRank: Int = 0,
 
-    @Column(name = "rank_change")
+    @Column(name = "rank_change", nullable = false)
     @Enumerated(EnumType.STRING)
-    var rankChange: RankChange
+    var rankChange: RankChange = RankChange.NEW
+
 ) : BaseEntity() {
 
     fun changeLastRank(lastRank: Int) {
-        this.lastRank = this.currentRank
+        this.lastRank = lastRank
     }
 
     fun changeCurrentRank(currentRank: Int) {
-        this.currentRank = currentRank + 1
+        this.currentRank = currentRank
     }
 
     fun changeRankChange(changeRank: RankChange) {

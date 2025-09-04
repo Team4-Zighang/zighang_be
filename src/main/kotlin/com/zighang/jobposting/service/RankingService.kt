@@ -20,19 +20,17 @@ class RankingService(
         val topJobPostingWithScores = redisTemplate.opsForZSet()
             .reverseRangeWithScores("scrap_ranking", 0, 99)
 
-        val jobPostings = jobPostingRepository.findAllById(
-            topJobPostingWithScores?.map { it.value.toString().toLong() } ?: emptyList()
-        )
+        val ids = topJobPostingWithScores?.map { it.value.toString().toLong() } ?: emptyList()
+        val postingsById = jobPostingRepository.findAllById(ids).associateBy { it.id }
+        val orderedPostings = ids.mapNotNull { postingsById[it] }
 
-        val rankingMap = jobPostings.associateBy { it.id }
-
-        jobPostings.forEachIndexed { index, jobPosting ->
+        orderedPostings.forEachIndexed { index, jobPosting ->
             jobPosting.changeLastRank(jobPosting.currentRank)
-            jobPosting.changeCurrentRank(index)
+            jobPosting.changeCurrentRank(index + 1)
             jobPosting.changeRankChange(calculateRankChange(jobPosting.lastRank, jobPosting.currentRank))
         }
 
-        jobPostingRepository.saveAll(jobPostings)
+        jobPostingRepository.saveAll(orderedPostings)
     }
 
     private fun calculateRankChange(lastRank: Int, currentRank: Int): RankChange {
