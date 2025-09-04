@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -36,7 +37,8 @@ class ScrapService(
     private val jobPostingRepository: JobPostingRepository,
     private val memoRepository: MemoRepository,
     private val objectStorageService: ObjectStorageService,
-    private val jobAnalysisEventProducer: JobAnalysisEventProducer
+    private val jobAnalysisEventProducer: JobAnalysisEventProducer,
+    private val redisTemplate: RedisTemplate<String, Any>
 ) {
 
     @Transactional
@@ -74,14 +76,27 @@ class ScrapService(
             }.let {
                 savedScrap -> save(savedScrap)
             }
-        } ?: save(
-            Scrap.create(
-                upsertScrapRequest.jobPostingId,
-                customUserDetails.getId(),
-                null,
-                null
+        } ?: run {
+            TransactionSynchronizationManager.registerSynchronization(
+                object : TransactionSynchronization {
+                    override fun afterCommit() {
+                        // 트랜잭션 커밋 후 Redis 랭킹 업데이트
+                        redisTemplate.opsForZSet().incrementScore(
+                            "scrap_ranking", upsertScrapRequest.jobPostingId.toString(), 1.0
+                        )
+                    }
+                }
             )
-        )
+
+            save(
+                Scrap.create(
+                    upsertScrapRequest.jobPostingId,
+                    customUserDetails.getId(),
+                    null,
+                    null
+                )
+            )
+        }
     }
 
     @Transactional(readOnly = true)

@@ -1,6 +1,7 @@
 package com.zighang.jobposting.entity
 
 import com.zighang.core.infrastructure.jpa.shared.BaseEntity
+import com.zighang.jobposting.entity.value.RankChange
 import jakarta.persistence.*
 import java.time.LocalDateTime
 import java.util.*
@@ -95,6 +96,28 @@ class JobPosting(
     @Column(name = "expired_date")
     val expiredDate: LocalDateTime,
 
+    // 순위 산정 관련 column
+    @Column(name = "current_rank", nullable = false)
+    var currentRank: Int = 0,
+
+    @Column(name="last_rank", nullable = false)
+    var lastRank: Int = 0,
+
+    @Column(name = "rank_change", nullable = false)
+    @Enumerated(EnumType.STRING)
+    var rankChange: RankChange = RankChange.NEW
+
 ) : BaseEntity() {
 
+    fun changeLastRank(lastRank: Int) {
+        this.lastRank = lastRank
+    }
+
+    fun changeCurrentRank(currentRank: Int) {
+        this.currentRank = currentRank
+    }
+
+    fun changeRankChange(changeRank: RankChange) {
+        this.rankChange = changeRank
+    }
 }
