@@ -69,7 +69,7 @@ class AlumniController(
 
     @GetMapping("/similar/info")
     override fun getAlumniBySimilarUsersController(
-        customUserDetails: CustomUserDetails
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails
     ): ResponseEntity<RestResponse<List<SimilarAlumniResponseDto>>> {
 
         return ResponseEntity.ok(
