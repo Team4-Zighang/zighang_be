@@ -1,10 +1,8 @@
-package com.zighang.scrap.dto.response
+package com.zighang.scrap.dto.response.alumni
 
 import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.entity.value.Company
 import com.zighang.scrap.util.dDayFactory
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 data class AlumniSimiliarJobPostingResponseDto(
 

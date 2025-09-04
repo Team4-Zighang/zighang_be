@@ -3,9 +3,10 @@ package com.zighang.scrap.presentation.controller
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.PageResponse
 import com.zighang.core.presentation.RestResponse
-import com.zighang.scrap.dto.response.AlumniSimiliarJobPostingResponseDto
-import com.zighang.scrap.dto.response.AlumniTop3CompanyResponseDto
-import com.zighang.scrap.dto.response.AlumniTop3JobPostingScrapResponseDto
+import com.zighang.scrap.dto.response.alumni.AlumniSimiliarJobPostingResponseDto
+import com.zighang.scrap.dto.response.alumni.AlumniTop3CompanyResponseDto
+import com.zighang.scrap.dto.response.alumni.AlumniTop3JobPostingScrapResponseDto
+import com.zighang.scrap.dto.response.alumni.SimilarAlumniResponseDto
 import com.zighang.scrap.presentation.swagger.AlumniSwagger
 import com.zighang.scrap.service.AlumniService
 import org.springframework.http.ResponseEntity
@@ -21,10 +22,11 @@ class AlumniController(
     private val alumniService: AlumniService
 ) : AlumniSwagger {
 
-    @GetMapping("/popular/scrap")
+    @GetMapping("/similar/job-postings/top3")
     override fun getTop3ScrappedJobPostingsBySimilarUsersController(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails
     ) : ResponseEntity<RestResponse<List<AlumniTop3JobPostingScrapResponseDto>>>{
+
         return ResponseEntity.ok(
             RestResponse<List<AlumniTop3JobPostingScrapResponseDto>>(
                 alumniService.getTop3ScrappedJobPostingsBySimilarUsers(
@@ -34,10 +36,11 @@ class AlumniController(
         )
     }
 
-    @GetMapping("/popular/company")
+    @GetMapping("/similar/companies/top3")
     override fun getTop3CompanyBySimilarUsersController(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails
     ): ResponseEntity<RestResponse<List<AlumniTop3CompanyResponseDto>>> {
+
         return ResponseEntity.ok(
             RestResponse<List<AlumniTop3CompanyResponseDto>>(
                 alumniService.getTop3ScrappedCompaniesBySimilarUsers(
@@ -47,11 +50,12 @@ class AlumniController(
         )
     }
 
-    @GetMapping("/scrap/list")
+    @GetMapping("/similar/scraps")
     override fun getScrappedJobPostingsBySimilarUsersController(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
         @RequestParam page: Int
     ) : ResponseEntity<RestResponse<PageResponse<AlumniSimiliarJobPostingResponseDto>>> {
+
         val safePage = if (page < 0) 0 else page
 
         return ResponseEntity.ok(
@@ -61,6 +65,18 @@ class AlumniController(
                         customUserDetails, safePage
                     )
                 )
+            )
+        )
+    }
+
+    @GetMapping("/similar/info")
+    override fun getAlumniBySimilarUsersController(
+        customUserDetails: CustomUserDetails
+    ): ResponseEntity<RestResponse<List<SimilarAlumniResponseDto>>> {
+
+        return ResponseEntity.ok(
+            RestResponse<List<SimilarAlumniResponseDto>>(
+                alumniService.getAlumniBySimilarUsers(customUserDetails)
             )
         )
     }

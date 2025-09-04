@@ -8,9 +8,10 @@ import com.zighang.member.exception.MemberErrorCode
 import com.zighang.member.exception.OnboardingErrorCode
 import com.zighang.member.repository.MemberRepository
 import com.zighang.member.repository.OnboardingRepository
-import com.zighang.scrap.dto.response.AlumniSimiliarJobPostingResponseDto
-import com.zighang.scrap.dto.response.AlumniTop3CompanyResponseDto
-import com.zighang.scrap.dto.response.AlumniTop3JobPostingScrapResponseDto
+import com.zighang.scrap.dto.response.alumni.AlumniSimiliarJobPostingResponseDto
+import com.zighang.scrap.dto.response.alumni.AlumniTop3CompanyResponseDto
+import com.zighang.scrap.dto.response.alumni.AlumniTop3JobPostingScrapResponseDto
+import com.zighang.scrap.dto.response.alumni.SimilarAlumniResponseDto
 import com.zighang.scrap.repository.ScrapRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -71,7 +72,7 @@ class AlumniService(
 
         val similarMemberIds = memberRepository.findByOnboardingIdIn(similarOnboardingIds).map { it.id }
 
-        // 1. 유사 사용자들이 스크랩한 공고 ID 리스트 가져오기 (중복 유지 = 스크랩 '빈도')
+        // 1. 유사 사용자들이 스크랩한 공고 ID 리스트 가져오기
         val scrappedJobPostingIds: List<Long> = scrapRepository.findByMemberIdIn(similarMemberIds)
             .map { it.jobPostingId }
         if (scrappedJobPostingIds.isEmpty()) return emptyList()
@@ -133,5 +134,60 @@ class AlumniService(
             val company = companyMapper.toJsonDto(jobPosting.company)
             AlumniSimiliarJobPostingResponseDto.create(jobPosting, company)
         }
+    }
+
+    // 나와 같은 직무를 희망하는 동문 리스트
+    @Transactional(readOnly = true)
+    fun getAlumniBySimilarUsers(
+        customUserDetails: CustomUserDetails
+    ) : List<SimilarAlumniResponseDto> {
+
+        val memberId = customUserDetails.getId()
+        val member = memberRepository.findByIdOrNull(memberId)
+            ?: throw MemberErrorCode.NOT_EXIST_MEMBER.toException()
+
+        val onboarding = member.onboardingId?.let {
+            onboardingRepository.findByIdOrNull(it)
+        } ?: throw OnboardingErrorCode.NOT_EXIST_ONBOARDING.toException()
+
+        // 같은 학교, 같은 직무를 가진 동문 ID 리스트 가져오기
+        val similarOnboardingIds = onboardingRepository.findBySchoolAndJobRole(
+            onboarding.school,
+            onboarding.jobRole
+        ).map { it.id }
+
+        val allSimilarMemberIds = memberRepository.findByOnboardingIdIn(similarOnboardingIds).map { it.id }
+
+        // 스크랩 공고가 4개 이상인 멤버 ID만 추리기
+        val filteredMemberIds = scrapRepository.findMemberIdsWithMoreThanFourScraps(allSimilarMemberIds)
+
+        val similarMembers = memberRepository.findAllById(filteredMemberIds).associateBy { it.id }
+        val similarOnboardings = onboardingRepository.findAllById(similarMembers.values.mapNotNull { it.onboardingId }).associateBy { it.id }
+        val allScraps = scrapRepository.findByMemberIdIn(filteredMemberIds)
+        val jobPostings = jobPostingRepository.findAllById(allScraps.map { it.jobPostingId }.toSet()).associateBy { it.id }
+
+        val results = mutableListOf<SimilarAlumniResponseDto>()
+
+        for (filteredMemberId in filteredMemberIds) {
+            val currentMember = similarMembers[filteredMemberId]!!
+            val currentOnboarding = similarOnboardings[currentMember.onboardingId!!]!!
+
+            // 스크랩한 공고의 기업 이미지 4개 추출
+            val scrappedJobPostingCompanys = allScraps
+                .filter { it.memberId == filteredMemberId }
+                .mapNotNull { scrap -> jobPostings[scrap.jobPostingId]?.company?.let { companyMapper.toJsonDto(it) } }
+                .take(4) // ✅ 상위 4개만 가져옴
+
+            results.add(
+                SimilarAlumniResponseDto(
+                    memberId = currentMember.id,
+                    memberName = currentMember.name,
+                    school = currentOnboarding.school.schoolName,
+                    jobRole = currentOnboarding.jobRole,
+                    companyLists = scrappedJobPostingCompanys
+                )
+            )
+        }
+        return results
     }
 }

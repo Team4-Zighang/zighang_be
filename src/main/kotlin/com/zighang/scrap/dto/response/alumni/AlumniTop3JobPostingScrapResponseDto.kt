@@ -1,4 +1,4 @@
-package com.zighang.scrap.dto.response
+package com.zighang.scrap.dto.response.alumni
 
 import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.entity.value.Company
