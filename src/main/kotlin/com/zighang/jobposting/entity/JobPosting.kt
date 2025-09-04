@@ -95,6 +95,15 @@ class JobPosting(
     @Column(name = "expired_date")
     val expiredDate: LocalDateTime,
 
+    // 순위 산정 관련 column
+    @Column(name = "current_rank", nullable = false)
+    val currentRank: Int = 0,
+
+    @Column(name="last_rank", nullable = false)
+    val lastRank: Int = 0,
+
+    @Column(name = "rank_change")
+    val rankChange: String
 ) : BaseEntity() {
 
 }
