@@ -97,13 +97,24 @@ class JobPosting(
 
     // 순위 산정 관련 column
     @Column(name = "current_rank", nullable = false)
-    val currentRank: Int = 0,
+    var currentRank: Int = 0,
 
     @Column(name="last_rank", nullable = false)
-    val lastRank: Int = 0,
+    var lastRank: Int = 0,
 
     @Column(name = "rank_change")
-    val rankChange: String
+    var rankChange: String
 ) : BaseEntity() {
 
+    fun changeLastRank(lastRank: Int) {
+        this.lastRank = this.currentRank
+    }
+
+    fun changeCurrentRank(currentRank: Int) {
+        this.currentRank = currentRank + 1
+    }
+
+    fun changeRankChange(changeRank: String) {
+        this.rankChange = changeRank
+    }
 }
