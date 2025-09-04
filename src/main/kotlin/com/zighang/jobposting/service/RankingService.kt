@@ -1,5 +1,6 @@
 package com.zighang.jobposting.service
 
+import com.zighang.jobposting.entity.value.RankChange
 import com.zighang.jobposting.repository.JobPostingRepository
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
@@ -11,7 +12,6 @@ class RankingService(
     private val jobPostingRepository: JobPostingRepository,
     private val redisTemplate: RedisTemplate<String, Any>
 ) {
-
 
     @Scheduled(cron = "0 0 0/6 * * *")
     @Transactional
@@ -35,12 +35,12 @@ class RankingService(
         jobPostingRepository.saveAll(jobPostings)
     }
 
-    private fun calculateRankChange(lastRank: Int, currentRank: Int): String {
+    private fun calculateRankChange(lastRank: Int, currentRank: Int): RankChange {
         return when {
-            lastRank == 0 -> "NEW" // 0이면 신규
-            currentRank < lastRank -> "UP" // 순위 상승
-            currentRank > lastRank -> "DOWN" // 순위 하락
-            else -> "STABLE" // 순위 변동 없음
+            lastRank == 0 -> RankChange.NEW // 0이면 신규
+            currentRank < lastRank -> RankChange.UP // 순위 상승
+            currentRank > lastRank -> RankChange.DOWN // 순위 하락
+            else -> RankChange.STABLE // 순위 변동 없음
         }
     }
 }

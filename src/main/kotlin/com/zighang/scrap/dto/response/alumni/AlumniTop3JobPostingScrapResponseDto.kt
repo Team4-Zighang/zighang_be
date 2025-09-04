@@ -22,10 +22,14 @@ data class AlumniTop3JobPostingScrapResponseDto(
     val dday: String,
 
     val isSaved: Boolean,
+
+    val changeRankValue: Int,
+
+    val changRankStatus: String?,
 ) {
 
     companion object {
-        fun create(jobPosting: JobPosting, company: Company): AlumniTop3JobPostingScrapResponseDto {
+        fun create(jobPosting: JobPosting, company: Company, isSaved: Boolean): AlumniTop3JobPostingScrapResponseDto {
             return AlumniTop3JobPostingScrapResponseDto(
                 jobPosting.id!!,
                 jobPosting.title,
@@ -35,7 +39,10 @@ data class AlumniTop3JobPostingScrapResponseDto(
                 jobPosting.recruitmentType,
                 "3년차 이상",
                 dDayFactory(jobPosting),
-                false
+                isSaved = isSaved,
+                jobPosting.currentRank - jobPosting.lastRank,
+                changRankStatus =
+                    if (jobPosting.rankChange == null) "NEW" else jobPosting.rankChange.name
             )
         }
     }

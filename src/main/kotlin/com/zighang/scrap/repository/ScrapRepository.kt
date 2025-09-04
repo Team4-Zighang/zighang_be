@@ -15,6 +15,8 @@ interface ScrapRepository : JpaRepository<Scrap, Long> {
 
     fun findByMemberIdIn(memberIdList: List<Long>): List<Scrap>
 
+    fun findByMemberId(memberId: Long): List<Scrap>
+
     @Query("SELECT s.memberId FROM Scrap s WHERE s.memberId IN :memberIds GROUP BY s.memberId HAVING COUNT(s.memberId) >= 4")
     fun findMemberIdsWithMoreThanFourScraps(memberIds: List<Long>): List<Long>
 }

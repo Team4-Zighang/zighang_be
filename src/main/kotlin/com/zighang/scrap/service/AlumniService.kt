@@ -41,6 +41,9 @@ class AlumniService(
             onboardingRepository.findByIdOrNull(it)
         } ?: throw OnboardingErrorCode.NOT_EXIST_ONBOARDING.toException()
 
+        val myScrappedJobPostingIds =
+            scrapRepository.findByMemberId(memberId).map { it.jobPostingId }
+
         val jobPostingList = jobPostingRepository.findTop3ScrappedJobPostingsBySimilarUsers(
             onboarding.school,
             onboarding.jobRole
@@ -48,7 +51,8 @@ class AlumniService(
 
         return jobPostingList.map { jobPosting ->
             val company = companyMapper.toJsonDto(jobPosting.company)
-            AlumniTop3JobPostingScrapResponseDto.create(jobPosting, company)
+            val isSaved = myScrappedJobPostingIds.contains(jobPosting.id)
+            AlumniTop3JobPostingScrapResponseDto.create(jobPosting, company, isSaved)
         }
     }
 
@@ -176,7 +180,7 @@ class AlumniService(
             val scrappedJobPostingCompanys = allScraps
                 .filter { it.memberId == filteredMemberId }
                 .mapNotNull { scrap -> jobPostings[scrap.jobPostingId]?.company?.let { companyMapper.toJsonDto(it) } }
-                .take(4) // ✅ 상위 4개만 가져옴
+                .take(4) // 상위 4개만 가져옴
 
             results.add(
                 SimilarAlumniResponseDto(

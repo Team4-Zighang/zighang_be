@@ -1,6 +1,7 @@
 package com.zighang.jobposting.entity
 
 import com.zighang.core.infrastructure.jpa.shared.BaseEntity
+import com.zighang.jobposting.entity.value.RankChange
 import jakarta.persistence.*
 import java.time.LocalDateTime
 import java.util.*
@@ -103,7 +104,8 @@ class JobPosting(
     var lastRank: Int = 0,
 
     @Column(name = "rank_change")
-    var rankChange: String
+    @Enumerated(EnumType.STRING)
+    var rankChange: RankChange
 ) : BaseEntity() {
 
     fun changeLastRank(lastRank: Int) {
@@ -114,7 +116,7 @@ class JobPosting(
         this.currentRank = currentRank + 1
     }
 
-    fun changeRankChange(changeRank: String) {
+    fun changeRankChange(changeRank: RankChange) {
         this.rankChange = changeRank
     }
 }
