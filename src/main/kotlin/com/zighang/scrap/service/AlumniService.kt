@@ -8,10 +8,7 @@ import com.zighang.member.exception.MemberErrorCode
 import com.zighang.member.exception.OnboardingErrorCode
 import com.zighang.member.repository.MemberRepository
 import com.zighang.member.repository.OnboardingRepository
-import com.zighang.scrap.dto.response.alumni.AlumniSimiliarJobPostingResponseDto
-import com.zighang.scrap.dto.response.alumni.AlumniTop3CompanyResponseDto
-import com.zighang.scrap.dto.response.alumni.AlumniTop3JobPostingScrapResponseDto
-import com.zighang.scrap.dto.response.alumni.SimilarAlumniResponseDto
+import com.zighang.scrap.dto.response.alumni.*
 import com.zighang.scrap.repository.ScrapRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -128,6 +125,9 @@ class AlumniService(
             onboardingRepository.findByIdOrNull(it)
         } ?: throw OnboardingErrorCode.NOT_EXIST_ONBOARDING.toException()
 
+        val myScrappedJobPostingIds =
+            scrapRepository.findByMemberId(memberId).map { it.jobPostingId }
+
         val jobPostingsPage = jobPostingRepository.findAllScrappedJobPostingsBySimilarUsers(
             onboarding.school,
             onboarding.jobRole,
@@ -136,7 +136,8 @@ class AlumniService(
 
         return jobPostingsPage.map { jobPosting ->
             val company = companyMapper.toJsonDto(jobPosting.company)
-            AlumniSimiliarJobPostingResponseDto.create(jobPosting, company)
+            val isSaved = myScrappedJobPostingIds.contains(jobPosting.id)
+            AlumniSimiliarJobPostingResponseDto.create(jobPosting, company, isSaved)
         }
     }
 
@@ -193,5 +194,33 @@ class AlumniService(
             )
         }
         return results
+    }
+
+    // 해당 동문의 스크랩 상세보기
+    fun getAlumniBySimilarUsersDetail(
+        customUserDetails: CustomUserDetails,
+        memberId: Long
+    ) : SimilarAlumniDetailResponseDto {
+        val member = memberRepository.findByIdOrNull(memberId)
+            ?: throw MemberErrorCode.NOT_EXIST_MEMBER.toException()
+
+        val onboarding = member.onboardingId?.let {
+            onboardingRepository.findByIdOrNull(it)
+        } ?: throw OnboardingErrorCode.NOT_EXIST_ONBOARDING.toException()
+
+        // 해당 멤버의 스크랩 id를 통해 posting 가져오기
+        val jobPostingId = scrapRepository.findByMemberId(memberId).map { it.jobPostingId }
+        val jobPostingList = jobPostingRepository.findAllById(jobPostingId)
+
+        val myScrappedJobPostingIds =
+            scrapRepository.findByMemberId(customUserDetails.getId()).map { it.jobPostingId }
+
+        val postingDtoList = jobPostingList.map { jobPosting ->
+            val company = companyMapper.toJsonDto(jobPosting.company)
+            val isSaved = myScrappedJobPostingIds.contains(jobPosting.id)
+            AlumniSimiliarJobPostingResponseDto.create(jobPosting, company, isSaved)
+        }
+
+        return SimilarAlumniDetailResponseDto.create(member, onboarding, postingDtoList)
     }
 }

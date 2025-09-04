@@ -34,7 +34,7 @@ data class AlumniSimiliarJobPostingResponseDto(
     val isSaved: Boolean
 ) {
     companion object {
-        fun create(jobPosting: JobPosting, company: Company): AlumniSimiliarJobPostingResponseDto {
+        fun create(jobPosting: JobPosting, company: Company, isSaved: Boolean): AlumniSimiliarJobPostingResponseDto {
             return AlumniSimiliarJobPostingResponseDto(
                 jobPosting.id,
                 jobPosting.title,
@@ -46,7 +46,7 @@ data class AlumniSimiliarJobPostingResponseDto(
                 jobPosting.recruitmentRegion,
                 0,
                 dDayFactory(jobPosting),
-                false,
+                isSaved = isSaved,
             )
         }
     }

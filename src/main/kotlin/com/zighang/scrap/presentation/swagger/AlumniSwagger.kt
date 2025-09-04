@@ -3,14 +3,12 @@ package com.zighang.scrap.presentation.swagger
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.PageResponse
 import com.zighang.core.presentation.RestResponse
-import com.zighang.scrap.dto.response.alumni.AlumniSimiliarJobPostingResponseDto
-import com.zighang.scrap.dto.response.alumni.AlumniTop3CompanyResponseDto
-import com.zighang.scrap.dto.response.alumni.AlumniTop3JobPostingScrapResponseDto
-import com.zighang.scrap.dto.response.alumni.SimilarAlumniResponseDto
+import com.zighang.scrap.dto.response.alumni.*
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 
 @Tag(name = "Alumni", description = "동문관 관련 API")
@@ -52,4 +50,14 @@ interface AlumniSwagger {
     fun getAlumniBySimilarUsersController(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
     ) : ResponseEntity<RestResponse<List<SimilarAlumniResponseDto>>>
+
+    @Operation(
+        summary = "동문관 - 나와 같은 직무를 희망하는 동문의 스크랩 세부 정보를 봅니다.",
+        description = "나와 같은 직무를 희망하는 동문들의 세부 정보를 봅니다.",
+        operationId = "/alumni/similar/info/{memberId}"
+    )
+    fun getAlumniBySimilarUsersDetailController(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @PathVariable memberId: Long
+    ) : ResponseEntity<RestResponse<SimilarAlumniDetailResponseDto>>
 }
