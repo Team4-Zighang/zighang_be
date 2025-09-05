@@ -71,7 +71,7 @@ class JobPostingService(
 
         // 새 후보 1개 찾기 (repo 구현은 예시)
         val filtered = jobPostingRepository.findNextByExcludingIdsAndDepths(
-            exclude.isEmpty(),
+            exclude.isNotEmpty(),
             exclude.toList(),
             depthOne,
             depthTwo,
