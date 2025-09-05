@@ -63,6 +63,38 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         pageable: Pageable
     ): List<JobPosting>
 
+    @Query("""
+        SELECT jp
+        FROM JobPosting jp
+        LEFT JOIN Scrap s ON s.jobPostingId = jp.id
+        WHERE (:excluded = false OR jp.id NOT IN :excludedIds)
+          AND (:depthOne IS NULL OR jp.depthOne = :depthOne)
+          AND (:depthTwo IS NULL OR jp.depthTwo = :depthTwo)
+        GROUP BY jp.id
+        ORDER BY COUNT(s.id) DESC, jp.uploadDate DESC, jp.id DESC
+    """)
+    fun findNextByExcludingIdsAndDepths(
+        @Param("excluded") excluded: Boolean,
+        @Param("excludedIds") excludedIds: List<Long>,
+        @Param("depthOne") depthOne: String?,
+        @Param("depthTwo") depthTwo: String?,
+        pageable: Pageable
+    ): List<JobPosting>
+
+    @Query("""
+        SELECT jp
+        FROM JobPosting jp
+        LEFT JOIN Scrap s ON s.jobPostingId = jp.id
+        WHERE (:excluded = false OR jp.id NOT IN :excludedIds)
+        GROUP BY jp.id
+        ORDER BY COUNT(s.id) DESC, jp.uploadDate DESC, jp.id DESC
+    """)
+    fun findNextByExcludingIdsOrderByPopularity(
+        @Param("excluded") excluded: Boolean,
+        @Param("excludedIds") excludedIds: List<Long>,
+        pageable: Pageable
+    ): List<JobPosting>
+
     @Query(
         value = """
             SELECT DISTINCT j FROM JobPosting j

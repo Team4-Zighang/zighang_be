@@ -3,6 +3,7 @@ package com.zighang.jobposting.service
 import com.zighang.card.dto.CardRedis
 import com.zighang.card.mapper.CardJobPosingAnalysisDtoMapper
 import com.zighang.card.service.CardService
+import com.zighang.card.value.CardPosition
 import com.zighang.core.clova.util.JsonCleaner
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.scrap.infrastructure.JobAnalysisCaller
@@ -59,5 +60,49 @@ class JobPostingService(
                 openDateTime = null
             )
         }
+    }
+
+    fun replace(memberId: Long, depthOne: String?, depthTwo: String?, position: CardPosition) : Boolean{
+        val top3 = cardService.getTop3Ids(memberId).toMutableList()
+        // 제외 대상: 현재 Top3 모든 id + 과거 노출 이력
+        val exclude = mutableSetOf<Long>()
+        exclude += top3.map { it.jobPostingId }
+        exclude += cardService.getServedIds(memberId)
+
+        // 새 후보 1개 찾기 (repo 구현은 예시)
+        val filtered = jobPostingRepository.findNextByExcludingIdsAndDepths(
+            exclude.isEmpty(),
+            exclude.toList(),
+            depthOne,
+            depthTwo,
+            pageable = PageRequest.of(0, 1)
+        ).firstOrNull()
+
+        // 2) 없으면 인기순으로 폴백 (예: score DESC, createdAt DESC)
+        val candidate = filtered ?: jobPostingRepository.findNextByExcludingIdsOrderByPopularity(
+            excluded = exclude.isNotEmpty(),
+            excludedIds = exclude.toList(),
+            pageable = PageRequest.of(0, 1)
+        ).firstOrNull() ?: return false
+
+        // 분석 → DTO → CardJobPosting
+        val result = analysisCaller.getCardJobResponse(candidate.ocrData).result.message.content
+        val dto = cardJobPosingAnalysisDtoMapper.toJsonDto(JsonCleaner.cleanJson(result))
+        val cardJobPosting = cardService.createCardJobPosting(dto, candidate)
+
+        // 새 카드로 교체 (같은 position 유지)
+        val newCard = CardRedis(
+            jobPostingId = candidate.id!!,
+            cardJobPosting = cardJobPosting,
+            isOpen = false,
+            openDateTime = null,
+            position = position
+        )
+
+        top3[cardService.idx(position)] = newCard
+        cardService.saveTop3Ids(memberId, top3)
+
+        cardService.addServedId(memberId, candidate.id!!)
+        return true;
     }
 }

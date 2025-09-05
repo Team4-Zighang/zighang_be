@@ -1,14 +1,13 @@
 package com.zighang.card.presentation.swagger
 
 import com.zighang.card.dto.CardContentResponse
-import com.zighang.card.dto.CreateCardSetResponse
+import com.zighang.card.dto.GetCardPositionRequest
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.RestResponse
-import com.zighang.memo.dto.response.MemoCreateResponse
 import io.swagger.v3.oas.annotations.Operation
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestBody
 
 interface CardSwagger {
     @Operation(
@@ -18,15 +17,34 @@ interface CardSwagger {
     )
     fun createCardSet(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
-    ) : ResponseEntity<RestResponse<CreateCardSetResponse>>
+    ) : ResponseEntity<RestResponse<Boolean>>
 
     @Operation(
         summary = "카드 오픈",
         description = "카드를 오픈한다.",
-        operationId = "/{cardId}"
+        operationId = "/show"
     )
     fun openCard(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
-        @PathVariable(name = "cardId") cardId : Long
+        @RequestBody cardPosition: GetCardPositionRequest
     ) : ResponseEntity<RestResponse<CardContentResponse>>
+
+    @Operation(
+        summary = "카드 한 장 재오픈",
+        description = "카드 한 장을 재오픈한다., 카드 한 장의 시간이 초과되면 프론트측에서는 이 api를 부르면 됩니다.",
+        operationId = "/replace"
+    )
+    fun replace(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @RequestBody cardPosition: GetCardPositionRequest
+    ) : ResponseEntity<RestResponse<Boolean>>
+
+    @Operation(
+        summary = "열린 카드 조회",
+        description = "열린 카드를 조회한다.",
+        operationId = "/show/open"
+    )
+    fun showOpenCard(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails
+    ) : ResponseEntity<RestResponse<List<CardContentResponse>>>
 }
