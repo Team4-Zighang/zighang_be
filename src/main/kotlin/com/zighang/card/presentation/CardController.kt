@@ -1,7 +1,7 @@
 package com.zighang.card.presentation
 
 import com.zighang.card.dto.CardContentResponse
-import com.zighang.card.dto.CreateCardSetResponse
+import com.zighang.card.dto.GetCardPositionRequest
 import com.zighang.card.facade.CardFacade
 import com.zighang.card.presentation.swagger.CardSwagger
 import com.zighang.core.infrastructure.CustomUserDetails
@@ -20,25 +20,46 @@ class CardController(
 
     @PostMapping("")
     override fun createCardSet(@AuthenticationPrincipal customUserDetails: CustomUserDetails):
-            ResponseEntity<RestResponse<CreateCardSetResponse>> {
+            ResponseEntity<RestResponse<Boolean>> {
+        cardFacade.createCard(customUserDetails)
         return ResponseEntity.ok(
             RestResponse(
-                cardFacade.createCard(customUserDetails)
+                true
             )
         )
     }
 
-    @GetMapping("/{cardId}")
+    @PostMapping("/show")
     override fun openCard(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
-        @PathVariable(name = "cardId") cardId: Long) :
+        @RequestBody cardPosition: GetCardPositionRequest) :
             ResponseEntity<RestResponse<CardContentResponse>> {
         return ResponseEntity.ok(
             RestResponse(
-                cardFacade.getCard(customUserDetails, cardId)
+                cardFacade.getCard(customUserDetails, cardPosition.position)
             )
         )
     }
 
+    @PostMapping("/replace")
+    override fun replace(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+        @RequestBody cardPosition: GetCardPositionRequest
+    ): ResponseEntity<RestResponse<Boolean>> {
+        return ResponseEntity.ok(
+            RestResponse(
+                cardFacade.replace(customUserDetails, cardPosition.position)
+            )
+        )
+    }
+
+    @GetMapping("/show/open")
+    override fun showOpenCard(@AuthenticationPrincipal customUserDetails: CustomUserDetails): ResponseEntity<RestResponse<List<CardContentResponse>>> {
+        return ResponseEntity.ok(
+            RestResponse(
+                cardFacade.showOpenList(customUserDetails)
+            )
+        )
+    }
 
 }

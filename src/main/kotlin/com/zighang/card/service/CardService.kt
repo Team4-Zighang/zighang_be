@@ -3,34 +3,44 @@ package com.zighang.card.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.zighang.card.dto.CardJobPosting
-import com.zighang.card.dto.CardJobPostingAnalysisDto
-import com.zighang.card.dto.CardRedis
-import com.zighang.card.dto.Company
+import com.zighang.card.dto.*
+import com.zighang.card.value.CardPosition
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.entity.JobPosting
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
+import java.time.Duration
 import java.time.LocalDateTime
 
 
 @Service
 class CardService(
     private val redisTemplate: RedisTemplate<String, String>,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) {
     private val prefix = "top3JobPosting:"
+    private fun servedKey(memberId: Long) = "card:served:$memberId"
 
     private fun key(memberId: Long) = "$prefix$memberId"
 
-    // 저장: jobPostingId 리스트를 String으로 저장
-    fun saveTop3Ids(memberId: Long, ids: List<CardRedis>) : List<Long> {
-        if (ids.isNotEmpty()) {
-            val values = ids.map { objectMapper.writeValueAsString(it) }.toTypedArray()
-            redisTemplate.opsForList().rightPushAll(key(memberId), *values)
+    fun saveTop3Ids(memberId: Long, ids: List<CardRedis>) {
+        require(ids.size == 3) { "Top3는 정확히 3개여야 합니다." }
+
+        val withPos = ids.mapIndexed { idx, card ->
+            val pos = when (idx) {
+                0 -> CardPosition.LEFT
+                1 -> CardPosition.CENTER
+                else -> CardPosition.RIGHT
+            }
+            card.copy(position = pos)
         }
-        return ids.map { it.cardId }
+
+        val k = key(memberId)
+        redisTemplate.delete(k)
+
+        val values = withPos.map { objectMapper.writeValueAsString(it) }.toTypedArray()
+        redisTemplate.opsForList().rightPushAll(k, *values)
     }
 
     fun getTop3Ids(memberId: Long): List<CardRedis> {
@@ -39,7 +49,7 @@ class CardService(
             ?: emptyList()
     }
 
-    fun getCardById(memberId: Long, cardId : Long): CardRedis {
+    fun getCardByPosition(memberId: Long, position: CardPosition): CardRedis {
         val key = key(memberId)
 
         // 1) 리스트 전체 읽기 (각 원소는 JSON 문자열)
@@ -56,7 +66,7 @@ class CardService(
             .toMutableList()
 
         // 3) 특정 cardId 찾기
-        val index = list.indexOfFirst { it.cardId == cardId }
+        val index = list.indexOfFirst { it.position == position }
         if (index == -1) throw DomainException(GlobalErrorCode.NOT_FOUND_CARD)
 
         // 4) 값 갱신
@@ -100,5 +110,44 @@ class CardService(
             academicConditions,
             address
         )
+    }
+
+    fun getServedIds(memberId: Long): Set<Long> {
+        val members = redisTemplate.opsForSet().members(servedKey(memberId)).orEmpty()
+        return members.mapNotNull { it.toLongOrNull() }.toSet()
+    }
+
+    fun idx(position: CardPosition) = when (position) {
+        CardPosition.LEFT -> 0
+        CardPosition.CENTER -> 1
+        CardPosition.RIGHT -> 2
+    }
+
+    fun addServedId(memberId: Long, id: Long) {
+        redisTemplate.opsForSet().add(servedKey(memberId), id.toString())
+        redisTemplate.expire(servedKey(memberId), Duration.ofHours(1))
+    }
+
+    fun getOpenCardList(memberId: Long): List<CardContentResponse> {
+        val now = LocalDateTime.now()                  // 시스템 타임존
+        val cutoff = now.minusMinutes(15)
+
+        // 1) 회원의 모든 카드 불러오기 (Top3만 쓰는 구조면 Top3, 별도 보관이 있으면 합쳐서 반환)
+        val cards: List<CardRedis> = fetchAllCards(memberId)
+
+        // 2) isOpen == true && openDateTime ∈ [cutoff, now] 인 카드만 필터
+        return cards
+            .asSequence()
+            .filter { it.isOpen }
+            .filter { it.openDateTime != null && !it.openDateTime!!.isBefore(cutoff) && !it.openDateTime!!.isAfter(now) }
+            .sortedByDescending { it.openDateTime } // 최신순
+            .map { CardContentResponse.from(it) }
+            .toList()
+    }
+
+    private fun fetchAllCards(memberId: Long): List<CardRedis> {
+        val k = key(memberId)
+        val raw = redisTemplate.opsForList().range(k, 0, -1).orEmpty()
+        return raw.map { objectMapper.readValue(it, CardRedis::class.java) }
     }
 }
