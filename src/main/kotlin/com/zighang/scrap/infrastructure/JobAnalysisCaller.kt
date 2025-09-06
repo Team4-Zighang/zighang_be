@@ -27,7 +27,7 @@ class JobAnalysisCaller(
     }
 
     fun getCardJobResponse(ocrData: String) : ChatResponse {
-        val systemMessage = SystemMessageFactory.cardJobInfoMessageFactory()
+        val systemMessage = SystemMessageFactory.jobAnalysisSystemMessageFactory()
 
         require(systemMessage.isNotBlank()) { "jobAnalysis system message must not be blank" }
         require(ocrData.isNotBlank()) { "ocrData must not be blank" }

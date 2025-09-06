@@ -19,7 +19,7 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
     @Query(
         """
             UPDATE JobPosting j 
-            SET j.qualification = :qualification, j.preferentialTreatment = :preferentialTreatment 
+            SET j.qualification = :qualification, j.preferentialTreatment = :preferentialTreatment, j.career = :career 
             WHERE j.id = :id
         """
     )
@@ -27,6 +27,7 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         @Param("id") id: Long,
         @Param("qualification") qualification: String,
         @Param("preferentialTreatment") preferentialTreatment: String,
+        @Param("career") career: String,
     ) : Int
     // 1) 직무/직군 조건 + 스크랩 수 내림차순 (Top N: Pageable)
     @Query(
