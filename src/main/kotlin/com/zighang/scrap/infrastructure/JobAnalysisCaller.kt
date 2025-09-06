@@ -19,7 +19,7 @@ class JobAnalysisCaller(
         require(ocrData.isNotBlank()) { "ocrData must not be blank" }
 
         val result = clovaChatCompletionCaller.clovaChatCompletionApiCaller(
-            SystemMessageFactory.jobAnalysisSystemMessageFactory(),
+            systemMessage,
             ocrData
         )
 

@@ -42,7 +42,7 @@ data class AlumniSimiliarJobPostingResponseDto(
                 company.companyImageUrl,
                 "경력 3 ~ 10년",
                 jobPosting.recruitmentType,
-                jobPosting.education,
+                jobPosting.education.displayName,
                 jobPosting.recruitmentRegion,
                 0,
                 dDayFactory(jobPosting),

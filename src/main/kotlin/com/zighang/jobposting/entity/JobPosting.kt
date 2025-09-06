@@ -1,6 +1,7 @@
 package com.zighang.jobposting.entity
 
 import com.zighang.core.infrastructure.jpa.shared.BaseEntity
+import com.zighang.jobposting.entity.value.Education
 import com.zighang.jobposting.entity.value.RankChange
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -47,7 +48,8 @@ class JobPosting(
 
     // 나중에 enum으로 바꿀 것
     @Column(name = "education")
-    val education: String = "",
+    @Enumerated(EnumType.STRING)
+    val education: Education,
 
     // 나중에 enum으로 바꿀 것
     @Column(name = "industry")
