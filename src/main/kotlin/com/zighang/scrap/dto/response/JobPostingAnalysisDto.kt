@@ -6,5 +6,5 @@ data class JobPostingAnalysisDto(
 
     val preferentialTreatment: String = "",
 
-    val carrer: String = "",
+    val career: String = "",
 )

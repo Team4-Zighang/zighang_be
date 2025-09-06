@@ -96,6 +96,9 @@ class JobPosting(
     @Column(name = "expired_date")
     val expiredDate: LocalDateTime,
 
+    @Column(name = "career")
+    val career: String,
+
     // 순위 산정 관련 column
     @Column(name = "current_rank", nullable = false)
     var currentRank: Int = 0,

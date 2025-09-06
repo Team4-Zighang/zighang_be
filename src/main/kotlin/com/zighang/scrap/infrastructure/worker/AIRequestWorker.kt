@@ -31,7 +31,9 @@ class AIRequestWorker(
                 JobEnrichedEvent(
                     event.id,
                     JobPostingAnalysisDto(
-                        jobPostingAnalysisDto.qualification, jobPostingAnalysisDto.preferentialTreatment
+                        jobPostingAnalysisDto.qualification,
+                        jobPostingAnalysisDto.preferentialTreatment,
+                        jobPostingAnalysisDto.career
                     )
                 )
             )
@@ -43,10 +45,13 @@ class AIRequestWorker(
     @RabbitListener(queues= ["\${mq.enriched.name}"])
     fun jobEnriched(event : JobEnrichedEvent) {
         try{
+            println(event)
+
             val updatedRows = jobPostingRepository.updateJobPostingAnalysis(
                 event.id,
                 event.jobPostingAnalysisDto.qualification,
-                event.jobPostingAnalysisDto.preferentialTreatment
+                event.jobPostingAnalysisDto.preferentialTreatment,
+                event.jobPostingAnalysisDto.career
             )
 
             if(updatedRows == 0) {
