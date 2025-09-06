@@ -8,21 +8,37 @@ import com.zighang.card.value.CardPosition
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.entity.JobPosting
+import com.zighang.scrap.service.ScrapService
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.*
 
 
 @Service
 class CardService(
     private val redisTemplate: RedisTemplate<String, String>,
     private val objectMapper: ObjectMapper,
+    private val scrapService: ScrapService
 ) {
     private val prefix = "top3JobPosting:"
     private fun servedKey(memberId: Long) = "card:served:$memberId"
 
     private fun key(memberId: Long) = "$prefix$memberId"
+    private fun scrapKey(memberId: Long) = "scrap:$memberId"
+
+    @Value("\${scrap.count_limit}")
+    private lateinit var maxCount : String;
+
+    fun getCardScrapCount(memberId: Long) : Long {
+        return redisTemplate.opsForValue().get(scrapKey(memberId))?.toLong() ?: 0L
+    }
+
+    fun upsertCardScrapCount(memberId: Long, scrapCount: Long) {
+        redisTemplate.opsForValue().set(scrapKey(memberId), scrapCount.toString())
+    }
 
     fun saveTop3Ids(memberId: Long, ids: List<CardRedis>) {
         require(ids.size == 3) { "Top3는 정확히 3개여야 합니다." }
@@ -149,5 +165,15 @@ class CardService(
         val k = key(memberId)
         val raw = redisTemplate.opsForList().range(k, 0, -1).orEmpty()
         return raw.map { objectMapper.readValue(it, CardRedis::class.java) }
+    }
+
+    fun getScrapForCard(memberId : Long): RemainScrapResponse {
+        val dbCount = scrapService.getScrapCount(memberId)
+        val redisCount = getCardScrapCount(memberId)
+
+        val diff = dbCount - redisCount
+        return RemainScrapResponse.create(
+            diff.coerceAtMost(maxCount.toLong())
+        )
     }
 }

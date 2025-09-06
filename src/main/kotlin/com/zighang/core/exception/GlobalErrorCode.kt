@@ -22,7 +22,8 @@ enum class GlobalErrorCode(
     CLOVA_API_CALL_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "클로바 API 연결에 실패했습니다."),
     NOT_CONVERT_JSON_TO_OBJECT(HttpStatus.INTERNAL_SERVER_ERROR, "JSON 변환에 실패했습니다."),
     NOT_EXIST_MEMBER_CARD(HttpStatus.BAD_REQUEST, "이 멤버는 카드를 지니고 있지 않습니다. 카드 갱신/생성을 하세요"),
-    NOT_FOUND_CARD(HttpStatus.NOT_FOUND, "해당 카드 공고는 존재하지 않습니다.");
+    NOT_FOUND_CARD(HttpStatus.NOT_FOUND, "해당 카드 공고는 존재하지 않습니다."),
+    LIMIT_CARD(HttpStatus.BAD_REQUEST, "공고 스크랩 수가 부족합니다.");
 
     override fun toException(): DomainException {
         return DomainException(this)

@@ -2,6 +2,7 @@ package com.zighang.card.presentation
 
 import com.zighang.card.dto.CardContentResponse
 import com.zighang.card.dto.GetCardPositionRequest
+import com.zighang.card.dto.RemainScrapResponse
 import com.zighang.card.facade.CardFacade
 import com.zighang.card.presentation.swagger.CardSwagger
 import com.zighang.core.infrastructure.CustomUserDetails
@@ -58,6 +59,16 @@ class CardController(
         return ResponseEntity.ok(
             RestResponse(
                 cardFacade.showOpenList(customUserDetails)
+            )
+        )
+    }
+
+    @GetMapping("/remain-scrap")
+    override fun showScrap(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails): ResponseEntity<RestResponse<RemainScrapResponse>> {
+        return ResponseEntity.ok(
+            RestResponse(
+                cardFacade.showScrap(customUserDetails)
             )
         )
     }

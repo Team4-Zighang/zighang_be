@@ -139,6 +139,13 @@ class ScrapService(
         return PageImpl(dashboards, pageable, scrapPage.totalElements)
     }
 
+    @Transactional(readOnly = true)
+    fun getScrapCount(memberId: Long) : Long{
+        return scrapRepository.countByMemberId(memberId);
+    }
+
+
+
     private fun isAnalysisNeed(jobPosting: JobPosting) : Boolean {
         return jobPosting.qualification.isNullOrBlank() || jobPosting.preferentialTreatment.isNullOrBlank()
     }

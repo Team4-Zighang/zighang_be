@@ -18,6 +18,7 @@ class JobPostingService(
     private val cardService: CardService
 ) {
     fun top3ByJob(depthOne: String?, depthTwo: String?): List<CardRedis> {
+
         val page3 = PageRequest.of(0, 3)
 
         val first = jobPostingRepository.findTopJobPostingsByDepths(depthOne, depthTwo, page3)
