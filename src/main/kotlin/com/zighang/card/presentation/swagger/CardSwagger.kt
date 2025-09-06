@@ -2,6 +2,7 @@ package com.zighang.card.presentation.swagger
 
 import com.zighang.card.dto.CardContentResponse
 import com.zighang.card.dto.GetCardPositionRequest
+import com.zighang.card.dto.RemainScrapResponse
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.RestResponse
 import io.swagger.v3.oas.annotations.Operation
@@ -47,4 +48,13 @@ interface CardSwagger {
     fun showOpenCard(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails
     ) : ResponseEntity<RestResponse<List<CardContentResponse>>>
+
+    @Operation(
+        summary = "스크랩 수 조회",
+        description = "스크랩 수를 조회한다. (0부터 3까지)",
+        operationId = "/remain-scrap"
+    )
+    fun showScrap(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails
+    ) : ResponseEntity<RestResponse<RemainScrapResponse>>
 }
