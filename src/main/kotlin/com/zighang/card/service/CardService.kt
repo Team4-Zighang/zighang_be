@@ -33,9 +33,7 @@ class CardService(
     private lateinit var maxCount : String;
 
     fun getCardScrapCount(memberId: Long) : Long {
-       return Optional.ofNullable(redisTemplate.opsForValue()[scrapKey(memberId)])
-            .map(java.lang.Long::valueOf)
-            .orElse(0L)
+        return redisTemplate.opsForValue().get(scrapKey(memberId))?.toLong() ?: 0L
     }
 
     fun upsertCardScrapCount(memberId: Long, scrapCount: Long) {

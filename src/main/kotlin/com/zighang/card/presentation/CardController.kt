@@ -64,7 +64,8 @@ class CardController(
     }
 
     @GetMapping("/remain-scrap")
-    override fun showScrap(customUserDetails: CustomUserDetails): ResponseEntity<RestResponse<RemainScrapResponse>> {
+    override fun showScrap(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails): ResponseEntity<RestResponse<RemainScrapResponse>> {
         return ResponseEntity.ok(
             RestResponse(
                 cardFacade.showScrap(customUserDetails)
