@@ -6,5 +6,9 @@ data class JobEnrichedEvent(
 
     val id : Long,
 
+    val memberId: Long? = null,
+
     val jobPostingAnalysisDto: JobPostingAnalysisDto,
+
+    val isCard: Boolean? = false
 )

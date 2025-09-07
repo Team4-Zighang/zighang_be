@@ -39,7 +39,7 @@ class CardFacade(
         val jobCategory = onboarding.jobCategory
         val jobRole = onboarding.jobRole
 
-        val top3JobPosting = jobPostingService.top3ByJob(jobCategory, jobRole)
+        val top3JobPosting = jobPostingService.top3ByJob(jobCategory, jobRole, member.id)
 
         //이전 카드 초기화
         cardService.evict(member.id)

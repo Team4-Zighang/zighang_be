@@ -1,23 +1,26 @@
 package com.zighang.jobposting.service
 
+import com.zighang.card.dto.CardJobPostingAnalysisDto
 import com.zighang.card.dto.CardRedis
 import com.zighang.card.mapper.CardJobPosingAnalysisDtoMapper
 import com.zighang.card.service.CardService
 import com.zighang.card.value.CardPosition
-import com.zighang.core.clova.util.JsonCleaner
 import com.zighang.jobposting.repository.JobPostingRepository
+import com.zighang.scrap.dto.request.JobScrapedEvent
 import com.zighang.scrap.infrastructure.JobAnalysisCaller
+import com.zighang.scrap.infrastructure.JobAnalysisEventProducer
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 
 @Service
 class JobPostingService(
     private val jobPostingRepository: JobPostingRepository,
-    private val analysisCaller: JobAnalysisCaller,
-    private val cardJobPosingAnalysisDtoMapper: CardJobPosingAnalysisDtoMapper,
-    private val cardService: CardService
+//    private val analysisCaller: JobAnalysisCaller,
+//    private val cardJobPosingAnalysisDtoMapper: CardJobPosingAnalysisDtoMapper,
+    private val cardService: CardService,
+    private val jobAnalysisEventProducer: JobAnalysisEventProducer
 ) {
-    fun top3ByJob(depthOne: String?, depthTwo: String?): List<CardRedis> {
+    fun top3ByJob(depthOne: String?, depthTwo: String?, memberId: Long): List<CardRedis> {
 
         val page3 = PageRequest.of(0, 3)
 
@@ -28,9 +31,15 @@ class JobPostingService(
         if (firstIds.size == 3) {
             return first.map {
                 jobPosting ->
-                val result = analysisCaller.getCardJobResponse(jobPosting.ocrData).result.message.content
-                val jobPostingAnalysisDto = cardJobPosingAnalysisDtoMapper.toJsonDto(JsonCleaner.cleanJson(result))
-                val cardJobPosting = cardService.createCardJobPosting(jobPostingAnalysisDto, jobPosting)
+//                val result = analysisCaller.getCardJobResponse(jobPosting.ocrData).result.message.content
+//                val jobPostingAnalysisDto = cardJobPosingAnalysisDtoMapper.toJsonDto(JsonCleaner.cleanJson(result))
+                jobAnalysisEventProducer.publishAnalysis(JobScrapedEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
+                val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
+                    jobPosting.career,
+                    jobPosting.recruitmentType,
+                    jobPosting.education.displayName
+                )
+                val cardJobPosting = cardService.createCardJobPosting(cardJobPostingAnalysisDto, jobPosting)
                 CardRedis.create(jobPostingId = jobPosting.id!!, cardJobPosting, isOpen = false, openDateTime = null)
             }
         }
@@ -51,9 +60,13 @@ class JobPostingService(
             .take(3)
         // 합치고, 중복 제거, 최대 3개까지 자르고, CardRedis로 변환
         return merged.map{ jobPosting ->
-            val result = analysisCaller.getCardJobResponse(jobPosting.ocrData).result.message.content
-            val dto = cardJobPosingAnalysisDtoMapper.toJsonDto(JsonCleaner.cleanJson(result))
-            val cardJobPosting = cardService.createCardJobPosting(dto, jobPosting)
+            jobAnalysisEventProducer.publishAnalysis(JobScrapedEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
+            val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
+                jobPosting.career,
+                jobPosting.recruitmentType,
+                jobPosting.education.displayName
+            )
+            val cardJobPosting = cardService.createCardJobPosting(cardJobPostingAnalysisDto, jobPosting)
             CardRedis.create(
                 jobPostingId = jobPosting.id!!,
                 cardJobPosting = cardJobPosting,
@@ -87,9 +100,14 @@ class JobPostingService(
         ).firstOrNull() ?: return false
 
         // 분석 → DTO → CardJobPosting
-        val result = analysisCaller.getCardJobResponse(candidate.ocrData).result.message.content
-        val dto = cardJobPosingAnalysisDtoMapper.toJsonDto(JsonCleaner.cleanJson(result))
-        val cardJobPosting = cardService.createCardJobPosting(dto, candidate)
+//        val result = analysisCaller.getCardJobResponse(candidate.ocrData).result.message.content
+        jobAnalysisEventProducer.publishAnalysis(JobScrapedEvent(candidate.id!!, memberId, candidate.ocrData, true))
+        val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
+            candidate.career,
+            candidate.recruitmentType,
+            candidate.education.displayName
+        )
+        val cardJobPosting = cardService.createCardJobPosting(cardJobPostingAnalysisDto, candidate)
 
         // 새 카드로 교체 (같은 position 유지)
         val newCard = CardRedis(

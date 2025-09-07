@@ -1,5 +1,6 @@
 package com.zighang.scrap.infrastructure.worker
 
+import com.zighang.card.service.CardService
 import com.zighang.core.clova.util.JsonCleaner
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.repository.JobPostingRepository
@@ -17,7 +18,8 @@ class AIRequestWorker(
     private val jobAnalysisEventProducer: JobAnalysisEventProducer,
     private val jobAnalysisCaller: JobAnalysisCaller,
     private val jobAnalysisDtoMapper: JobAnalysisDtoMapper,
-    private val jobPostingRepository: JobPostingRepository
+    private val jobPostingRepository: JobPostingRepository,
+    private val cardService: CardService
 ) {
     @RabbitListener(queues= ["\${mq.analysis.name}"])
     fun jobPostingToClova(event : JobScrapedEvent) {
@@ -30,11 +32,13 @@ class AIRequestWorker(
             jobAnalysisEventProducer.publishEnriched(
                 JobEnrichedEvent(
                     event.id,
+                    event.memberId,
                     JobPostingAnalysisDto(
                         jobPostingAnalysisDto.qualification,
                         jobPostingAnalysisDto.preferentialTreatment,
                         jobPostingAnalysisDto.career
-                    )
+                    ),
+                    event.isCard
                 )
             )
         } catch (e: Exception) {
@@ -45,8 +49,6 @@ class AIRequestWorker(
     @RabbitListener(queues= ["\${mq.enriched.name}"])
     fun jobEnriched(event : JobEnrichedEvent) {
         try{
-            println(event)
-
             val updatedRows = jobPostingRepository.updateJobPostingAnalysis(
                 event.id,
                 event.jobPostingAnalysisDto.qualification,
@@ -56,6 +58,10 @@ class AIRequestWorker(
 
             if(updatedRows == 0) {
                 throw IllegalArgumentException("posting id : ${event.id}의 자격요건/우대사항 업데이트를 실패했습니다.")
+            }
+
+            if(event.isCard == true) {
+                cardService.updateCardByJobPostingId(event.memberId!!, event.id, event.jobPostingAnalysisDto.career)
             }
         }catch (e:Exception){
             throw GlobalErrorCode.INTERNAL_SERVER_ERROR.toException()
