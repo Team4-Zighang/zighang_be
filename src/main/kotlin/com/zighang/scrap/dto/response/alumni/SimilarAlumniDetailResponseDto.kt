@@ -20,7 +20,7 @@ data class SimilarAlumniDetailResponseDto(
             return SimilarAlumniDetailResponseDto(
                 member.id,
                 member.name,
-                onboarding.targetCompany,
+                onboarding.major,
                 onboarding.jobRole,
                 list
             )
