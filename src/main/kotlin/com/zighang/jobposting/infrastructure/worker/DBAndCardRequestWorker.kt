@@ -5,7 +5,9 @@ import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.scrap.dto.request.JobEnrichedEvent
 import org.springframework.amqp.rabbit.annotation.RabbitListener
+import org.springframework.stereotype.Component
 
+@Component
 class DBAndCardRequestWorker(
     private val jobPostingRepository: JobPostingRepository,
     private val cardService: CardService
