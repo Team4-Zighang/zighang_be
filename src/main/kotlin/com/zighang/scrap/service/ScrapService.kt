@@ -8,7 +8,7 @@ import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
-import com.zighang.scrap.dto.request.JobScrapedEvent
+import com.zighang.scrap.dto.request.JobAnalysisEvent
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.dto.response.FileDeleteResponse
@@ -54,7 +54,7 @@ class ScrapService(
                         
                         // TODO: 카드 뽑기 커밋 후 추가
                         // 레디스로 동일 큐 내 같은 데이터 저장 안되도록 방어
-                        val event = JobScrapedEvent(
+                        val event = JobAnalysisEvent(
                             id = jobPosting.id!!,
                             ocrData = jobPosting.ocrData
                         )

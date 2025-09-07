@@ -5,7 +5,7 @@ import com.zighang.card.dto.CardRedis
 import com.zighang.card.service.CardService
 import com.zighang.card.value.CardPosition
 import com.zighang.jobposting.repository.JobPostingRepository
-import com.zighang.scrap.dto.request.JobScrapedEvent
+import com.zighang.scrap.dto.request.JobAnalysisEvent
 import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -31,7 +31,7 @@ class JobPostingService(
                 jobPosting ->
 //                val result = analysisCaller.getCardJobResponse(jobPosting.ocrData).result.message.content
 //                val jobPostingAnalysisDto = cardJobPosingAnalysisDtoMapper.toJsonDto(JsonCleaner.cleanJson(result))
-                jobAnalysisEventProducer.publishAnalysis(JobScrapedEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
+                jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
                 val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
                     jobPosting.career,
                     jobPosting.recruitmentType,
@@ -58,7 +58,7 @@ class JobPostingService(
             .take(3)
         // 합치고, 중복 제거, 최대 3개까지 자르고, CardRedis로 변환
         return merged.map{ jobPosting ->
-            jobAnalysisEventProducer.publishAnalysis(JobScrapedEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
+            jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
             val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
                 jobPosting.career,
                 jobPosting.recruitmentType,
@@ -99,7 +99,7 @@ class JobPostingService(
 
         // 분석 → DTO → CardJobPosting
 //        val result = analysisCaller.getCardJobResponse(candidate.ocrData).result.message.content
-        jobAnalysisEventProducer.publishAnalysis(JobScrapedEvent(candidate.id!!, memberId, candidate.ocrData, true))
+        jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(candidate.id!!, memberId, candidate.ocrData, true))
         val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
             candidate.career,
             candidate.recruitmentType,

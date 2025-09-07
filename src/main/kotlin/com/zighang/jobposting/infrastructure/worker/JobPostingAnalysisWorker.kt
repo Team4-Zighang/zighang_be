@@ -3,11 +3,11 @@ package com.zighang.jobposting.infrastructure.worker
 import com.zighang.core.clova.util.JsonCleaner
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.scrap.dto.request.JobEnrichedEvent
-import com.zighang.scrap.dto.request.JobScrapedEvent
+import com.zighang.scrap.dto.request.JobAnalysisEvent
 import com.zighang.scrap.dto.response.JobPostingAnalysisDto
 import com.zighang.jobposting.infrastructure.caller.JobAnalysisCaller
 import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
-import com.zighang.scrap.infrastructure.mapper.JobAnalysisDtoMapper
+import com.zighang.jobposting.infrastructure.mapper.JobAnalysisDtoMapper
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 
 class JobPostingAnalysisWorker(
@@ -17,7 +17,7 @@ class JobPostingAnalysisWorker(
 ) {
 
     @RabbitListener(queues= ["\${mq.analysis.name}"])
-    fun jobPostingToClova(event : JobScrapedEvent) {
+    fun jobPostingToClova(event : JobAnalysisEvent) {
         try {
             // clova 자격요건/우대사항 분석
             val result = jobAnalysisCaller.call(event.ocrData).result.message.content

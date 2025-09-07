@@ -2,7 +2,7 @@ package com.zighang.scrap.dto.request
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-data class JobScrapedEvent (
+data class JobAnalysisEvent (
     @field:NotNull
     val id: Long,
 
