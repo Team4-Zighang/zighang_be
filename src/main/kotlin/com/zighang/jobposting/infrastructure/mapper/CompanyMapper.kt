@@ -1,4 +1,4 @@
-package com.zighang.jobposting.infrastructure
+package com.zighang.jobposting.infrastructure.mapper
 
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper

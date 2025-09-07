@@ -1,4 +1,4 @@
-package com.zighang.scrap.infrastructure
+package com.zighang.jobposting.infrastructure.producer
 
 import com.zighang.core.config.rabbitmq.config.RabbitProperties
 import com.zighang.scrap.dto.request.JobEnrichedEvent

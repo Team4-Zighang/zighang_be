@@ -2,13 +2,11 @@ package com.zighang.jobposting.service
 
 import com.zighang.card.dto.CardJobPostingAnalysisDto
 import com.zighang.card.dto.CardRedis
-import com.zighang.card.mapper.CardJobPosingAnalysisDtoMapper
 import com.zighang.card.service.CardService
 import com.zighang.card.value.CardPosition
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.scrap.dto.request.JobScrapedEvent
-import com.zighang.scrap.infrastructure.JobAnalysisCaller
-import com.zighang.scrap.infrastructure.JobAnalysisEventProducer
+import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 

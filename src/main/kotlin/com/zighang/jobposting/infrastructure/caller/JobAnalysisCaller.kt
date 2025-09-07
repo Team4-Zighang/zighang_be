@@ -1,4 +1,4 @@
-package com.zighang.scrap.infrastructure
+package com.zighang.jobposting.infrastructure.caller
 
 import com.zighang.core.clova.dto.ChatResponse
 import com.zighang.core.clova.infrastructure.ClovaChatCompletionCaller

@@ -15,7 +15,7 @@ import com.zighang.scrap.dto.response.FileDeleteResponse
 import com.zighang.scrap.dto.response.FileResponse
 import com.zighang.scrap.dto.response.JobPostingResponse
 import com.zighang.scrap.entity.Scrap
-import com.zighang.scrap.infrastructure.JobAnalysisEventProducer
+import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
 import com.zighang.scrap.repository.ScrapRepository
 import com.zighang.scrap.value.FileType
 import lombok.extern.slf4j.Slf4j
