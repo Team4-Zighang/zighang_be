@@ -8,7 +8,9 @@ import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.dto.response.FileDeleteResponse
 import com.zighang.scrap.dto.response.FileResponse
+import com.zighang.scrap.dto.response.PersonalityAnalysisDto
 import com.zighang.scrap.presentation.swagger.ScrapSwagger
+import com.zighang.scrap.service.PersonalityAnalysisService
 import com.zighang.scrap.service.ScrapService
 import com.zighang.scrap.value.FileType
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -24,7 +26,8 @@ import org.springframework.web.multipart.MultipartFile
 @RequestMapping("/scrap")
 @Tag(name = "Scrap", description = "스크랩 관련 API")
 class ScrapController(
-    private val scrapService: ScrapService
+    private val scrapService: ScrapService,
+    private val personalityAnalysisService: PersonalityAnalysisService
 ) : ScrapSwagger{
 
     @PostMapping
@@ -86,6 +89,17 @@ class ScrapController(
         return ResponseEntity.ok(
             RestResponse<FileDeleteResponse>(
                 scrapService.deleteFile(customUserDetails, scrapId, fileUrl, fileType)
+            )
+        )
+    }
+
+    @GetMapping("/personality")
+    override fun getPersonalityOfMember(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails
+    ): ResponseEntity<RestResponse<PersonalityAnalysisDto>> {
+        return ResponseEntity.ok(
+            RestResponse<PersonalityAnalysisDto>(
+                personalityAnalysisService.getPersonalityAnalysis(customUserDetails)
             )
         )
     }

@@ -8,6 +8,7 @@ import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.dto.response.FileDeleteResponse
 import com.zighang.scrap.dto.response.FileResponse
+import com.zighang.scrap.dto.response.PersonalityAnalysisDto
 import com.zighang.scrap.value.FileType
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
@@ -70,4 +71,12 @@ interface ScrapSwagger {
         @PathVariable fileType: FileType,
         @RequestParam fileUrl: String
     ) : ResponseEntity<RestResponse<FileDeleteResponse>>
+
+    @Operation(
+        summary = "스크랩 이후 성향분석 결과 보기",
+        description = "성향분석 결과를 리턴, 아직 분석이 안된 경우 404, 프론트에서 알아서 처리",
+        operationId = "/scrap/personality",
+    ) fun getPersonalityOfMember(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails,
+    ): ResponseEntity<RestResponse<PersonalityAnalysisDto>>
 }

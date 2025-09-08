@@ -9,12 +9,14 @@ import com.zighang.member.repository.PersonalityRepository
 import com.zighang.scrap.dto.request.PersonalityUpdateEvent
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 
 @Component
 class PersonalityUpdateWorker(
     private val personalityRepository: PersonalityRepository,
 ) {
 
+    @Transactional
     @RabbitListener(queues = ["\${mq.personality-update.name}"])
     fun updatePersonality(event: PersonalityUpdateEvent) {
         val companySize = setCompanySize(event.personalityValue.majorValue)
