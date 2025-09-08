@@ -36,14 +36,14 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         from JobPosting jp
         left join Scrap s on s.jobPostingId = jp.id
         where (:depthOne is null or jp.depthOne = :depthOne)
-          and (:depthTwo is null or jp.depthTwo = :depthTwo)
+          and (:depthTwoList is null or jp.depthTwo in :depthTwoList)
         group by jp
         order by count(s.id) desc, jp.uploadDate desc, jp.id desc
         """
     )
     fun findTopJobPostingsByDepths(
         @Param("depthOne") depthOne: String?,
-        @Param("depthTwo") depthTwo: String?,
+        @Param("depthTwoList") depthTwoList: List<String>?,
         pageable: Pageable
     ): List<JobPosting>
 
