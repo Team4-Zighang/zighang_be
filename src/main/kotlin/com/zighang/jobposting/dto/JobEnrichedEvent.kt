@@ -1,4 +1,4 @@
-package com.zighang.scrap.dto.request
+package com.zighang.jobposting.dto
 
 import com.zighang.scrap.dto.response.JobPostingAnalysisDto
 

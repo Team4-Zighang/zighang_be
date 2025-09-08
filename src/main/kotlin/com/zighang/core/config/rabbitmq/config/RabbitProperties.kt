@@ -15,7 +15,13 @@ data class RabbitProperties(
     val analysis: AnalysisQueue = AnalysisQueue(),
 
     @NestedConfigurationProperty
-    val enriched: EnrichedQueue
+    val enriched: EnrichedQueue = EnrichedQueue(),
+
+    @NestedConfigurationProperty
+    val personality: PersonalityQueue = PersonalityQueue(),
+
+    @NestedConfigurationProperty
+    val personalityUpdate: PersonalityUpdateQueue = PersonalityUpdateQueue(),
 )
 
 data class DeadLetterQueue(
@@ -37,6 +43,18 @@ data class AnalysisQueue(
 )
 
 data class EnrichedQueue(
+    val name: String = "",
+    val exchange: String = "",
+    val routingKey: String = ""
+)
+
+data class PersonalityQueue(
+    val name: String = "",
+    val exchange: String = "",
+    val routingKey: String = ""
+)
+
+data class PersonalityUpdateQueue(
     val name: String = "",
     val exchange: String = "",
     val routingKey: String = ""

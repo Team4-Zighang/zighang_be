@@ -2,8 +2,8 @@ package com.zighang.jobposting.infrastructure.worker
 
 import com.zighang.core.clova.util.JsonCleaner
 import com.zighang.core.exception.GlobalErrorCode
-import com.zighang.scrap.dto.request.JobEnrichedEvent
-import com.zighang.scrap.dto.request.JobAnalysisEvent
+import com.zighang.jobposting.dto.JobEnrichedEvent
+import com.zighang.jobposting.dto.JobAnalysisEvent
 import com.zighang.scrap.dto.response.JobPostingAnalysisDto
 import com.zighang.jobposting.infrastructure.caller.JobAnalysisCaller
 import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer

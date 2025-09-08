@@ -8,7 +8,7 @@ import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
-import com.zighang.scrap.dto.request.JobAnalysisEvent
+import com.zighang.jobposting.dto.JobAnalysisEvent
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.dto.response.FileDeleteResponse

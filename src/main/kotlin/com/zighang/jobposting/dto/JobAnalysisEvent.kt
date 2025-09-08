@@ -1,4 +1,4 @@
-package com.zighang.scrap.dto.request
+package com.zighang.jobposting.dto
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
