@@ -3,7 +3,7 @@ package com.zighang.member.entity.value.personality
 enum class CharacterType(
     val displayName: String
 ) {
-    DURMJIK("듬직행"),
+    DEUMJIK("듬직행"),
     SILSOK("실속행"),
     SEONGSIL("성실행"),
     DANJJAN("단짠행"),

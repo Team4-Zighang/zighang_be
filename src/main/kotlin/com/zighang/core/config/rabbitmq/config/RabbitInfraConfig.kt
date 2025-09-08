@@ -92,7 +92,7 @@ class RabbitInfraConfig(
     @Bean
     fun personalityUpdateQueue() : Queue {
         return Queue(
-            rabbitProperties.personalityUpdate.routingKey, true, false, false, getDLQArgs()
+            rabbitProperties.personalityUpdate.name, true, false, false, getDLQArgs()
         )
     }
 

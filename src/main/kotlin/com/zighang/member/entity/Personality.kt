@@ -18,27 +18,70 @@ class Personality(
     val memberId: Long,
 
     @Column(name = "charcter_type", nullable = false)
-    val charcterType: CharacterType,
+    @Enumerated(EnumType.STRING)
+    var charcterType: CharacterType,
 
     @Column(name = "company_size", nullable = false)
     @Enumerated(EnumType.STRING)
-    val companySize: CompanySize,
+    var companySize: CompanySize,
 
     @Column(name = "company_size_value", nullable = false)
-    val companySizeValue: Int,
+    var companySizeValue: Int,
 
     @Column(name = "work_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    val workType: WorkType,
+    var workType: WorkType,
 
     @Column(name = "work_type_value", nullable = false)
-    val workTypeValue: Int,
+    var workTypeValue: Int,
 
     @Column(name = "pursuit_of_value_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    val pursuitOfValueType: PursuitOfValueType,
+    var pursuitOfValueType: PursuitOfValueType,
 
     @Column(name = "pursuit_of_value_type_value", nullable = false)
-    val pursuitOfValueTypeValue: Int,
+    var pursuitOfValueTypeValue: Int,
 ) {
+
+    companion object{
+        fun create(
+            memberId: Long,
+            charcterType: CharacterType,
+            companySize: CompanySize,
+            companySizeValue: Int,
+            workType: WorkType,
+            workTypeValue: Int,
+            pursuitOfValueType: PursuitOfValueType,
+            pursuitOfValueTypeValue: Int,
+        ): Personality {
+            return Personality(
+                memberId = memberId,
+                charcterType = charcterType,
+                companySize = companySize,
+                companySizeValue = companySizeValue,
+                workType = workType,
+                workTypeValue = workTypeValue,
+                pursuitOfValueType = pursuitOfValueType,
+                pursuitOfValueTypeValue = pursuitOfValueTypeValue
+            )
+        }
+    }
+
+    fun update(
+        charcterType: CharacterType,
+        companySize: CompanySize,
+        companySizeValue: Int,
+        workType: WorkType,
+        workTypeValue: Int,
+        pursuitOfValueType: PursuitOfValueType,
+        pursuitOfValueTypeValue: Int,
+    ) {
+        this.charcterType = charcterType
+        this.companySize = companySize
+        this.companySizeValue = companySizeValue
+        this.workType = workType
+        this.workTypeValue = workTypeValue
+        this.pursuitOfValueType = pursuitOfValueType
+        this.pursuitOfValueTypeValue = pursuitOfValueTypeValue
+    }
 }
