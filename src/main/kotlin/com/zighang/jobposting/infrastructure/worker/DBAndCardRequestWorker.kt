@@ -29,10 +29,8 @@ class DBAndCardRequestWorker(
 
             if(event.isCard) {
                 // 해당 부분에서 카드 레디스 업데이트
-                val memberId = requireNotNull(event.memberId) {
-                    "카드 업데이트 시 memberId가 필수로 필요합니다"
-                }
-                cardService.updateCardByJobPostingId(event.memberId, event.id, event.jobPostingAnalysisDto.career)
+                val memberId = event.memberId ?: throw GlobalErrorCode.NOT_EXIST_MEMBER.toException()
+                cardService.updateCardByJobPostingId(memberId, event.id, event.jobPostingAnalysisDto.career)
             }
         }catch (e: DomainException){
             throw e

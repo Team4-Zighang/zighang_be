@@ -9,7 +9,7 @@ enum class MemberErrorCode (
     override val message: String,
 ) : BaseErrorCode<DomainException> {
 
-    NOT_EXIST_MEMBER(HttpStatus.BAD_REQUEST, "해당 멤버가 존재하지 않습니다.");
+    NOT_EXIST_MEMBER(HttpStatus.NOT_FOUND, "해당 멤버가 존재하지 않습니다.");
 
     override fun toException(): DomainException {
         return DomainException(this)
