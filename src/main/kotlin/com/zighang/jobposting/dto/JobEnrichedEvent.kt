@@ -10,5 +10,5 @@ data class JobEnrichedEvent(
 
     val jobPostingAnalysisDto: JobPostingAnalysisDto,
 
-    val isCard: Boolean? = false
+    val isCard: Boolean = false
 )

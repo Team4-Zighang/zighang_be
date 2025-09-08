@@ -11,5 +11,5 @@ data class JobAnalysisEvent (
     @field:NotBlank
     val ocrData: String,
 
-    val isCard: Boolean? = false
+    val isCard: Boolean = false
 )

@@ -11,9 +11,9 @@ enum class GlobalErrorCode(
     // 예시 에러 코드
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "내부 서버 오류가 발생했습니다."),
     INVALID_REFRESH_TOKEN(HttpStatus.FORBIDDEN, "유효한 리프레쉬 토큰이 아닙니다."),
-    NOT_EXIST_MEMBER(HttpStatus.BAD_REQUEST, "해당 멤버가 존재하지 않습니다."),
-    NOT_EXIST_PERSONALITY(HttpStatus.BAD_REQUEST, "해당 멤버의 성향분석 결과가 존재하지 않습니다."),
-    NOT_EXIST_ONBOARDING(HttpStatus.BAD_REQUEST, "온보딩 데이터가 존재하지 않습니다"),
+    NOT_EXIST_MEMBER(HttpStatus.NOT_FOUND, "해당 멤버가 존재하지 않습니다."),
+    NOT_EXIST_PERSONALITY(HttpStatus.NOT_FOUND, "해당 멤버의 성향분석 결과가 존재하지 않습니다."),
+    NOT_EXIST_ONBOARDING(HttpStatus.NOT_FOUND, "온보딩 데이터가 존재하지 않습니다"),
     FILE_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 업로드에 실패했습니다."),
     FILE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "파일 삭제에 실패했습니다."),
     IS_NOT_YOUR_FILE(HttpStatus.BAD_REQUEST, "본인의 파일만 삭제할 수 있습니다."),

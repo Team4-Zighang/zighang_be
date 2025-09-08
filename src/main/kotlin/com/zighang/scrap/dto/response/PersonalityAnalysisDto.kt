@@ -17,7 +17,7 @@ data class PersonalityAnalysisDto(
     companion object{
         fun create(personality: Personality): PersonalityAnalysisDto{
             return PersonalityAnalysisDto(
-                characterName = personality.charcterType.displayName,
+                characterName = personality.characterType.displayName,
                 CompanyValue(
                     personality.companySizeValue,
                     100 - personality.companySizeValue,

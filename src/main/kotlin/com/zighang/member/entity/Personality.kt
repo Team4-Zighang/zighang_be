@@ -19,7 +19,7 @@ class Personality(
 
     @Column(name = "charcter_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    var charcterType: CharacterType,
+    var characterType: CharacterType,
 
     @Column(name = "company_size", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -46,7 +46,7 @@ class Personality(
     companion object{
         fun create(
             memberId: Long,
-            charcterType: CharacterType,
+            characterType: CharacterType,
             companySize: CompanySize,
             companySizeValue: Int,
             workType: WorkType,
@@ -56,7 +56,7 @@ class Personality(
         ): Personality {
             return Personality(
                 memberId = memberId,
-                charcterType = charcterType,
+                characterType = characterType,
                 companySize = companySize,
                 companySizeValue = companySizeValue,
                 workType = workType,
@@ -76,7 +76,7 @@ class Personality(
         pursuitOfValueType: PursuitOfValueType,
         pursuitOfValueTypeValue: Int,
     ) {
-        this.charcterType = charcterType
+        this.characterType = charcterType
         this.companySize = companySize
         this.companySizeValue = companySizeValue
         this.workType = workType

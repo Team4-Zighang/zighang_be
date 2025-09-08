@@ -141,12 +141,13 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         where (jp.depthOne = :depthOne)
           and (jp.id in :postingIds)
           and (:memberId = s.memberId)
-        order by s.createdAt desc limit 10
+        group by jp order by max(s.createdAt) desc
     """)
     fun findScrapedJobPostingsBydepthOneAndMemberId(
         @Param("memberId") memberId : Long,
         @Param("postingIds") postingIds: List<Long>,
         @Param("depthOne") depthOne: String,
+        pageable: Pageable
     ) : List<JobPosting>
 
     @Query("""
@@ -155,10 +156,11 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         left join Scrap s on s.jobPostingId = jp.id
         where (jp.id in :postingIds)
           and (:memberId = s.memberId)
-        order by s.createdAt desc limit 10
+        group by jp order by max(s.createdAt) desc
     """)
     fun findScrapedJobPostingsByMemberIdAndJobPostingIds(
         @Param("memberId") memberId : Long,
         @Param("postingIds") postingIds: List<Long>,
+        pageable: Pageable
     ) : List<JobPosting>
 }

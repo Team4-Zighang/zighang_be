@@ -130,11 +130,18 @@ class JobPostingService(
         postingIds: List<Long>
     ) : String {
 
-        var jobPostings = jobPostingRepository.findScrapedJobPostingsBydepthOneAndMemberId(memberId, postingIds, depthOne)
+        val pageable = PageRequest.of(0,10)
+        var jobPostings =
+            jobPostingRepository.findScrapedJobPostingsBydepthOneAndMemberId(
+                memberId, postingIds, depthOne, pageable
+            )
 
         // 개수 너무 적으면 전체 스크랩에서 수집
         if(jobPostings.size < 3) {
-            jobPostings = jobPostingRepository.findScrapedJobPostingsByMemberIdAndJobPostingIds(memberId, postingIds)
+            jobPostings =
+                jobPostingRepository.findScrapedJobPostingsByMemberIdAndJobPostingIds(
+                    memberId, postingIds, pageable
+                )
         }
 
         return jobPostings.joinToString("\n") { jobPosting ->

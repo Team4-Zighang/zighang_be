@@ -31,7 +31,7 @@ class PersonalityUpdateWorker(
         if (existingPersonality == null) {
             val personality = Personality.create(
                 memberId = memberId,
-                charcterType = characterType,
+                characterType = characterType,
                 companySize = companySize,
                 companySizeValue = event.personalityValue.majorValue,
                 workType = workType,
