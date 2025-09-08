@@ -27,10 +27,7 @@ class Onboarding (
     var school : School,
 
     @Column(name = "major", nullable = false)
-    var major : String,
-
-    @Column(name = "jobRole", nullable = false)
-    var jobRole : String
+    var major : String
 ) : BaseEntity() {
     companion object {
         fun create(
@@ -45,8 +42,7 @@ class Onboarding (
                 careerYear = careerYear,
                 region = region,
                 school = school,
-                major = major,
-                jobRole = "생산" // Todo 임시방편
+                major = major
             )
         }
     }

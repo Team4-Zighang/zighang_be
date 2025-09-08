@@ -4,6 +4,7 @@ import com.zighang.jobposting.entity.JobPosting
 import com.zighang.member.entity.value.School
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
@@ -98,40 +99,49 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
 
     @Query(
         value = """
-            SELECT DISTINCT j FROM JobPosting j
+            SELECT DISTINCT j 
+            FROM JobPosting j
             INNER JOIN Scrap s ON j.id = s.jobPostingId
             INNER JOIN Member m ON s.memberId = m.id
             INNER JOIN Onboarding o ON m.onboardingId = o.id
-            WHERE o.school = :school AND o.jobRole = :jobRole
+            INNER JOIN JobRole jr ON jr.onboardingId = o.id
+            WHERE o.school = :school 
+              AND jr.jobRole IN :jobRoles
             ORDER BY j.uploadDate DESC
         """,
         countQuery = """
-            SELECT COUNT(DISTINCT j.id) FROM JobPosting j
+            SELECT COUNT(DISTINCT j.id) 
+            FROM JobPosting j
             INNER JOIN Scrap s ON j.id = s.jobPostingId
             INNER JOIN Member m ON s.memberId = m.id
             INNER JOIN Onboarding o ON m.onboardingId = o.id
-            WHERE o.school = :school AND o.jobRole = :jobRole
+            INNER JOIN JobRole jr ON jr.onboardingId = o.id
+            WHERE o.school = :school 
+              AND jr.jobRole IN :jobRoles
         """
     )
     fun findAllScrappedJobPostingsBySimilarUsers(
         school: School,
-        jobRole: String,
+        jobRoles: List<String>,
         pageable: Pageable
     ): Page<JobPosting>
 
     @Query("""
-        SELECT j FROM JobPosting j
-        INNER JOIN Scrap s on j.id = s.jobPostingId
+        SELECT j 
+        FROM JobPosting j
+        INNER JOIN Scrap s ON j.id = s.jobPostingId
         INNER JOIN Member m ON s.memberId = m.id
         INNER JOIN Onboarding o ON m.onboardingId = o.id
-        where o.school= :school AND o.jobRole = :jobRole
-        group by (j.id)
-        order by count(s.id) desc
-        limit 3
+        INNER JOIN JobRole jr ON jr.onboardingId = o.id
+        WHERE o.school = :school 
+          AND jr.jobRole IN :jobRoles
+        GROUP BY j.id
+        ORDER BY COUNT(s.id) DESC
     """)
     fun findTop3ScrappedJobPostingsBySimilarUsers(
         school: School,
-        jobRole: String,
+        jobRoles: List<String>,
+        pageable: Pageable = PageRequest.of(0, 3)
     ): List<JobPosting>
 
     @Query("""
