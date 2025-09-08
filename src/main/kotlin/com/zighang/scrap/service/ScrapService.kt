@@ -8,7 +8,7 @@ import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
-import com.zighang.scrap.dto.request.JobAnalysisEvent
+import com.zighang.jobposting.dto.JobAnalysisEvent
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.dto.response.FileDeleteResponse
@@ -16,6 +16,8 @@ import com.zighang.scrap.dto.response.FileResponse
 import com.zighang.scrap.dto.response.JobPostingResponse
 import com.zighang.scrap.entity.Scrap
 import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
+import com.zighang.member.repository.MemberRepository
+import com.zighang.member.repository.OnboardingRepository
 import com.zighang.scrap.repository.ScrapRepository
 import com.zighang.scrap.value.FileType
 import lombok.extern.slf4j.Slf4j
@@ -38,7 +40,8 @@ class ScrapService(
     private val memoRepository: MemoRepository,
     private val objectStorageService: ObjectStorageService,
     private val jobAnalysisEventProducer: JobAnalysisEventProducer,
-    private val redisTemplate: RedisTemplate<String, Any>
+    private val redisTemplate: RedisTemplate<String, Any>,
+    private val personalityAnalysisService: PersonalityAnalysisService
 ) {
 
     @Transactional
@@ -77,6 +80,9 @@ class ScrapService(
             TransactionSynchronizationManager.registerSynchronization(
                 object : TransactionSynchronization {
                     override fun afterCommit() {
+                        // 트랜잭션 커밋 후 성향 분석 할 것인지 확인
+                        personalityAnalysisService.publishAnalysis(customUserDetails)
+
                         // 트랜잭션 커밋 후 Redis 랭킹 업데이트
                         redisTemplate.opsForZSet().incrementScore(
                             "scrap_ranking", upsertScrapRequest.jobPostingId.toString(), 1.0

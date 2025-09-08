@@ -1,4 +1,4 @@
-package com.zighang.scrap.dto.request
+package com.zighang.jobposting.dto
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -11,5 +11,5 @@ data class JobAnalysisEvent (
     @field:NotBlank
     val ocrData: String,
 
-    val isCard: Boolean? = false
+    val isCard: Boolean = false
 )

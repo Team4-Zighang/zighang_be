@@ -5,7 +5,7 @@ import com.zighang.card.dto.CardRedis
 import com.zighang.card.service.CardService
 import com.zighang.card.value.CardPosition
 import com.zighang.jobposting.repository.JobPostingRepository
-import com.zighang.scrap.dto.request.JobAnalysisEvent
+import com.zighang.jobposting.dto.JobAnalysisEvent
 import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -121,5 +121,37 @@ class JobPostingService(
 
         cardService.addServedId(memberId, candidate.id!!)
         return true;
+    }
+
+    // 같은 직군의 공고만 모으기
+    fun getJobPostingSummaryByJobCategory(
+        memberId: Long,
+        depthOne: String,
+        postingIds: List<Long>
+    ) : String {
+
+        val pageable = PageRequest.of(0,10)
+        var jobPostings =
+            jobPostingRepository.findScrapedJobPostingsBydepthOneAndMemberId(
+                memberId, postingIds, depthOne, pageable
+            )
+
+        // 개수 너무 적으면 전체 스크랩에서 수집
+        if(jobPostings.size < 3) {
+            jobPostings =
+                jobPostingRepository.findScrapedJobPostingsByMemberIdAndJobPostingIds(
+                    memberId, postingIds, pageable
+                )
+        }
+
+        return jobPostings.joinToString("\n") { jobPosting ->
+            jobPosting.summaryData
+                .takeUnless { it.isBlank() }
+                ?: listOfNotNull(
+                    jobPosting.content,
+                    jobPosting.teamInfo
+                ).joinToString("\n")
+                    .ifBlank { "데이터 없음" }
+        }
     }
 }

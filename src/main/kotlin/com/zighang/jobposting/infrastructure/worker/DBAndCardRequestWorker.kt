@@ -1,9 +1,10 @@
 package com.zighang.jobposting.infrastructure.worker
 
 import com.zighang.card.service.CardService
+import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.repository.JobPostingRepository
-import com.zighang.scrap.dto.request.JobEnrichedEvent
+import com.zighang.jobposting.dto.JobEnrichedEvent
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Component
 
@@ -23,15 +24,18 @@ class DBAndCardRequestWorker(
             )
 
             if(updatedRows == 0) {
-                throw IllegalArgumentException("posting id : ${event.id}의 자격요건/우대사항 업데이트를 실패했습니다.")
+                throw GlobalErrorCode.NOT_EXIST_JOB_POSTING.toException()
             }
 
-            if(event.isCard == true) {
+            if(event.isCard) {
                 // 해당 부분에서 카드 레디스 업데이트
-                // 카드 이벤트 발행의 경우에서만 실행
-                cardService.updateCardByJobPostingId(event.memberId!!, event.id, event.jobPostingAnalysisDto.career)
+                val memberId = event.memberId ?: throw GlobalErrorCode.NOT_EXIST_MEMBER.toException()
+                cardService.updateCardByJobPostingId(memberId, event.id, event.jobPostingAnalysisDto.career)
             }
-        }catch (e:Exception){
+        }catch (e: DomainException){
+            throw e
+        }
+        catch (e:Exception){
             throw GlobalErrorCode.INTERNAL_SERVER_ERROR.toException()
         }
     }

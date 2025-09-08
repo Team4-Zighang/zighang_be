@@ -68,6 +68,44 @@ class RabbitInfraConfig(
     fun jobEnrichedBinding() :Binding =
         BindingBuilder.bind(jobEnrichedQueue()).to(jobEnrichedExchange()).with(rabbitProperties.enriched.routingKey)
 
+
+    // 스크랩 성향 분석 Queue
+
+    @Bean
+    fun personalityAnalysisQueue() : Queue {
+        return Queue(
+            rabbitProperties.personality.name, true, false, false, getDLQArgs()
+        )
+    }
+
+    @Bean
+    fun personalityAnalysisExchange() : DirectExchange = DirectExchange(rabbitProperties.personality.exchange)
+
+    @Bean
+    fun personalityAnalysisBinding() : Binding =
+        BindingBuilder
+            .bind(personalityAnalysisQueue())
+            .to(personalityAnalysisExchange())
+            .with(rabbitProperties.personality.routingKey)
+
+    // 성향 분석 뒤 업데이트 큐
+    @Bean
+    fun personalityUpdateQueue() : Queue {
+        return Queue(
+            rabbitProperties.personalityUpdate.name, true, false, false, getDLQArgs()
+        )
+    }
+
+    @Bean
+    fun personalityUpdateExchange() : DirectExchange = DirectExchange(rabbitProperties.personalityUpdate.exchange)
+
+    @Bean
+    fun personalityUpdateBinding() : Binding =
+        BindingBuilder
+            .bind(personalityUpdateQueue())
+            .to(personalityUpdateExchange())
+            .with(rabbitProperties.personalityUpdate.routingKey)
+
     // dlq 에러 핸들링을 위해 사용하는 Args
     private fun getDLQArgs() : Map<String, String> {
         return mapOf(

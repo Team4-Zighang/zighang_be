@@ -34,8 +34,33 @@ class SystemMessageFactory {
 
         """.trimIndent()
 
+        private val analysisPrompt : String = """
+            아래 저장된 채용 공고 데이터를 분석하여 PersonalityValueDto에 맞는 값을 출력해주세요.
+
+            규칙:
+            1. 출력은 **JSON 형식**으로만 하고, 다른 key를 만들지 마세요.
+            2. JSON key는 반드시 아래와 일치해야 합니다:
+               - majorValue: 대기업 성향 점수 (0~100, 0이면 스타트업에 가까움, 100이면 대기업에 가까움)
+               - officeValue: 오피스 출근 근무 성향 점수 (0~100, 0이면 원격에 가까움, 100이면 출근에 가까움)
+               - feeValue: 연봉 우선 성향 점수 (0~100, 0이면 복지 중심, 100이면 연봉 중심)
+            3. 값은 정수로만 작성하고, 반드시 0~100 범위 내에서 작성
+            4. 매번 다른 채용공고를 분석할 때, 값은 합이 100이 될 필요 없이 항목별 독립적으로 결정
+            5. JSON 외 다른 출력, 설명, 주석, 마크다운은 절대 포함하지 마세요.
+
+            예시출력:
+            {
+              "majorValue": 72,
+              "officeValue": 55,
+              "feeValue": 40
+            }
+        """.trimIndent()
+
         fun jobAnalysisSystemMessageFactory(): String {
             return jobAnalysisSystemMessage
+        }
+
+        fun personalityAnalysisMessageFactory(): String {
+            return analysisPrompt
         }
     }
 }

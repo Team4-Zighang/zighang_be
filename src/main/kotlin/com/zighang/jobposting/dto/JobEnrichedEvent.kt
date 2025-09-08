@@ -1,4 +1,4 @@
-package com.zighang.scrap.dto.request
+package com.zighang.jobposting.dto
 
 import com.zighang.scrap.dto.response.JobPostingAnalysisDto
 
@@ -10,5 +10,5 @@ data class JobEnrichedEvent(
 
     val jobPostingAnalysisDto: JobPostingAnalysisDto,
 
-    val isCard: Boolean? = false
+    val isCard: Boolean = false
 )
