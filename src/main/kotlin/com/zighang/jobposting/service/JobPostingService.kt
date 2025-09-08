@@ -122,4 +122,29 @@ class JobPostingService(
         cardService.addServedId(memberId, candidate.id!!)
         return true;
     }
+
+    // 같은 직군의 공고만 모으기
+    fun getJobPostingSummaryByJobCategory(
+        memberId: Long,
+        depthOne: String,
+        postingIds: List<Long>
+    ) : String {
+
+        var jobPostings = jobPostingRepository.findScrapedJobPostingsBydepthOneAndMemberId(memberId, postingIds, depthOne)
+
+        // 개수 너무 적으면 전체 스크랩에서 수집
+        if(jobPostings.size < 3) {
+            jobPostings = jobPostingRepository.findScrapedJobPostingsByMemberIdAndJobPostingIds(memberId, postingIds)
+        }
+
+        return jobPostings.joinToString("\n") { jobPosting ->
+            jobPosting.summaryData
+                .takeUnless { it.isBlank() }
+                ?: listOfNotNull(
+                    jobPosting.content,
+                    jobPosting.teamInfo
+                ).joinToString("\n")
+                    .ifBlank { "데이터 없음" }
+        }
+    }
 }

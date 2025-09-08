@@ -3,5 +3,7 @@ package com.zighang.scrap.dto.request
 data class PersonalityAnalysisEvent(
     val memberId : Long,
 
-    val jobSummaryList: List<String>
+    val jobCategory: String,
+
+    val jobPostingIds: List<Long>
 )

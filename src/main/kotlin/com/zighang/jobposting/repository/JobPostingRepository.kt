@@ -133,4 +133,32 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         school: School,
         jobRole: String,
     ): List<JobPosting>
+
+    @Query("""
+        select jp
+        from JobPosting jp
+        left join Scrap s on s.jobPostingId = jp.id
+        where (jp.depthOne = :depthOne)
+          and (jp.id in :postingIds)
+          and (:memberId = s.memberId)
+        order by s.createdAt desc limit 10
+    """)
+    fun findScrapedJobPostingsBydepthOneAndMemberId(
+        @Param("memberId") memberId : Long,
+        @Param("postingIds") postingIds: List<Long>,
+        @Param("depthOne") depthOne: String,
+    ) : List<JobPosting>
+
+    @Query("""
+        select jp
+        from JobPosting jp
+        left join Scrap s on s.jobPostingId = jp.id
+        where (jp.id in :postingIds)
+          and (:memberId = s.memberId)
+        order by s.createdAt desc limit 10
+    """)
+    fun findScrapedJobPostingsByMemberIdAndJobPostingIds(
+        @Param("memberId") memberId : Long,
+        @Param("postingIds") postingIds: List<Long>,
+    ) : List<JobPosting>
 }
