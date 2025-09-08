@@ -11,6 +11,8 @@ class JobAnalysisDtoMapper(
 )
 : AbstractObjectMapper<JobPostingAnalysisDto?>(objectMapper) {
     fun toJsonDto(json: String?): JobPostingAnalysisDto {
+        require(!json.isNullOrBlank()) { "JobPostingAnalysis json must not be null or blank" }
+
         return parse<JobPostingAnalysisDto>(json, JobPostingAnalysisDto::class.java)
     }
 }

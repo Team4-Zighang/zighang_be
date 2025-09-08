@@ -23,7 +23,7 @@ class JobPostingAnalysisWorker(
     private val redisTemplate: RedisTemplate<String, String>
 ) {
 
-    private fun tryLockJobPosting(jobPostingId: Long, ttlSeconds: Long = 60L): Boolean {
+    private fun tryLockJobPosting(jobPostingId: Long, ttlSeconds: Long = 180L): Boolean {
         val key = "lock:jobPosting:$jobPostingId"
         val success = redisTemplate.opsForValue().setIfAbsent(key, "locked")
         if (success == true) {

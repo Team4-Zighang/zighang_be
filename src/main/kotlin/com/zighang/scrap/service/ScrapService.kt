@@ -51,9 +51,6 @@ class ScrapService(
             TransactionSynchronizationManager.registerSynchronization(
                 object : TransactionSynchronization {
                     override fun afterCommit() {
-                        
-                        // TODO: 카드 뽑기 커밋 후 추가
-                        // 레디스로 동일 큐 내 같은 데이터 저장 안되도록 방어
                         val event = JobAnalysisEvent(
                             id = jobPosting.id!!,
                             ocrData = jobPosting.ocrData
