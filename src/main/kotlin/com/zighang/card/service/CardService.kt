@@ -176,4 +176,32 @@ class CardService(
             diff.coerceAtMost(maxCount.toLong())
         )
     }
+
+    //memberId의 top3 카드 중 jobPostingId가 일치하는 카드 갱신
+    fun updateCardByJobPostingId(memberId: Long, jobPostingId: Long, updatedCareer: String?) {
+        val listKey = key(memberId)
+        val rawList: List<String> = redisTemplate.opsForList().range(listKey, 0, -1).orEmpty()
+
+        val mapper = jacksonObjectMapper()
+            .registerModule(com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+        val mutableList = rawList.toMutableList()
+        val updates = mutableListOf<Pair<Int, String>>()
+
+        mutableList.forEachIndexed { index, json ->
+            val card = mapper.readValue(json, CardRedis::class.java)
+            if (card.jobPostingId == jobPostingId) {
+                val oldJobPosting = card.cardJobPosting
+                val newCardJobPosting = oldJobPosting?.copy(career = updatedCareer)
+                val updatedCard = card.copy(cardJobPosting = newCardJobPosting)
+                updates += index to mapper.writeValueAsString(updatedCard)
+            }
+        }
+
+        updates.forEach{ (idx, updatedJson) ->
+            redisTemplate.opsForList().set(listKey, idx.toLong(), updatedJson)
+        }
+    }
+
 }
