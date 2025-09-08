@@ -1,8 +1,8 @@
-package com.zighang.scrap.infrastructure
+package com.zighang.jobposting.infrastructure.producer
 
 import com.zighang.core.config.rabbitmq.config.RabbitProperties
 import com.zighang.scrap.dto.request.JobEnrichedEvent
-import com.zighang.scrap.dto.request.JobScrapedEvent
+import com.zighang.scrap.dto.request.JobAnalysisEvent
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.stereotype.Component
 
@@ -11,7 +11,7 @@ class JobAnalysisEventProducer(
     private val rabbitTemplate: RabbitTemplate,
     private val rabbitProperties: RabbitProperties
 ) {
-    fun publishAnalysis(event: JobScrapedEvent) {
+    fun publishAnalysis(event: JobAnalysisEvent) {
         rabbitTemplate.convertAndSend(
             rabbitProperties.analysis.exchange,
             rabbitProperties.analysis.routingKey,

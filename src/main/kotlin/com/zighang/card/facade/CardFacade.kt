@@ -37,7 +37,7 @@ class CardFacade(
 
         val onboarding = onboardingService.getById(member.onboardingId!!)
         val jobCategory = onboarding.jobCategory
-//        val jobRole = onboarding.jobRole
+
         val jobRole = "생산" // Todo 직무 여러 개도 고려하도록 수정
         val top3JobPosting = jobPostingService.top3ByJob(jobCategory, jobRole)
 
