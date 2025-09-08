@@ -16,12 +16,17 @@ data class SimilarAlumniDetailResponseDto(
     val scrapList: List<AlumniSimiliarJobPostingResponseDto>
 ){
     companion object {
-        fun create(member: Member, onboarding: Onboarding, list: List<AlumniSimiliarJobPostingResponseDto>): SimilarAlumniDetailResponseDto{
+        fun create(
+            member: Member,
+            onboarding: Onboarding,
+            jobRole: String,
+            list: List<AlumniSimiliarJobPostingResponseDto>
+        ) : SimilarAlumniDetailResponseDto{
             return SimilarAlumniDetailResponseDto(
                 member.id,
                 member.name,
                 onboarding.major,
-                onboarding.jobRole,
+                jobRole,
                 list
             )
         }
