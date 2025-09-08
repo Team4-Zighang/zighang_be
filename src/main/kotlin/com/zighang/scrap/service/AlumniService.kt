@@ -2,7 +2,7 @@ package com.zighang.scrap.service
 
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.jobposting.entity.value.Company
-import com.zighang.jobposting.infrastructure.CompanyMapper
+import com.zighang.jobposting.infrastructure.mapper.CompanyMapper
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.member.exception.MemberErrorCode
 import com.zighang.member.exception.OnboardingErrorCode

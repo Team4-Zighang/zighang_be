@@ -7,8 +7,8 @@ data class OnboardingRequest(
     @Schema(description = "직군", example = "IT")
     val jobCategory: String,
 
-    @Schema(description = "직무", example = "백엔드")
-    val jobRole: String,
+    @Schema(description = "직무", example = "[\"백엔드\", \"프론트엔드\"]")
+    val jobRole: List<String>,
 
     @Schema(description = "연차", example = "YEAR_0(0),\n" +
             "    YEAR_1(1),\n" +
@@ -47,6 +47,6 @@ data class OnboardingRequest(
     @Schema(description = "학교", example = "건국대학교")
     val school: String,
 
-    @Schema(description = "희망 기업", example = "현대")
-    val targetCompany : String
+    @Schema(description = "전공", example = "현대")
+    val major : String
 )

@@ -14,9 +14,6 @@ class Onboarding (
     @Column(name = "job_category", nullable = false)
     var jobCategory : String,
 
-    @Column(name = "job_role", nullable = false)
-    var jobRole : String,
-
     @Enumerated(EnumType.STRING)
     @Column(name = "career_year", nullable = false)
     var careerYear : CareerYear,
@@ -29,42 +26,42 @@ class Onboarding (
     @Enumerated(EnumType.STRING)
     var school : School,
 
-    @Column(name = "target_company", nullable = false)
-    var targetCompany : String,
+    @Column(name = "major", nullable = false)
+    var major : String,
+
+    @Column(name = "jobRole", nullable = false)
+    var jobRole : String
 ) : BaseEntity() {
     companion object {
         fun create(
             jobCategory: String,
-            jobRole: String,
             careerYear: CareerYear,
             region: Region,
             school: School,
-            targetCompany: String
+            major: String
         ): Onboarding {
             return Onboarding(
                 jobCategory = jobCategory,
-                jobRole = jobRole,
                 careerYear = careerYear,
                 region = region,
                 school = school,
-                targetCompany = targetCompany
+                major = major,
+                jobRole = "생산" // Todo 임시방편
             )
         }
     }
 
     fun update(
         jobCategory: String,
-        jobRole: String,
         careerYear: CareerYear,
         region: Region,
         school: School,
-        targetCompany: String
+        major: String
     ) {
         this.jobCategory = jobCategory
-        this.jobRole = jobRole
         this.careerYear = careerYear
         this.region = region
         this.school = school
-        this.targetCompany = targetCompany
+        this.major = major
     }
 }
