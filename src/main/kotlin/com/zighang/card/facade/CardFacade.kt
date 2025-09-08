@@ -8,6 +8,7 @@ import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.jobposting.service.JobPostingService
+import com.zighang.member.service.JobRoleService
 import com.zighang.member.service.MemberService
 import com.zighang.member.service.OnboardingService
 import com.zighang.scrap.service.ScrapService
@@ -21,6 +22,7 @@ class CardFacade(
     private val onboardingService: OnboardingService,
     private val jobPostingService: JobPostingService,
     private val scrapService: ScrapService,
+    private val jobRoleService: JobRoleService
 ) {
     @Value("\${scrap.count_limit}")
     private lateinit var limitScrapCount: String
@@ -38,8 +40,9 @@ class CardFacade(
         val onboarding = onboardingService.getById(member.onboardingId!!)
         val jobCategory = onboarding.jobCategory
 
-        val jobRole = "생산" // Todo 직무 여러 개도 고려하도록 수정
-        val top3JobPosting = jobPostingService.top3ByJob(jobCategory, jobRole)
+        val jobRoleList = jobRoleService.findAllByOnboardingId(onboarding.id)
+            .map { jobRole -> jobRole.jobRole }
+        val top3JobPosting = jobPostingService.top3ByJob(jobCategory, jobRoleList, member.id)
 
         //이전 카드 초기화
         cardService.evict(member.id)

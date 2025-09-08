@@ -18,7 +18,7 @@ class JobPostingService(
     private val cardService: CardService,
     private val jobAnalysisEventProducer: JobAnalysisEventProducer
 ) {
-    fun top3ByJob(depthOne: String?, depthTwo: String?, memberId: Long): List<CardRedis> {
+    fun top3ByJob(depthOne: String?, depthTwo: List<String>, memberId: Long): List<CardRedis> {
 
         val page3 = PageRequest.of(0, 3)
 
