@@ -98,8 +98,8 @@ class JobPosting(
     @Column(name = "expired_date")
     val expiredDate: LocalDateTime,
 
-    @Column(name = "career")
-    val career: String,
+    @Column(name = "career", nullable = true)
+    var career: String,
 
     // 순위 산정 관련 column
     @Column(name = "current_rank", nullable = false)
@@ -110,7 +110,19 @@ class JobPosting(
 
     @Column(name = "rank_change", nullable = false)
     @Enumerated(EnumType.STRING)
-    var rankChange: RankChange = RankChange.NEW
+    var rankChange: RankChange = RankChange.NEW,
+
+    @Column(name = "min_career")
+    var minCareer:Int,
+
+    @Column(name = "max_career")
+    var maxCareer:Int,
+
+    @Column(name = "view_count", nullable = false)
+    var viewCount: Int = 100,
+
+    @Column(name = "apply_count", nullable = false)
+    var applyCount: Int = 100
 
 ) : BaseEntity() {
 
@@ -124,5 +136,17 @@ class JobPosting(
 
     fun changeRankChange(changeRank: RankChange) {
         this.rankChange = changeRank
+    }
+
+    fun updateViewCount() {
+        this.viewCount += 1
+    }
+
+    fun updateApplyCount() {
+        this.applyCount += 1
+    }
+
+    fun updateCareer(career: String) {
+        this.career = career
     }
 }

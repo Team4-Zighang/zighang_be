@@ -38,16 +38,21 @@ class CardFacade(
         }
 
         val onboarding = onboardingService.getById(member.onboardingId!!)
-        val jobCategory = onboarding.jobCategory
 
         val jobRoleList = jobRoleService.findAllByOnboardingId(onboarding.id)
             .map { jobRole -> jobRole.jobRole }
-        val top3JobPosting = jobPostingService.top3ByJob(jobCategory, jobRoleList, member.id)
+        val leftJob = jobPostingService.filterByCareerAndJobRoleAndLowestView(member, jobRoleList, onboarding)
+        val centerJob = jobPostingService.filterByCareerAndJobRoleAndLowestApply(member, jobRoleList, onboarding)
+        val rightJob = jobPostingService.filterByCareerAndJobRoleAndLatest(member, jobRoleList, onboarding)
 
+        val threeJobPosting = listOf(leftJob, centerJob, rightJob)
+        println(leftJob)
+        println(centerJob)
+        println(rightJob)
         //이전 카드 초기화
         cardService.evict(member.id)
         //카드 3개 생성
-        cardService.saveTop3Ids(member.id, top3JobPosting)
+        cardService.saveTop3Ids(member.id, threeJobPosting)
         //스크랩 수 레디스에 저장
         cardService.upsertCardScrapCount(member.id, scrapCount)
     }

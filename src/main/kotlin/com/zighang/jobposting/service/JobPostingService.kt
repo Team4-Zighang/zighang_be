@@ -6,73 +6,103 @@ import com.zighang.card.service.CardService
 import com.zighang.card.value.CardPosition
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.jobposting.dto.JobAnalysisEvent
+import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
+import com.zighang.member.entity.Member
+import com.zighang.member.entity.Onboarding
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class JobPostingService(
     private val jobPostingRepository: JobPostingRepository,
-//    private val analysisCaller: JobAnalysisCaller,
-//    private val cardJobPosingAnalysisDtoMapper: CardJobPosingAnalysisDtoMapper,
     private val cardService: CardService,
-    private val jobAnalysisEventProducer: JobAnalysisEventProducer
+    private val jobAnalysisEventProducer: JobAnalysisEventProducer,
 ) {
-    fun top3ByJob(depthOne: String?, depthTwo: List<String>, memberId: Long): List<CardRedis> {
+    fun filterByCareerAndJobRoleAndLowestView(member : Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
+        val excludedIds = cardService.getServedIds(member.id)
+        val myCareer = onboarding.careerYear.year
+        val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByViewCount(
+            roles = depthTwo,
+            career = myCareer,
+            excludedIds = excludedIds,
+            excludedEmpty = excludedIds.isEmpty()
+        )
+        val picked = pickJobPostingOrFallback(firstTry, excludedIds)
+        return toCardRedisAfterPick(member.id, picked)
+    }
 
-        val page3 = PageRequest.of(0, 3)
+    fun filterByCareerAndJobRoleAndLowestApply(member: Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
+        val excludedIds = cardService.getServedIds(member.id)
+        val myCareer = onboarding.careerYear.year
+        val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByApplyCount(
+            roles = depthTwo,
+            career = myCareer,
+            excludedIds = excludedIds,
+            excludedEmpty = excludedIds.isEmpty()
+        )
+        val picked = pickJobPostingOrFallback(firstTry, excludedIds)
+        return toCardRedisAfterPick(member.id, picked)
+    }
 
-        val first = jobPostingRepository.findTopJobPostingsByDepths(depthOne, depthTwo, page3)
-        val firstIds = first.mapNotNull { it.id }
+    fun filterByCareerAndJobRoleAndLatest(member: Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
+        val dataLimit = LocalDateTime.now().minusMonths(2)
+        val excludedIds = cardService.getServedIds(member.id)
+        val myCareer = onboarding.careerYear.year
+        println(myCareer)
+        val firstTry = jobPostingRepository.findRecentByRolesAndCareerExcluding(
+            roles = depthTwo,
+            career = myCareer,
+            excludedIds = excludedIds,
+            excludedEmpty =  excludedIds.isEmpty(),
+            dateLimit = dataLimit
+        )
+        val picked = pickJobPostingOrFallback(firstTry, excludedIds)
+        return toCardRedisAfterPick(member.id, picked)
+    }
 
-        // 1차로 3개가 끝나면 바로 CardRedis로 변환해서 반환
-        if (firstIds.size == 3) {
-            return first.map {
-                jobPosting ->
-//                val result = analysisCaller.getCardJobResponse(jobPosting.ocrData).result.message.content
-//                val jobPostingAnalysisDto = cardJobPosingAnalysisDtoMapper.toJsonDto(JsonCleaner.cleanJson(result))
-                jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
-                val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
-                    jobPosting.career,
-                    jobPosting.recruitmentType,
-                    jobPosting.education.displayName
-                )
-                val cardJobPosting = cardService.createCardJobPosting(cardJobPostingAnalysisDto, jobPosting)
-                CardRedis.create(jobPostingId = jobPosting.id!!, cardJobPosting, isOpen = false, openDateTime = null)
-            }
-        }
-
-        // 부족분 보충
-        val need = 3 - firstIds.size
-        val second = if (need > 0) {
-            jobPostingRepository.findTopJobPostingsExcludingIds(
-                excluded = firstIds.isNotEmpty(),
-                excludedIds = firstIds,
-                pageable = PageRequest.of(0, need)
-            )
+    private fun pickJobPostingOrFallback(
+        firstTry: List<JobPosting>,
+        excludedIds: Set<Long>
+    ): JobPosting {
+        return if (firstTry.isNotEmpty()) {
+            firstTry.first()
         } else {
-            emptyList()
-        }
-        val merged = (first + second)
-            .distinctBy { it.id }
-            .take(3)
-        // 합치고, 중복 제거, 최대 3개까지 자르고, CardRedis로 변환
-        return merged.map{ jobPosting ->
-            jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
-            val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
-                jobPosting.career,
-                jobPosting.recruitmentType,
-                jobPosting.education.displayName
-            )
-            val cardJobPosting = cardService.createCardJobPosting(cardJobPostingAnalysisDto, jobPosting)
-            CardRedis.create(
-                jobPostingId = jobPosting.id!!,
-                cardJobPosting = cardJobPosting,
-                isOpen = false,
-                openDateTime = null
-            )
+            jobPostingRepository.findOneLowestViewExcluding(
+                excludedIds = excludedIds,
+                excludedEmpty = excludedIds.isEmpty()
+            ).first()
         }
     }
+
+    fun toCardRedisAfterPick(memberId: Long, picked: JobPosting): CardRedis {
+        val jobPostingId = requireNotNull(picked.id) { "picked.id is null (unsaved entity?)" }
+
+        // 1) 추천 이력 저장
+        cardService.addServedId(memberId, jobPostingId)
+
+        // 2) 분석 이벤트 발행
+        jobAnalysisEventProducer.publishAnalysis(
+            JobAnalysisEvent(jobPostingId, memberId, picked.ocrData, true)
+        )
+
+        // 3) 카드용 DTO 생성 및 CardJobPosting 생성
+        val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
+            picked.recruitmentType,
+            picked.education.displayName
+        )
+        val cardJobPosting = cardService.createCardJobPosting(cardJobPostingAnalysisDto, picked)
+
+        // 4) CardRedis 조립
+        return CardRedis.create(
+            jobPostingId = jobPostingId,
+            cardJobPosting = cardJobPosting,
+            isOpen = false,
+            openDateTime = null
+        )
+    }
+    
 
     fun replace(memberId: Long, depthOne: String?, depthTwo: String?, position: CardPosition) : Boolean{
         val top3 = cardService.getTop3Ids(memberId).toMutableList()
@@ -101,7 +131,6 @@ class JobPostingService(
 //        val result = analysisCaller.getCardJobResponse(candidate.ocrData).result.message.content
         jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(candidate.id!!, memberId, candidate.ocrData, true))
         val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
-            candidate.career,
             candidate.recruitmentType,
             candidate.education.displayName
         )
