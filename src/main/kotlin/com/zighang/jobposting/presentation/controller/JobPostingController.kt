@@ -4,8 +4,10 @@ import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.RestResponse
 import com.zighang.jobposting.dto.response.PostingEvaluationSaveResponseDto
 import com.zighang.jobposting.dto.request.PostingEvaluationSaveRequestDto
+import com.zighang.jobposting.dto.response.JobPostingDetailResponseDto
 import com.zighang.jobposting.dto.response.PostingEvaluationListResponseDto
 import com.zighang.jobposting.presentation.swagger.JobPostingSwagger
+import com.zighang.jobposting.service.JobPostingService
 import com.zighang.jobposting.service.PostingEvaluationService
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -15,7 +17,8 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/posting")
 class JobPostingController(
-    private val jobPostingEvaluationService: PostingEvaluationService
+    private val jobPostingEvaluationService: PostingEvaluationService,
+    private val jobPostingService: JobPostingService
 ) : JobPostingSwagger {
 
     @PostMapping("/eval")
@@ -51,5 +54,14 @@ class JobPostingController(
         )
     }
 
-
+    @GetMapping("{postingId}")
+    fun getDetailOfPosting(
+        @PathVariable postingId: Long,
+    ) : ResponseEntity<RestResponse<JobPostingDetailResponseDto>> {
+        return ResponseEntity.ok(
+            RestResponse<JobPostingDetailResponseDto>(
+                jobPostingService.getOneJobPosting(postingId)
+            )
+        )
+    }
 }
