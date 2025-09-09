@@ -67,8 +67,9 @@ class CardFacade(
     fun replace(customUserDetails: CustomUserDetails, position: CardPosition) : Boolean{
         val member = memberService.getById(customUserDetails.getId())
         val onboarding = onboardingService.getById(member.onboardingId!!)
-        val jobRole = "생산" // Todo 직무 여러 개도 고려하도록 수정
-        return jobPostingService.replace(member.id, onboarding.jobCategory, jobRole,position);
+        val jobRoleList = jobRoleService.findAllByOnboardingId(onboarding.id)
+            .map { jobRole -> jobRole.jobRole }
+        return jobPostingService.replace(member, jobRoleList, onboarding, position);
     }
 
     fun showOpenList(customUserDetails: CustomUserDetails): List<CardContentResponse> {

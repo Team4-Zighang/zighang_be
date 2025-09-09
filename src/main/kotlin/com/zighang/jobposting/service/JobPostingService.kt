@@ -4,6 +4,8 @@ import com.zighang.card.dto.CardJobPostingAnalysisDto
 import com.zighang.card.dto.CardRedis
 import com.zighang.card.service.CardService
 import com.zighang.card.value.CardPosition
+import com.zighang.core.exception.DomainException
+import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.jobposting.dto.JobAnalysisEvent
 import com.zighang.jobposting.entity.JobPosting
@@ -50,7 +52,6 @@ class JobPostingService(
         val dataLimit = LocalDateTime.now().minusMonths(2)
         val excludedIds = cardService.getServedIds(member.id)
         val myCareer = onboarding.careerYear.year
-        println(myCareer)
         val firstTry = jobPostingRepository.findRecentByRolesAndCareerExcluding(
             roles = depthTwo,
             career = myCareer,
@@ -104,51 +105,17 @@ class JobPostingService(
     }
     
 
-    fun replace(memberId: Long, depthOne: String?, depthTwo: String?, position: CardPosition) : Boolean{
-        val top3 = cardService.getTop3Ids(memberId).toMutableList()
-        // 제외 대상: 현재 Top3 모든 id + 과거 노출 이력
-        val exclude = mutableSetOf<Long>()
-        exclude += top3.map { it.jobPostingId }
-        exclude += cardService.getServedIds(memberId)
-
-        // 새 후보 1개 찾기 (repo 구현은 예시)
-        val filtered = jobPostingRepository.findNextByExcludingIdsAndDepths(
-            exclude.isNotEmpty(),
-            exclude.toList(),
-            depthOne,
-            depthTwo,
-            pageable = PageRequest.of(0, 1)
-        ).firstOrNull()
-
-        // 2) 없으면 인기순으로 폴백 (예: score DESC, createdAt DESC)
-        val candidate = filtered ?: jobPostingRepository.findNextByExcludingIdsOrderByPopularity(
-            excluded = exclude.isNotEmpty(),
-            excludedIds = exclude.toList(),
-            pageable = PageRequest.of(0, 1)
-        ).firstOrNull() ?: return false
-
-        // 분석 → DTO → CardJobPosting
-//        val result = analysisCaller.getCardJobResponse(candidate.ocrData).result.message.content
-        jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(candidate.id!!, memberId, candidate.ocrData, true))
-        val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
-            candidate.recruitmentType,
-            candidate.education.displayName
-        )
-        val cardJobPosting = cardService.createCardJobPosting(cardJobPostingAnalysisDto, candidate)
-
-        // 새 카드로 교체 (같은 position 유지)
-        val newCard = CardRedis(
-            jobPostingId = candidate.id!!,
-            cardJobPosting = cardJobPosting,
-            isOpen = false,
-            openDateTime = null,
-            position = position
-        )
-
-        top3[cardService.idx(position)] = newCard
-        cardService.saveTop3Ids(memberId, top3)
-
-        cardService.addServedId(memberId, candidate.id!!)
+    fun replace(member: Member, depthTwo: List<String>, onboarding: Onboarding, position: CardPosition) : Boolean{
+        val top3 = cardService.getTop3Ids(member.id).toMutableList()
+        val retryCard = when (position) {
+            CardPosition.LEFT -> filterByCareerAndJobRoleAndLowestView(member, depthTwo, onboarding)
+            CardPosition.CENTER -> filterByCareerAndJobRoleAndLowestApply(member, depthTwo, onboarding)
+            CardPosition.RIGHT -> filterByCareerAndJobRoleAndLatest(member, depthTwo, onboarding)
+            else -> throw DomainException(GlobalErrorCode.INVALID_POSITION_CARD)
+        }
+        top3[cardService.idx(position)] = retryCard
+        cardService.saveTop3Ids(member.id, top3)
+        cardService.addServedId(member.id, retryCard.jobPostingId)
         return true;
     }
 
