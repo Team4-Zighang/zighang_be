@@ -39,12 +39,13 @@ class JobPostingController(
         @PathVariable postingId: Long,
         @RequestParam(value = "page", defaultValue = "0") page: Int,
     ): ResponseEntity<RestResponse<PostingEvaluationListResponseDto>> {
+        val safePage = if (page < 0) 0 else page
         return ResponseEntity.ok(
             RestResponse<PostingEvaluationListResponseDto>(
                 jobPostingEvaluationService.getEvaluationList(
                     customUserDetails,
                     postingId,
-                    page
+                    safePage
                 )
             )
         )

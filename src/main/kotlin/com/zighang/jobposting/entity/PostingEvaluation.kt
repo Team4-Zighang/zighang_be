@@ -21,7 +21,7 @@ class PostingEvaluation(
     @Column(name = "eval_score", nullable = false)
     val evalScore : Int,
 
-    @Column(name = "eval_text", nullable = false)
+    @Column(name = "eval_text", nullable = false, columnDefinition = "TEXT")
     val evalText : String,
 
     @Column(name = "recruitment_step", nullable = false)

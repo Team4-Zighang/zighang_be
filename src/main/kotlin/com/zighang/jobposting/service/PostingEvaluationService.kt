@@ -9,7 +9,7 @@ import com.zighang.jobposting.dto.response.PostingEvaluationListResponseDto
 import com.zighang.jobposting.entity.PostingEvaluation
 import com.zighang.jobposting.exception.JobPostingErrorCode
 import com.zighang.jobposting.repository.JobPostingRepository
-import com.zighang.jobposting.repository.PostingEvaluationRespository
+import com.zighang.jobposting.repository.PostingEvaluationRepository
 import com.zighang.member.entity.Member
 import com.zighang.member.exception.MemberErrorCode
 import com.zighang.member.repository.MemberRepository
@@ -17,15 +17,17 @@ import com.zighang.member.repository.OnboardingRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.SliceImpl
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class PostingEvaluationService(
-    private val postingEvaluationRespository: PostingEvaluationRespository,
+    private val postingEvaluationRepository: PostingEvaluationRepository,
     private val memberRepository: MemberRepository,
     private val jobPostingRepository: JobPostingRepository,
     private val onboardingRepository: OnboardingRepository
 ) {
 
+    @Transactional
     fun saveEvaluation(
         customUserDetails: CustomUserDetails,
         postingEvaluationSaveRequestDto: PostingEvaluationSaveRequestDto
@@ -44,7 +46,7 @@ class PostingEvaluationService(
             postingEvaluationSaveRequestDto.recruitmentStep
         )
 
-        postingEvaluationRespository.save(postingEvaluation)
+        postingEvaluationRepository.save(postingEvaluation)
 
         return PostingEvaluationSaveResponseDto.successCreate(
             postingEvaluation.id,
@@ -52,6 +54,7 @@ class PostingEvaluationService(
         )
     }
 
+    @Transactional(readOnly = true)
     fun getEvaluationList(
         customUserDetails: CustomUserDetails,
         postingId: Long,
@@ -60,11 +63,12 @@ class PostingEvaluationService(
 
         val currentMember = getMember(customUserDetails)
 
-        val onboarding = currentMember.onboardingId?.let { onboardingRepository.findById(it) }
+        val onboarding = currentMember.onboardingId?.
+        let { id -> onboardingRepository.findById(id).orElseThrow { GlobalErrorCode.NOT_EXIST_ONBOARDING.toException() } }
             ?: throw GlobalErrorCode.NOT_EXIST_ONBOARDING.toException()
 
-        val allEvaluations = postingEvaluationRespository
-            .findByPostingIdAndSchool(postingId, onboarding.get().school)
+        val allEvaluations = postingEvaluationRepository
+            .findByPostingIdAndSchool(postingId, onboarding.school)
         // 본인 것 보여줘도 되나?
 //            .filter { it.memberId != currentMember.id }
 
@@ -84,7 +88,7 @@ class PostingEvaluationService(
         val memberMap = memberRepository.findAllById(memberIds)
             .associate { it.id to it.onboardingId }
 
-        val onboardingIds = memberMap.values.toSet()
+        val onboardingIds = memberMap.values.filterNotNull().toSet()
         val onboardingMap = onboardingRepository.findAllById(onboardingIds)
             .associate { it.id to (it.major) }
 
@@ -106,7 +110,7 @@ class PostingEvaluationService(
         )
 
         return PostingEvaluationListResponseDto(
-            schoolName = onboarding.get().school.schoolName,
+            schoolName = onboarding.school.schoolName,
             avgScore = avgScore,
             totalCount = totalCount,
             evalList = slice

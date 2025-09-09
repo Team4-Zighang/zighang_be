@@ -5,7 +5,7 @@ import com.zighang.member.entity.value.School
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 
-interface PostingEvaluationRespository : CrudRepository<PostingEvaluation, Long> {
+interface PostingEvaluationRepository : CrudRepository<PostingEvaluation, Long> {
 
     @Query("""
         select p

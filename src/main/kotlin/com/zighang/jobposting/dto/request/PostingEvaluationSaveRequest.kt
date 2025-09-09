@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 
 data class PostingEvaluationSaveRequestDto (
 
@@ -18,6 +19,7 @@ data class PostingEvaluationSaveRequestDto (
     @Schema(description = "해당 공고 평점", example = "3")
     val evalScore: Int,
 
+    @field:Size(max = 1000)
     @Schema(description = "해당 공고 공고 평", example = "저를 안뽑아줘서 채용공고가 불친절하다 생각했어요.")
     val evalText: String,
 
