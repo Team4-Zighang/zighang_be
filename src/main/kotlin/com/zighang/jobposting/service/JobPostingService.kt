@@ -31,7 +31,8 @@ class JobPostingService(
                 jobPosting ->
 //                val result = analysisCaller.getCardJobResponse(jobPosting.ocrData).result.message.content
 //                val jobPostingAnalysisDto = cardJobPosingAnalysisDtoMapper.toJsonDto(JsonCleaner.cleanJson(result))
-                jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
+                val ocrOrContent = if(jobPosting.ocrData.isBlank()) jobPosting.content else jobPosting.ocrData
+                jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(jobPosting.id!!, memberId, ocrOrContent,true))
                 val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
                     jobPosting.career,
                     jobPosting.recruitmentType,
@@ -58,7 +59,8 @@ class JobPostingService(
             .take(3)
         // 합치고, 중복 제거, 최대 3개까지 자르고, CardRedis로 변환
         return merged.map{ jobPosting ->
-            jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(jobPosting.id!!, memberId, jobPosting.ocrData,true))
+            val ocrOrContent = if(jobPosting.ocrData.isBlank()) jobPosting.content else jobPosting.ocrData
+            jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(jobPosting.id!!, memberId, ocrOrContent,true))
             val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
                 jobPosting.career,
                 jobPosting.recruitmentType,
@@ -99,7 +101,8 @@ class JobPostingService(
 
         // 분석 → DTO → CardJobPosting
 //        val result = analysisCaller.getCardJobResponse(candidate.ocrData).result.message.content
-        jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(candidate.id!!, memberId, candidate.ocrData, true))
+        val ocrOrContent = if(candidate.ocrData.isBlank()) candidate.content else candidate.ocrData
+        jobAnalysisEventProducer.publishAnalysis(JobAnalysisEvent(candidate.id!!, memberId, ocrOrContent, true))
         val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
             candidate.career,
             candidate.recruitmentType,

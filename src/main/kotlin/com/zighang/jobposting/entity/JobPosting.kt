@@ -27,7 +27,7 @@ class JobPosting(
     @Column(name = "title", length = 1024)
     val title: String = "",
 
-    @Column(name = "content", length = 1024)
+    @Column(name = "content", columnDefinition = "TEXT")
     val content: String = "",
 
     // 추후 enum으로 데이터 보고 바꿀 것
@@ -110,7 +110,19 @@ class JobPosting(
 
     @Column(name = "rank_change", nullable = false)
     @Enumerated(EnumType.STRING)
-    var rankChange: RankChange = RankChange.NEW
+    var rankChange: RankChange = RankChange.NEW,
+
+    @Column(name = "min_career")
+    var minCareer:Int,
+
+    @Column(name = "max_career")
+    var maxCareer:Int,
+
+    @Column(name = "view_count", nullable = false)
+    var viewCount: Int = 100,
+
+    @Column(name = "apply_count", nullable = false)
+    var applyCount: Int = 100
 
 ) : BaseEntity() {
 
