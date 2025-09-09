@@ -1,11 +1,12 @@
 package com.zighang.jobposting.entity
 
+import com.zighang.core.infrastructure.jpa.shared.BaseEntity
 import com.zighang.jobposting.entity.value.RecruitmentStep
 import jakarta.persistence.*
 
 @Entity
 @Table(name = "posting_evaluation")
-class PostingEvaluation (
+class PostingEvaluation(
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,7 +27,7 @@ class PostingEvaluation (
     @Column(name = "recruitment_step", nullable = false)
     @Enumerated(EnumType.STRING)
     val recruitmentStep : RecruitmentStep,
-){
+) : BaseEntity() {
 
     companion object{
         fun create(

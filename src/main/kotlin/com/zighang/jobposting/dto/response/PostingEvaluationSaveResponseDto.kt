@@ -1,4 +1,4 @@
-package com.zighang.jobposting.dto
+package com.zighang.jobposting.dto.response
 
 import io.swagger.v3.oas.annotations.media.Schema
 
@@ -17,7 +17,7 @@ class PostingEvaluationSaveResponseDto(
     val message: String
 ) {
     companion object{
-        fun successCreate(evaluationId: Long, postingId: Long): PostingEvaluationSaveResponseDto{
+        fun successCreate(evaluationId: Long, postingId: Long): PostingEvaluationSaveResponseDto {
             return PostingEvaluationSaveResponseDto(
                 evaluationId,
                 postingId,
