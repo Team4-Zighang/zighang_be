@@ -48,13 +48,14 @@ class ScrapService(
             .orElseThrow{DomainException(GlobalErrorCode.NOT_EXIST_JOB_POSTING)}
 
         // 우대사항 / 자격 요건 중 둘중 하나라도 null 인 경우 publish
-        if (isAnalysisNeed(jobPosting) && !jobPosting.ocrData.isNullOrBlank()) {
+        if (isAnalysisNeed(jobPosting)) {
             TransactionSynchronizationManager.registerSynchronization(
                 object : TransactionSynchronization {
                     override fun afterCommit() {
+                        val ocrOrContent = if(jobPosting.ocrData.isBlank()) jobPosting.content else jobPosting.ocrData
                         val event = JobAnalysisEvent(
                             id = jobPosting.id!!,
-                            ocrData = jobPosting.ocrData
+                            ocrData = ocrOrContent
                         )
                         jobAnalysisEventProducer.publishAnalysis(event)
                     }

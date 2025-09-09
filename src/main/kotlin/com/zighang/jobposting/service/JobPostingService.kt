@@ -19,6 +19,8 @@ import java.time.LocalDateTime
 @Service
 class JobPostingService(
     private val jobPostingRepository: JobPostingRepository,
+//    private val analysisCaller: JobAnalysisCaller,
+//    private val cardJobPosingAnalysisDtoMapper: CardJobPosingAnalysisDtoMapper,
     private val cardService: CardService,
     private val jobAnalysisEventProducer: JobAnalysisEventProducer,
 ) {
@@ -103,7 +105,7 @@ class JobPostingService(
             openDateTime = null
         )
     }
-    
+
 
     fun replace(member: Member, depthTwo: List<String>, onboarding: Onboarding, position: CardPosition) : Boolean{
         val top3 = cardService.getTop3Ids(member.id).toMutableList()
