@@ -5,7 +5,7 @@ import com.zighang.card.dto.CardRedis
 import com.zighang.card.service.CardService
 import com.zighang.card.value.CardPosition
 import com.zighang.jobposting.repository.JobPostingRepository
-import com.zighang.jobposting.dto.JobAnalysisEvent
+import com.zighang.jobposting.dto.event.JobAnalysisEvent
 import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service

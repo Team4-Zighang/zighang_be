@@ -16,4 +16,6 @@ interface OnboardingRepository : JpaRepository<Onboarding, Long> {
     """
     )
     fun findBySchoolAndJobRoleIn(school: School, jobRoles: List<String>): List<Onboarding>
+
+    fun findByIdIn(idList: List<Long>): List<Onboarding>
 }

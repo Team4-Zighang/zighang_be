@@ -1,5 +1,6 @@
 package com.zighang.member.entity
 
+import com.zighang.core.infrastructure.jpa.shared.BaseEntity
 import com.zighang.member.entity.value.personality.CharacterType
 import com.zighang.member.entity.value.personality.CompanySize
 import com.zighang.member.entity.value.personality.PursuitOfValueType
@@ -41,7 +42,7 @@ class Personality(
 
     @Column(name = "pursuit_of_value_type_value", nullable = false)
     var pursuitOfValueTypeValue: Int,
-) {
+) : BaseEntity() {
 
     companion object{
         fun create(

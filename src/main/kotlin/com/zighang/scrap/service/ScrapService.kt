@@ -8,7 +8,7 @@ import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
-import com.zighang.jobposting.dto.JobAnalysisEvent
+import com.zighang.jobposting.dto.event.JobAnalysisEvent
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.dto.response.FileDeleteResponse
@@ -16,8 +16,6 @@ import com.zighang.scrap.dto.response.FileResponse
 import com.zighang.scrap.dto.response.JobPostingResponse
 import com.zighang.scrap.entity.Scrap
 import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
-import com.zighang.member.repository.MemberRepository
-import com.zighang.member.repository.OnboardingRepository
 import com.zighang.scrap.repository.ScrapRepository
 import com.zighang.scrap.value.FileType
 import lombok.extern.slf4j.Slf4j

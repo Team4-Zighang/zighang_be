@@ -4,7 +4,7 @@ import com.zighang.card.service.CardService
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.repository.JobPostingRepository
-import com.zighang.jobposting.dto.JobEnrichedEvent
+import com.zighang.jobposting.dto.event.JobEnrichedEvent
 import org.springframework.amqp.rabbit.annotation.RabbitListener
 import org.springframework.stereotype.Component
 

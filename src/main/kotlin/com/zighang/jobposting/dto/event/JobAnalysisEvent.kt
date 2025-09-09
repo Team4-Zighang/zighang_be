@@ -1,4 +1,4 @@
-package com.zighang.jobposting.dto
+package com.zighang.jobposting.dto.event
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull

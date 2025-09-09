@@ -1,8 +1,8 @@
 package com.zighang.jobposting.infrastructure.producer
 
 import com.zighang.core.config.rabbitmq.config.RabbitProperties
-import com.zighang.jobposting.dto.JobEnrichedEvent
-import com.zighang.jobposting.dto.JobAnalysisEvent
+import com.zighang.jobposting.dto.event.JobEnrichedEvent
+import com.zighang.jobposting.dto.event.JobAnalysisEvent
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.stereotype.Component
 
