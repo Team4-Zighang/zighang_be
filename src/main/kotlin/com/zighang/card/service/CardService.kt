@@ -14,7 +14,6 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
-import java.util.*
 
 
 @Service
@@ -112,7 +111,7 @@ class CardService(
             .replace(Regex("""\bNone\b"""), "null") // None → null
         val company: Company = mapper.readValue(fixedJson)
         val title = jobPosting.title
-        val career = jobPostingAnalysisDto.career
+        val career = parsingCareer(jobPosting.minCareer, jobPosting.maxCareer)
         val recruitmentType = jobPostingAnalysisDto.recruitmentType
         val academicConditions = jobPostingAnalysisDto.academicConditions
         val address = jobPosting.recruitmentAddress
@@ -126,6 +125,37 @@ class CardService(
             academicConditions,
             address
         )
+    }
+
+    private fun parsingCareer(minCareer: Int, maxCareer: Int): String? {
+        var careerString = ""
+        if(minCareer == -1) {
+            return "경력 무관"
+        }
+        if(minCareer == 0) {
+            careerString += "신입"
+            if(maxCareer == 0) {
+                return careerString
+            }
+            if(maxCareer in 1..9) {
+                careerString += (" ~ " + maxCareer.toString() + "년차")
+            }
+            if(maxCareer >= 10) {
+                careerString += " ~ 10년차 이상"
+            }
+        }
+        if(minCareer > 0) {
+            careerString += (minCareer.toString() + "년차")
+            if(maxCareer < 10) {
+                careerString += (" ~ " + maxCareer.toString() + "년차")
+                return careerString
+            }
+            else {
+                careerString += " 이상"
+                return careerString
+            }
+        }
+        return "정보 없음"
     }
 
     fun getServedIds(memberId: Long): Set<Long> {
@@ -178,30 +208,30 @@ class CardService(
     }
 
     //memberId의 top3 카드 중 jobPostingId가 일치하는 카드 갱신
-    fun updateCardByJobPostingId(memberId: Long, jobPostingId: Long, updatedCareer: String?) {
-        val listKey = key(memberId)
-        val rawList: List<String> = redisTemplate.opsForList().range(listKey, 0, -1).orEmpty()
-
-        val mapper = jacksonObjectMapper()
-            .registerModule(com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
-            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        val mutableList = rawList.toMutableList()
-        val updates = mutableListOf<Pair<Int, String>>()
-
-        mutableList.forEachIndexed { index, json ->
-            val card = mapper.readValue(json, CardRedis::class.java)
-            if (card.jobPostingId == jobPostingId) {
-                val oldJobPosting = card.cardJobPosting
-                val newCardJobPosting = oldJobPosting?.copy(career = updatedCareer)
-                val updatedCard = card.copy(cardJobPosting = newCardJobPosting)
-                updates += index to mapper.writeValueAsString(updatedCard)
-            }
-        }
-
-        updates.forEach{ (idx, updatedJson) ->
-            redisTemplate.opsForList().set(listKey, idx.toLong(), updatedJson)
-        }
-    }
+//    fun updateCardByJobPostingId(memberId: Long, jobPostingId: Long) {
+//        val listKey = key(memberId)
+//        val rawList: List<String> = redisTemplate.opsForList().range(listKey, 0, -1).orEmpty()
+//
+//        val mapper = jacksonObjectMapper()
+//            .registerModule(com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+//            .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+//
+//        val mutableList = rawList.toMutableList()
+//        val updates = mutableListOf<Pair<Int, String>>()
+//
+//        mutableList.forEachIndexed { index, json ->
+//            val card = mapper.readValue(json, CardRedis::class.java)
+//            if (card.jobPostingId == jobPostingId) {
+//                val oldJobPosting = card.cardJobPosting
+//                val newCardJobPosting = oldJobPosting?.copy(career = updatedCareer)
+//                val updatedCard = card.copy(cardJobPosting = newCardJobPosting)
+//                updates += index to mapper.writeValueAsString(updatedCard)
+//            }
+//        }
+//
+//        updates.forEach{ (idx, updatedJson) ->
+//            redisTemplate.opsForList().set(listKey, idx.toLong(), updatedJson)
+//        }
+//    }
 
 }

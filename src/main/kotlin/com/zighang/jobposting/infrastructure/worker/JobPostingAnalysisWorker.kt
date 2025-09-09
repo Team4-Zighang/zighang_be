@@ -56,7 +56,6 @@ class JobPostingAnalysisWorker(
                         JobPostingAnalysisDto(
                             qualification = posting.qualification,
                             preferentialTreatment = posting.preferentialTreatment,
-                            career = posting.career
                         )
                     }.orElse(JobPostingAnalysisDto())
             }

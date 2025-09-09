@@ -11,16 +11,124 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Repository
 interface JobPostingRepository : CrudRepository<JobPosting, Long> {
+
+    @Query(
+        """
+    SELECT jp
+    FROM JobPosting jp
+    WHERE jp.depthTwo IN :roles
+      AND ( :excludedEmpty = true OR jp.id NOT IN :excludedIds )
+      AND jp.uploadDate >= :dateLimit
+      AND (
+            (:career = 0 AND ( (jp.minCareer = 0 AND jp.maxCareer >= 0) OR jp.minCareer = -1 ))
+         OR (:career > 0 AND ( (jp.minCareer <= :career AND jp.maxCareer >= :career) OR jp.minCareer = -1 ))
+      )
+    ORDER BY
+      CASE
+        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer = 0 THEN 0
+        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer > 0 THEN 1
+        WHEN :career > 0 AND (jp.minCareer <= :career AND jp.maxCareer >= :career) THEN 0
+        WHEN jp.minCareer = -1 THEN 9
+        ELSE 99
+      END,
+      jp.viewCount ASC,
+      jp.id DESC
+    """
+    )
+    fun findRecentByRolesAndCareerExcluding(
+        @Param("roles") roles: List<String>,
+        @Param("career") career: Int,
+        @Param("excludedIds") excludedIds: Set<Long>,
+        @Param("excludedEmpty") excludedEmpty: Boolean,
+        @Param("dateLimit") dateLimit: LocalDateTime,
+        pageable: Pageable = PageRequest.of(0, 1)
+    ): List<JobPosting>
+
+    @Query(
+        """
+    SELECT jp
+    FROM JobPosting jp
+    WHERE jp.depthTwo IN :roles
+      AND ( :excludedEmpty = true OR jp.id NOT IN :excludedIds )
+      AND (
+            (:career = 0 AND ( (jp.minCareer = 0 AND jp.maxCareer >= 0) OR jp.minCareer = -1 ))
+         OR (:career > 0 AND ( (jp.minCareer <= :career AND jp.maxCareer >= :career) OR jp.minCareer = -1 ))
+      )
+    ORDER BY
+      CASE
+        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer = 0 THEN 0        
+        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer > 0 THEN 1        
+        WHEN :career > 0 AND (jp.minCareer <= :career AND jp.maxCareer >= :career) THEN 0  
+        WHEN jp.minCareer = -1 THEN 9                                             
+        ELSE 99
+      END,
+      jp.applyCount ASC,
+      jp.id DESC
+    """
+    )
+    fun findOneByRolesAndCareerExcludingOrderedByApplyCount(
+        @Param("roles") roles: List<String>,
+        @Param("career") career: Int,
+        @Param("excludedIds") excludedIds: Set<Long>,
+        @Param("excludedEmpty") excludedEmpty: Boolean,
+        pageable: Pageable = PageRequest.of(0, 1)
+    ): List<JobPosting>
+
+    @Query(
+        """
+    SELECT jp
+    FROM JobPosting jp
+    WHERE jp.depthTwo IN :roles
+      AND ( :excludedEmpty = true OR jp.id NOT IN :excludedIds )
+      AND (
+            (:career = 0 AND ( (jp.minCareer = 0 AND jp.maxCareer >= 0) OR jp.minCareer = -1 ))
+         OR (:career > 0 AND ( (jp.minCareer <= :career AND jp.maxCareer >= :career) OR jp.minCareer = -1 ))
+      )
+    ORDER BY
+      CASE
+        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer = 0 THEN 0        
+        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer > 0 THEN 1        
+        WHEN :career > 0 AND (jp.minCareer <= :career AND jp.maxCareer >= :career) THEN 0  
+        WHEN jp.minCareer = -1 THEN 9                                             
+        ELSE 99
+      END,
+      jp.viewCount ASC,
+      jp.id DESC
+    """
+    )
+    fun findOneByRolesAndCareerExcludingOrderedByViewCount(
+        @Param("roles") roles: List<String>,
+        @Param("career") career: Int,
+        @Param("excludedIds") excludedIds: Set<Long>,
+        @Param("excludedEmpty") excludedEmpty: Boolean,
+        pageable: Pageable = PageRequest.of(0, 1)
+    ): List<JobPosting>
+
+    @Query(
+        """
+    SELECT jp
+    FROM JobPosting jp
+    WHERE (:excludedEmpty = true OR jp.id NOT IN :excludedIds)
+    ORDER BY jp.viewCount ASC, jp.id DESC
+    """
+    )
+    fun findOneLowestViewExcluding(
+        @Param("excludedIds") excludedIds: Set<Long>,
+        @Param("excludedEmpty") excludedEmpty: Boolean,
+        pageable: Pageable = PageRequest.of(0, 1)
+    ): List<JobPosting>
 
     @Transactional
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(
         """
             UPDATE JobPosting j 
-            SET j.qualification = :qualification, j.preferentialTreatment = :preferentialTreatment, j.career = :career 
+            SET j.qualification = :qualification, j.preferentialTreatment = :preferentialTreatment
             WHERE j.id = :id
         """
     )
@@ -28,7 +136,6 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         @Param("id") id: Long,
         @Param("qualification") qualification: String,
         @Param("preferentialTreatment") preferentialTreatment: String,
-        @Param("career") career: String,
     ) : Int
     // 1) 직무/직군 조건 + 스크랩 수 내림차순 (Top N: Pageable)
     @Query(
