@@ -25,4 +25,17 @@ class JobAnalysisCaller(
 
         return clovaResponseMapper.toJsonDto(result)
     }
+
+    fun extractCarrier(ocrSummary : String) : ChatResponse {
+        val systemMessage = SystemMessageFactory.analysisCareerMessageFactory()
+        require(systemMessage.isNotBlank()) { "careerAnalysis system message must not be blank" }
+        require(ocrSummary.isNotBlank()) { "ocrData must not be blank" }
+
+        val result = clovaChatCompletionCaller.clovaChatCompletionApiCaller(
+            systemMessage,
+            ocrSummary
+        )
+
+        return clovaResponseMapper.toJsonDto(result)
+    }
 }

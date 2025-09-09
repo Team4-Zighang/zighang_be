@@ -20,22 +20,22 @@ class DBAndCardRequestWorker(
                 event.id,
                 event.jobPostingAnalysisDto.qualification,
                 event.jobPostingAnalysisDto.preferentialTreatment,
-                event.jobPostingAnalysisDto.career
             )
 
             if(updatedRows == 0) {
                 throw GlobalErrorCode.NOT_EXIST_JOB_POSTING.toException()
             }
 
-            if(event.isCard) {
-                // 해당 부분에서 카드 레디스 업데이트
-                val memberId = event.memberId ?: throw GlobalErrorCode.NOT_EXIST_MEMBER.toException()
-                cardService.updateCardByJobPostingId(memberId, event.id, event.jobPostingAnalysisDto.career)
-            }
+//            if(event.isCard) {
+//                // 해당 부분에서 카드 레디스 업데이트
+//                val memberId = event.memberId ?: throw GlobalErrorCode.NOT_EXIST_MEMBER.toException()
+//                cardService.updateCardByJobPostingId(memberId, event.id)
+//            }
         }catch (e: DomainException){
             throw e
         }
         catch (e:Exception){
+            println(e.message)
             throw GlobalErrorCode.INTERNAL_SERVER_ERROR.toException()
         }
     }
