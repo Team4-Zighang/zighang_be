@@ -27,4 +27,22 @@ class PostingEvaluation (
     @Enumerated(EnumType.STRING)
     val recruitmentStep : RecruitmentStep,
 ){
+
+    companion object{
+        fun create(
+            memberId: Long,
+            postingId: Long,
+            evalScore: Int,
+            evalText: String,
+            recruitmentStep: RecruitmentStep,
+        ): PostingEvaluation{
+            return PostingEvaluation(
+                memberId = memberId,
+                postingId = postingId,
+                evalScore = evalScore,
+                evalText = evalText,
+                recruitmentStep = recruitmentStep,
+            )
+        }
+    }
 }
