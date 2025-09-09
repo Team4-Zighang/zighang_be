@@ -44,7 +44,8 @@ class SecurityConfig(
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/webjars/**",
-                    "/onboarding/school"
+                    "/onboarding/school",
+                    "/posting/**"
                 ).permitAll()
                 .anyRequest().authenticated()
             }
