@@ -115,8 +115,7 @@ class JobPostingService(
         }
         top3[cardService.idx(position)] = retryCard
         cardService.saveTop3Ids(member.id, top3)
-        cardService.addServedId(member.id, retryCard.jobPostingId)
-        return true;
+        return true
     }
 
     // 같은 직군의 공고만 모으기
