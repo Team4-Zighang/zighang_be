@@ -38,16 +38,12 @@ class MemberService(
     fun getMemberInfo(customUserDetails: CustomUserDetails) : MemberDto {
         val member = getById(customUserDetails.getId())
 
-        val onboardingId = member.onboardingId ?: return MemberDto(member, null, null)
+        val onboardingId = member.onboardingId ?: return MemberDto.create(member, null, null)
 
         val onboarding = onboardingRepository.findById(onboardingId).orElse(null)
 
         val jobRole = if(onboarding == null) emptyList() else jobRoleRepository.findByOnboardingId(onboardingId)
 
-        return MemberDto(
-            member,
-            onboarding,
-            jobRole
-        )
+        return MemberDto.create(member, onboarding, jobRole)
     }
 }

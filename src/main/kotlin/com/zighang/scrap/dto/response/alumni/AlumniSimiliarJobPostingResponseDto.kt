@@ -2,6 +2,9 @@ package com.zighang.scrap.dto.response.alumni
 
 import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.entity.value.Company
+import com.zighang.jobposting.util.getCareer
+import com.zighang.jobposting.util.getRegion
+import com.zighang.jobposting.util.getWorkType
 import com.zighang.member.entity.value.Region
 import com.zighang.scrap.util.dDayFactory
 import io.swagger.v3.oas.annotations.media.Schema
@@ -31,7 +34,7 @@ data class AlumniSimiliarJobPostingResponseDto(
     val education: String,
 
     // 지역정보 확인 후 수정
-    @Schema(description = "채용 지역", example = "서울 (영어로 뜰텐데 변환 코드가 다른 브랜치에 있어서 일단 연결 ㄱㄱ)")
+    @Schema(description = "채용 지역", example = "서울")
     val region: String,
 
     // 조회수 필드 추가시 수정
@@ -53,10 +56,10 @@ data class AlumniSimiliarJobPostingResponseDto(
                 jobPosting.title,
                 company.companyName,
                 company.companyImageUrl,
-                "경력 3 ~ 10년",
-                jobPosting.recruitmentType,
+                getCareer(jobPosting),
+                getWorkType(jobPosting),
                 jobPosting.education.displayName,
-                jobPosting.recruitmentRegion,
+                getRegion(jobPosting),
                 jobPosting.viewCount,
                 dDayFactory(jobPosting),
                 isSaved = isSaved,

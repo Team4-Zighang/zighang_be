@@ -3,6 +3,8 @@ package com.zighang.scrap.dto.response.alumni
 import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.entity.value.Company
 import com.zighang.jobposting.entity.value.RankChange
+import com.zighang.jobposting.util.getCareer
+import com.zighang.jobposting.util.getWorkType
 import com.zighang.scrap.util.dDayFactory
 import io.swagger.v3.oas.annotations.media.Schema
 
@@ -49,8 +51,8 @@ data class AlumniTop3JobPostingScrapResponseDto(
                 company.companyName,
                 company.companyImageUrl,
                 jobPosting.depthTwo,
-                jobPosting.recruitmentType,
-                "3년차 이상",
+                getWorkType(jobPosting),
+                getCareer(jobPosting),
                 dDayFactory(jobPosting),
                 isSaved = isSaved,
                 jobPosting.currentRank - jobPosting.lastRank,

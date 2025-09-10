@@ -9,5 +9,5 @@ data class Company(
     val companyName: String,
 
     @Schema(description = "회사 로고 이미지 url", example = "https://~")
-    val companyImageUrl: String?,
+    var companyImageUrl: String?,
 )

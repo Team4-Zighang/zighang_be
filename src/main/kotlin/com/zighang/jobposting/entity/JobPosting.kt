@@ -27,7 +27,7 @@ class JobPosting(
     @Column(name = "title", length = 1024)
     val title: String = "",
 
-    @Column(name = "content", length = 1024)
+    @Column(name = "content", columnDefinition = "TEXT")
     val content: String = "",
 
     // 추후 enum으로 데이터 보고 바꿀 것
@@ -43,7 +43,7 @@ class JobPosting(
     @Column(name = "recruitment_image_url", length = 512)
     val recruitmentImageUrl: String = "",
 
-    @Column(name = "company", length = 1024)
+    @Column(name = "company", columnDefinition = "TEXT")
     val company: String = "",
 
     // 나중에 enum으로 바꿀 것
