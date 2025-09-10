@@ -4,6 +4,7 @@ import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.entity.value.Company
 import com.zighang.jobposting.util.getCareer
 import com.zighang.jobposting.util.getRegion
+import com.zighang.jobposting.util.getWorkType
 import com.zighang.member.entity.value.Region
 import com.zighang.scrap.util.dDayFactory
 import io.swagger.v3.oas.annotations.media.Schema
@@ -56,7 +57,7 @@ data class AlumniSimiliarJobPostingResponseDto(
                 company.companyName,
                 company.companyImageUrl,
                 getCareer(jobPosting),
-                jobPosting.recruitmentType,
+                getWorkType(jobPosting),
                 jobPosting.education.displayName,
                 getRegion(jobPosting),
                 jobPosting.viewCount,
