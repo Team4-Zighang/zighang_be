@@ -4,6 +4,7 @@ import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.member.dto.request.OnboardingRequest
 import com.zighang.member.entity.JobRole
+import com.zighang.member.entity.Member
 import com.zighang.member.entity.Onboarding
 import com.zighang.member.entity.value.School
 import com.zighang.member.repository.JobRoleRepository
@@ -28,15 +29,18 @@ class OnboardingService(
     }
 
     @Transactional
-    fun upsertOnboarding(onboardingId: Long?, onboardingRequest: OnboardingRequest) {
+    fun upsertOnboarding(member : Member, onboardingId: Long?, onboardingRequest: OnboardingRequest) {
         val onboarding = if (onboardingId == null) {
-            Onboarding.create(
+            val newOnboarding = Onboarding.create(
                 jobCategory = onboardingRequest.jobCategory,
                 careerYear = onboardingRequest.careerYear,
                 region = onboardingRequest.region,
                 school = School.fromSchoolName(onboardingRequest.school),
                 major = onboardingRequest.major
-            ).let(onboardingRepository::save)
+            )
+            onboardingRepository.save(newOnboarding)
+            member.completeOnboarding(newOnboarding)
+            newOnboarding
         } else {
             val found = onboardingRepository.findById(onboardingId)
                 .orElseThrow { NoSuchElementException("Onboarding not found: $onboardingId") }

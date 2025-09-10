@@ -15,6 +15,6 @@ class MemberFacade(
     @Transactional
     fun onboarding(customUserDetails: CustomUserDetails, onboardingRequest: OnboardingRequest) {
         val member = memberService.getById(customUserDetails.getId())
-        onboardingService.upsertOnboarding(member.onboardingId, onboardingRequest)
+        onboardingService.upsertOnboarding(member, member.onboardingId, onboardingRequest)
     }
 }
