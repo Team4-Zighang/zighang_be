@@ -179,8 +179,7 @@ class AlumniService(
                 .filter { it.memberId == filteredMemberId }
                 .mapNotNull { scrap -> jobPostings[scrap.jobPostingId]?.company?.let { companyMapper.toJsonDto(it) } }
                 .take(4) // 상위 4개만 가져옴
-
-            val currentJobRoles = jobRole.joinToString(",")
+            val currentJobRoles = jobRoleRepository.findByOnboardingId(currentOnboarding.id).map{it.jobRole}
 
             results.add(
                 SimilarAlumniResponseDto(
