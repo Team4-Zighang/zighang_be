@@ -8,10 +8,17 @@ import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.jobposting.dto.event.JobAnalysisEvent
+import com.zighang.jobposting.dto.response.JobPostingDetailResponseDto
 import com.zighang.jobposting.entity.JobPosting
+import com.zighang.jobposting.exception.JobPostingErrorCode
+import com.zighang.jobposting.infrastructure.mapper.CompanyMapper
 import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
+import com.zighang.jobposting.util.getCareer
+import com.zighang.jobposting.util.getRegion
+import com.zighang.jobposting.util.getWorkType
 import com.zighang.member.entity.Member
 import com.zighang.member.entity.Onboarding
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -19,11 +26,13 @@ import java.time.LocalDateTime
 @Service
 class JobPostingService(
     private val jobPostingRepository: JobPostingRepository,
-//    private val analysisCaller: JobAnalysisCaller,
-//    private val cardJobPosingAnalysisDtoMapper: CardJobPosingAnalysisDtoMapper,
     private val cardService: CardService,
     private val jobAnalysisEventProducer: JobAnalysisEventProducer,
+    private val companyMapper: CompanyMapper,
 ) {
+    @Value("\${cloudfront.url}")
+    private lateinit var cloudfrontUrl: String
+
     fun filterByCareerAndJobRoleAndLowestView(member : Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
         val excludedIds = cardService.getServedIds(member.id)
         val myCareer = onboarding.careerYear.year
@@ -106,7 +115,6 @@ class JobPostingService(
         )
     }
 
-
     fun replace(member: Member, depthTwo: List<String>, onboarding: Onboarding, position: CardPosition) : Boolean{
         val top3 = cardService.getTop3Ids(member.id).toMutableList()
         val retryCard = when (position) {
@@ -154,7 +162,7 @@ class JobPostingService(
 
     fun getOneJobPosting(postingId: Long) : JobPostingDetailResponseDto {
         val jobPosting = jobPostingRepository.findById(postingId)
-            .orElseThrow{ throw JobPostingErrorCode.NOT_EXISTS_JOB_POSTING.toException() }
+            .orElseThrow { throw JobPostingErrorCode.NOT_EXISTS_JOB_POSTING.toException() }
 
         val education = jobPosting.education.displayName
         val depthTwo = jobPosting.depthTwo
@@ -163,8 +171,13 @@ class JobPostingService(
         val region = getRegion(jobPosting)
 
         // 이미지 url 들어가는 부분 조정하기 -> cloudfrontUrl
-        val company = companyMapper.toJsonDto(jobPosting.company)
+        val company = companyMapper.toJsonDto(jobPosting.company).apply {
+            companyImageUrl = companyImageUrl?.let {
+                if (it.startsWith("http")) it else cloudfrontUrl + it
+            }
+        }
 
+        // 조회수 증가 필드 만들기
 
         return JobPostingDetailResponseDto(
             education = education,
@@ -172,34 +185,8 @@ class JobPostingService(
             career = career,
             workType = workType,
             region = region,
+            company = company,
+            viewCount = jobPosting.viewCount,
         )
-    }
-
-    private fun getWorkType(jobPosting: JobPosting): String {
-        val workTypes = jobPosting.recruitmentType.split(",")
-            .mapNotNull { RecruitmentType.entries.find { enumVal -> enumVal.name == it } }
-
-        return workTypes.joinToString(", ") {
-            it.displayName
-        }
-    }
-
-    private fun getRegion(jobPosting: JobPosting) : String {
-        val regions = jobPosting.recruitmentRegion.split(",")
-            .mapNotNull { Region.entries.find { enumVal -> enumVal.name == it } }
-
-        return regions.joinToString (", "){
-            it.regionName
-        }
-    }
-
-    private fun getCareer(jobPosting: JobPosting) : String {
-        return when {
-            jobPosting.minCareer == -1 && jobPosting.maxCareer == -1 -> "무관"
-            jobPosting.minCareer == 0 && jobPosting.maxCareer == 0 -> "신입"
-            jobPosting.minCareer >= 3 && jobPosting.maxCareer <= 3 -> "경력 3년 이상"
-            jobPosting.minCareer > 0 && jobPosting.maxCareer > 0 -> "경력 ${jobPosting.minCareer}-${jobPosting.maxCareer}년"
-            else -> "기타"
-        }
     }
 }
