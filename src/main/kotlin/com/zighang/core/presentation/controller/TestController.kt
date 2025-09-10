@@ -8,8 +8,10 @@ import com.zighang.core.config.rabbitmq.TestEventPublisher
 import com.zighang.core.config.swagger.ApiErrorCode
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
+import com.zighang.core.jwt.TokenService
 import com.zighang.core.presentation.RestResponse
-import org.apache.http.entity.ContentType.MULTIPART_FORM_DATA
+import com.zighang.member.repository.MemberRepository
+import io.swagger.v3.oas.annotations.Operation
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -20,9 +22,11 @@ import org.springframework.web.multipart.MultipartFile
 class TestController(
     private val objectStorageService: ObjectStorageService,
     private val clovaChatService: ClovaChatService,
-    private val testEventPublisher: TestEventPublisher
+    private val testEventPublisher: TestEventPublisher,
+    private val tokenService: TokenService,
+    private val memberRepository: MemberRepository
 ) {
-    
+
     @GetMapping("/hello")
     fun getHello(): ResponseEntity<RestResponse<String>> {
         return ResponseEntity.ok(RestResponse("Hello"))
@@ -71,5 +75,23 @@ class TestController(
         @RequestBody chatRequest: ChatRequest
     ) {
         testEventPublisher.testPublisher(chatRequest)
+    }
+
+    @GetMapping("/token")
+    @Operation(
+        summary = "테스트용 토큰 발급",
+        description = "테스트 용으로 토큰을 발급합니다. 해당 API를 실행한뒤 /member/me를 통해 유저 정보를 불러옵니다.",
+        operationId = "/test/token"
+    )
+    fun token(
+        @RequestParam memberId: Long
+    ): ResponseEntity<RestResponse<String>> {
+        val member = memberRepository.findById(memberId)
+
+        return ResponseEntity.ok(
+            RestResponse(
+                tokenService.provideAccessToken(memberId, member.get().role.name)
+            )
+        )
     }
 }

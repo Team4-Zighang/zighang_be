@@ -10,7 +10,7 @@ data class DashboardResponse(
     val memoId : Long?,
 
     @Schema(description = "메모 내용", example = "메모 내용 내용")
-    val memoDescription: String?,
+    val memoContent: String?,
 
     @Schema(description = "공고 정보")
     val jobPostingResponse : JobPostingResponse,
