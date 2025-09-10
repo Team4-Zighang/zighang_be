@@ -11,6 +11,7 @@ import com.zighang.member.repository.MemberRepository
 import com.zighang.member.repository.OnboardingRepository
 import com.zighang.scrap.dto.response.alumni.*
 import com.zighang.scrap.repository.ScrapRepository
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
@@ -26,6 +27,9 @@ class AlumniService(
     private val scrapRepository: ScrapRepository,
     private val jobRoleRepository: JobRoleRepository
 ) {
+
+    @Value("\${cloudfront.url}")
+    private lateinit var cloudfrontUrl: String;
 
     // 나와 같은 학교를 다니고 같은 직무를 가진 사람들이 많이 스크랩한 top3 공고 보여주기
     @Transactional(readOnly = true)
@@ -48,7 +52,11 @@ class AlumniService(
         )
 
         return jobPostingList.map { jobPosting ->
-            val company = companyMapper.toJsonDto(jobPosting.company)
+            val company = companyMapper.toJsonDto(jobPosting.company).apply {
+                companyImageUrl = companyImageUrl?.let {
+                    if(it.startsWith("http")) it else cloudfrontUrl + it
+                }
+            }
             val isSaved = myScrappedJobPostingIds.contains(jobPosting.id)
             AlumniTop3JobPostingScrapResponseDto.create(jobPosting, company, isSaved)
         }
@@ -106,6 +114,11 @@ class AlumniService(
             .take(3)
             .map { (companyName) ->
                 val companyData = companyDataByName[companyName] ?: Company(companyName, null)
+                companyData.apply {
+                    companyImageUrl = companyImageUrl?.let {
+                        if(it.startsWith("http")) it else cloudfrontUrl + it
+                    }
+                }
                 AlumniTop3CompanyResponseDto.create(companyData)
             }
     }
@@ -134,7 +147,11 @@ class AlumniService(
         )
 
         return jobPostingsPage.map { jobPosting ->
-            val company = companyMapper.toJsonDto(jobPosting.company)
+            val company = companyMapper.toJsonDto(jobPosting.company).apply {
+                companyImageUrl = companyImageUrl?.let {
+                    if(it.startsWith("http")) it else cloudfrontUrl + it
+                }
+            }
             val isSaved = myScrappedJobPostingIds.contains(jobPosting.id)
             AlumniSimiliarJobPostingResponseDto.create(jobPosting, company, isSaved)
         }
@@ -177,7 +194,14 @@ class AlumniService(
             // 스크랩한 공고의 기업 이미지 4개 추출
             val scrappedJobPostingCompanys = allScraps
                 .filter { it.memberId == filteredMemberId }
-                .mapNotNull { scrap -> jobPostings[scrap.jobPostingId]?.company?.let { companyMapper.toJsonDto(it) } }
+                .mapNotNull { scrap -> jobPostings[scrap.jobPostingId]?.company?.let {
+                        companyMapper.toJsonDto(it).apply {
+                            companyImageUrl = companyImageUrl?.let {
+                                if(it.startsWith("http")) it else cloudfrontUrl + it
+                            }
+                        }
+                    }
+                }
                 .take(4) // 상위 4개만 가져옴
             val currentJobRoles = jobRoleRepository.findByOnboardingId(currentOnboarding.id).map{it.jobRole}
 
@@ -216,7 +240,11 @@ class AlumniService(
             scrapRepository.findByMemberId(customUserDetails.getId()).map { it.jobPostingId }
 
         val postingDtoList = jobPostingList.map { jobPosting ->
-            val company = companyMapper.toJsonDto(jobPosting.company)
+            val company = companyMapper.toJsonDto(jobPosting.company).apply {
+                companyImageUrl = companyImageUrl?.let {
+                    if(it.startsWith("http")) it else cloudfrontUrl + it
+                }
+            }
             val isSaved = myScrappedJobPostingIds.contains(jobPosting.id)
             AlumniSimiliarJobPostingResponseDto.create(jobPosting, company, isSaved)
         }

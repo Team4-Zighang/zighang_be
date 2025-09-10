@@ -118,6 +118,8 @@ class ScrapService(
                 ?: throw DomainException(GlobalErrorCode.NOT_EXIST_JOB_POSTING)
 
             val memoId = memoMap[s.jobPostingId]?.id
+            val memo = memoId?.let { memoRepository.findById(it).get() }
+
             val jobPostingResponse = JobPostingResponse.create(posting)
 
             val resumeFileResponse = FileResponse.create(
@@ -132,6 +134,7 @@ class ScrapService(
             DashboardResponse.create(
                 s.id,
                 memoId,
+                memo?.memoContent,
                 jobPostingResponse,
                 resumeFileResponse,
                 portfolioFileResponse
