@@ -30,6 +30,8 @@ class CardService(
 
     @Value("\${scrap.count_limit}")
     private lateinit var maxCount : String;
+    @Value("\${cloudfront.url}")
+    private lateinit var imageHost: String;
 
     fun getCardScrapCount(memberId: Long) : Long {
         return redisTemplate.opsForValue().get(scrapKey(memberId))?.toLong() ?: 0L
@@ -117,7 +119,7 @@ class CardService(
         val address = jobPosting.recruitmentAddress
 
         return CardJobPosting.create(
-            company.companyImageUrl,
+            imageHost + company.companyImageUrl,
             company.companyName,
             title,
             career,
