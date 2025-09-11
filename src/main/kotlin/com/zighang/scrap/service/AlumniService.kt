@@ -211,6 +211,7 @@ class AlumniService(
                     memberId = currentMember.id,
                     memberName = currentMember.name,
                     school = currentOnboarding.school.schoolName,
+                    major = currentOnboarding.major,
                     jobRole = currentJobRoles,
                     companyLists = scrappedJobPostingCompanys
                 )

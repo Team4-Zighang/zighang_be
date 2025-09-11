@@ -16,6 +16,9 @@ data class SimilarAlumniResponseDto(
     @Schema(description = "동문 학교", example = "서울대학교")
     val school: String,
 
+    @Schema(description = "동문 전공", example = "컴퓨터공학부")
+    val major: String,
+
     @Schema(description = "동문 희망 직무", example = "개발자")
     val jobRole: List<String>,
 
