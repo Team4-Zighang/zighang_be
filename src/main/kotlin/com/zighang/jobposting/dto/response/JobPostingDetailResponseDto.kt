@@ -15,6 +15,8 @@ data class JobPostingDetailResponseDto(
     val recruitmentImageUrl: String?,
     val recruitmentContent: String?,
     val recruitmentOriginalUrl: String?,
+    val uploadDate: String?,
+    val expiredDate: String?,
 ) {
 
 }
