@@ -9,6 +9,7 @@ import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
 import com.zighang.jobposting.dto.event.JobAnalysisEvent
+import com.zighang.jobposting.infrastructure.mapper.CompanyMapper
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.dto.response.FileDeleteResponse
@@ -39,7 +40,8 @@ class ScrapService(
     private val objectStorageService: ObjectStorageService,
     private val jobAnalysisEventProducer: JobAnalysisEventProducer,
     private val redisTemplate: RedisTemplate<String, Any>,
-    private val personalityAnalysisService: PersonalityAnalysisService
+    private val personalityAnalysisService: PersonalityAnalysisService,
+    private val companyMapper: CompanyMapper
 ) {
 
     @Transactional
@@ -48,13 +50,14 @@ class ScrapService(
             .orElseThrow{DomainException(GlobalErrorCode.NOT_EXIST_JOB_POSTING)}
 
         // 우대사항 / 자격 요건 중 둘중 하나라도 null 인 경우 publish
-        if (isAnalysisNeed(jobPosting) && !jobPosting.ocrData.isNullOrBlank()) {
+        if (isAnalysisNeed(jobPosting)) {
             TransactionSynchronizationManager.registerSynchronization(
                 object : TransactionSynchronization {
                     override fun afterCommit() {
+                        val ocrOrContent = if(jobPosting.ocrData.isBlank()) jobPosting.content else jobPosting.ocrData
                         val event = JobAnalysisEvent(
                             id = jobPosting.id!!,
-                            ocrData = jobPosting.ocrData
+                            ocrData = ocrOrContent
                         )
                         jobAnalysisEventProducer.publishAnalysis(event)
                     }
@@ -120,7 +123,8 @@ class ScrapService(
             val memoId = memoMap[s.jobPostingId]?.id
             val memo = memoId?.let { memoRepository.findById(it).get() }
 
-            val jobPostingResponse = JobPostingResponse.create(posting)
+            val company = companyMapper.toJsonDto(posting.company)
+            val jobPostingResponse = JobPostingResponse.create(posting, company)
 
             val resumeFileResponse = FileResponse.create(
                 s.resumeUrl,
