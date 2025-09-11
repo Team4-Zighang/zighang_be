@@ -1,6 +1,7 @@
 package com.zighang.scrap.dto.response
 
 import com.zighang.jobposting.entity.JobPosting
+import com.zighang.jobposting.entity.value.Company
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,6 +12,8 @@ data class JobPostingResponse(
     val postingId : Long,
     @Schema(description = "공고 타이틀", example = "OOO 공고")
     val title : String?,
+    @Schema(description = "기업 이름", example = "(주)삼성")
+    val companyName: String,
     @Schema(description = "서류 마감일", example = "2025-07-20 00:05:00.000000")
     val expiredDate : LocalDateTime?,
     @Schema(description = "D-DAY", example = "3")
@@ -22,11 +25,12 @@ data class JobPostingResponse(
 ) {
     companion object{
         fun create(
-            jobPosting: JobPosting
+            jobPosting: JobPosting, company: Company
         ) : JobPostingResponse {
             return JobPostingResponse(
                 jobPosting.id!!,
                 jobPosting.title,
+                company.companyName,
                 jobPosting.expiredDate,
                 computeDday(jobPosting.expiredDate),
                 jobPosting.qualification,

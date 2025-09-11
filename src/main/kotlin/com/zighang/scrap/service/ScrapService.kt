@@ -9,6 +9,7 @@ import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
 import com.zighang.jobposting.dto.event.JobAnalysisEvent
+import com.zighang.jobposting.infrastructure.mapper.CompanyMapper
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.dto.response.DashboardResponse
 import com.zighang.scrap.dto.response.FileDeleteResponse
@@ -39,7 +40,8 @@ class ScrapService(
     private val objectStorageService: ObjectStorageService,
     private val jobAnalysisEventProducer: JobAnalysisEventProducer,
     private val redisTemplate: RedisTemplate<String, Any>,
-    private val personalityAnalysisService: PersonalityAnalysisService
+    private val personalityAnalysisService: PersonalityAnalysisService,
+    private val companyMapper: CompanyMapper
 ) {
 
     @Transactional
@@ -121,7 +123,8 @@ class ScrapService(
             val memoId = memoMap[s.jobPostingId]?.id
             val memo = memoId?.let { memoRepository.findById(it).get() }
 
-            val jobPostingResponse = JobPostingResponse.create(posting)
+            val company = companyMapper.toJsonDto(posting.company)
+            val jobPostingResponse = JobPostingResponse.create(posting, company)
 
             val resumeFileResponse = FileResponse.create(
                 s.resumeUrl,
