@@ -51,7 +51,8 @@ class AlumniController(
     @GetMapping("/similar/scraps")
     override fun getScrappedJobPostingsBySimilarUsersController(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
-        @RequestParam page: Int
+        @RequestParam page: Int,
+        @RequestParam(required = false, defaultValue = "false") isMobile: Boolean
     ) : ResponseEntity<RestResponse<PageResponse<AlumniSimiliarJobPostingResponseDto>>> {
 
         val safePage = if (page < 0) 0 else page
@@ -60,7 +61,7 @@ class AlumniController(
             RestResponse<PageResponse<AlumniSimiliarJobPostingResponseDto>>(
                 PageResponse.from(
                     alumniService.getScrappedJobPostingsBySimilarUsers(
-                        customUserDetails, safePage
+                        customUserDetails, safePage, isMobile
                     )
                 )
             )
