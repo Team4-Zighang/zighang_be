@@ -161,32 +161,69 @@ class JobPostingService(
     }
 
     fun getOneJobPosting(postingId: Long) : JobPostingDetailResponseDto {
-        val jobPosting = jobPostingRepository.findById(postingId)
-            .orElseThrow { throw JobPostingErrorCode.NOT_EXISTS_JOB_POSTING.toException() }
+        try{
 
-        val education = jobPosting.education.displayName
-        val depthTwo = jobPosting.depthTwo
-        val career = getCareer(jobPosting)
-        val workType = getWorkType(jobPosting)
-        val region = getRegion(jobPosting)
+            val jobPosting = jobPostingRepository.findById(postingId)
+                .orElseThrow { throw JobPostingErrorCode.NOT_EXISTS_JOB_POSTING.toException() }
 
-        // 이미지 url 들어가는 부분 조정하기 -> cloudfrontUrl
-        val company = companyMapper.toJsonDto(jobPosting.company).apply {
-            companyImageUrl = companyImageUrl?.let {
-                if (it.startsWith("http")) it else cloudfrontUrl + it
+            val education = jobPosting.education.displayName
+            val depthTwo = jobPosting.depthTwo?.takeIf { it.isNotBlank() }
+            val career = getCareer(jobPosting)
+            val workType = getWorkType(jobPosting)
+            val region = getRegion(jobPosting)
+
+            // 이미지 url 들어가는 부분 조정하기 -> cloudfrontUrl
+            val company = companyMapper.toJsonDto(jobPosting.company).apply {
+                companyImageUrl = companyImageUrl?.let {
+                    if (it.startsWith("http")) it else cloudfrontUrl + it
+                }
             }
+
+            // content 관련 설정
+            val recruitmentImageUrl: String? = jobPosting.recruitmentImageUrl
+                ?.takeIf { it.isNotBlank() }
+
+            val htmlTagRegex = Regex("^\\s*<\\w+.*?>")
+
+            val content = jobPosting.content
+                .ifBlank { null }
+                ?.let {
+                    if (htmlTagRegex.containsMatchIn(it)) {
+                        // HTML 태그로 시작하는 경우 -> 필요한 항목들 렌더링 가능하게 보내주기
+                        listOf(
+                            jobPosting.content,
+                            jobPosting.jobDescription,
+                            jobPosting.qualification,
+                            jobPosting.preferentialTreatment,
+                            jobPosting.recruitmentProcess
+                        ).mapNotNull { it.takeIf { s -> !s.isNullOrBlank() } }
+                            .joinToString("<br>")
+                    } else {
+                        // 일반 텍스트
+                        // mapper로 변환처리
+                        it
+                    }
+                }
+
+            // 조회수 증가 필드 만들기
+
+            return JobPostingDetailResponseDto(
+                postingId = jobPosting.id!!,
+                title = jobPosting.title,
+                education = education,
+                depthTwo = depthTwo,
+                career = career,
+                workType = workType,
+                region = region,
+                company = company,
+                viewCount = jobPosting.viewCount,
+                recruitmentImageUrl = recruitmentImageUrl,
+                recruitmentContent = content
+            )
+
+        }catch (e: Exception) {
+            e.printStackTrace()
+            throw e
         }
-
-        // 조회수 증가 필드 만들기
-
-        return JobPostingDetailResponseDto(
-            education = education,
-            depthTwo = depthTwo,
-            career = career,
-            workType = workType,
-            region = region,
-            company = company,
-            viewCount = jobPosting.viewCount,
-        )
     }
 }
