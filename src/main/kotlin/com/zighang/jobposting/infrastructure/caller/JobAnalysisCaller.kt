@@ -14,7 +14,7 @@ class JobAnalysisCaller(
 
     fun call(ocrData : String) : ChatResponse {
         val systemMessage = SystemMessageFactory.jobAnalysisSystemMessageFactory()
-
+//        println(ocrData)
         require(systemMessage.isNotBlank()) { "jobAnalysis system message must not be blank" }
         require(ocrData.isNotBlank()) { "ocrData must not be blank" }
 
@@ -22,6 +22,8 @@ class JobAnalysisCaller(
             systemMessage,
             ocrData
         )
+
+//        println(result)
 
         return clovaResponseMapper.toJsonDto(result)
     }
