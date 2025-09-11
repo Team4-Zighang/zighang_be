@@ -128,7 +128,8 @@ class AlumniService(
     @Transactional(readOnly = true)
     fun getScrappedJobPostingsBySimilarUsers(
         customUserDetails: CustomUserDetails,
-        page: Int
+        page: Int,
+        isMobile: Boolean
     ) : Page<AlumniSimiliarJobPostingResponseDto> {
 
         val onboarding = getMemberInfo(customUserDetails).onboardingId?.let {
@@ -143,7 +144,7 @@ class AlumniService(
         val jobPostingsPage = jobPostingRepository.findAllScrappedJobPostingsBySimilarUsers(
             onboarding.school,
             jobRole,
-            PageRequest.of(page, 6)
+            PageRequest.of(page, if(isMobile) 3 else 6)
         )
 
         return jobPostingsPage.map { jobPosting ->

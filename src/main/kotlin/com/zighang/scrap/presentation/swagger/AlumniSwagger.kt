@@ -40,6 +40,7 @@ interface AlumniSwagger {
     fun getScrappedJobPostingsBySimilarUsersController(
         @AuthenticationPrincipal customUserDetails: CustomUserDetails,
         @RequestParam page: Int,
+        @RequestParam(required = false, defaultValue = "false") isMobile: Boolean,
     ): ResponseEntity<RestResponse<PageResponse<AlumniSimiliarJobPostingResponseDto>>>
 
     @Operation(
