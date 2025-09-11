@@ -13,7 +13,8 @@ data class JobPostingDetailResponseDto(
     val company: Company,
     val viewCount: Int,
     val recruitmentImageUrl: String?,
-    val recruitmentContent: String?
+    val recruitmentContent: String?,
+    val recruitmentOriginalUrl: String?,
 ) {
 
 }

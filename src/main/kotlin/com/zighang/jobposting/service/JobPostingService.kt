@@ -218,7 +218,8 @@ class JobPostingService(
                 company = company,
                 viewCount = jobPosting.viewCount,
                 recruitmentImageUrl = recruitmentImageUrl,
-                recruitmentContent = content
+                recruitmentContent = content,
+                recruitmentOriginalUrl = jobPosting.recruitmentOriginalUrl
             )
 
         }catch (e: Exception) {
