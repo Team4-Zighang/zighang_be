@@ -33,8 +33,8 @@ class CardService(
     @Value("\${cloudfront.url}")
     private lateinit var imageHost: String;
 
-    fun getCardScrapCount(memberId: Long) : Long {
-        return redisTemplate.opsForValue().get(scrapKey(memberId))?.toLong() ?: 0L
+    fun getCardScrapCount(memberId: Long) : Long? {
+        return redisTemplate.opsForValue().get(scrapKey(memberId))?.toLong()
     }
 
     fun upsertCardScrapCount(memberId: Long, scrapCount: Long) {
@@ -141,9 +141,11 @@ class CardService(
             }
             if(maxCareer in 1..9) {
                 careerString += (" ~ " + maxCareer.toString() + "년차")
+                return careerString
             }
             if(maxCareer >= 10) {
                 careerString += " ~ 10년차 이상"
+                return careerString
             }
         }
         if(minCareer > 0) {
@@ -201,7 +203,7 @@ class CardService(
 
     fun getScrapForCard(memberId : Long): RemainScrapResponse {
         val dbCount = scrapService.getScrapCount(memberId)
-        val redisCount = getCardScrapCount(memberId)
+        val redisCount = getCardScrapCount(memberId) ?: return RemainScrapResponse.create(0L)
 
         val diff = dbCount - redisCount
         return RemainScrapResponse.create(

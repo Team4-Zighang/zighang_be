@@ -33,7 +33,7 @@ class CardFacade(
         val scrapCount = scrapService.getScrapCount(member.id)
         val getCardScrapCount = cardService.getCardScrapCount(member.id)
 
-        if(scrapCount < getCardScrapCount + limitScrapCount.toLong()) {
+        if(getCardScrapCount!= null && scrapCount < getCardScrapCount + limitScrapCount.toLong()) {
             throw DomainException(GlobalErrorCode.LIMIT_CARD)
         }
 

@@ -34,26 +34,38 @@ class JobPostingService(
     fun filterByCareerAndJobRoleAndLowestView(member : Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
         val excludedIds = cardService.getServedIds(member.id)
         val myCareer = onboarding.careerYear.year
-        val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByViewCount(
-            roles = depthTwo,
-            career = myCareer,
-            excludedIds = excludedIds,
-            excludedEmpty = excludedIds.isEmpty()
-        )
-        val picked = pickJobPostingOrFallback(firstTry, excludedIds)
+        val shuffledDepthTwo = depthTwo.shuffled()
+        for(sdt in shuffledDepthTwo) {
+            val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByViewCount(
+                role = sdt,
+                career = myCareer,
+                excludedIds = excludedIds,
+                excludedEmpty = excludedIds.isEmpty()
+            )
+            if(firstTry.isNotEmpty()) {
+                return toCardRedisAfterPick(member.id, firstTry[0])
+            }
+        }
+        val picked = pickJobPostingOrFallback(excludedIds)
         return toCardRedisAfterPick(member.id, picked)
     }
 
     fun filterByCareerAndJobRoleAndLowestApply(member: Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
         val excludedIds = cardService.getServedIds(member.id)
         val myCareer = onboarding.careerYear.year
-        val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByApplyCount(
-            roles = depthTwo,
-            career = myCareer,
-            excludedIds = excludedIds,
-            excludedEmpty = excludedIds.isEmpty()
-        )
-        val picked = pickJobPostingOrFallback(firstTry, excludedIds)
+        val shuffledDepthTwo = depthTwo.shuffled()
+        for(sdt in shuffledDepthTwo) {
+            val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByApplyCount(
+                role = sdt,
+                career = myCareer,
+                excludedIds = excludedIds,
+                excludedEmpty = excludedIds.isEmpty()
+            )
+            if(firstTry.isNotEmpty()) {
+                return toCardRedisAfterPick(member.id, firstTry[0])
+            }
+        }
+        val picked = pickJobPostingOrFallback(excludedIds)
         return toCardRedisAfterPick(member.id, picked)
     }
 
@@ -61,29 +73,30 @@ class JobPostingService(
         val dataLimit = LocalDateTime.now().minusMonths(2)
         val excludedIds = cardService.getServedIds(member.id)
         val myCareer = onboarding.careerYear.year
-        val firstTry = jobPostingRepository.findRecentByRolesAndCareerExcluding(
-            roles = depthTwo,
-            career = myCareer,
-            excludedIds = excludedIds,
-            excludedEmpty =  excludedIds.isEmpty(),
-            dateLimit = dataLimit
-        )
-        val picked = pickJobPostingOrFallback(firstTry, excludedIds)
+        val shuffledDepthTwo = depthTwo.shuffled()
+        for(sdt in shuffledDepthTwo) {
+            val firstTry = jobPostingRepository.findRecentByRolesAndCareerExcluding(
+                role = sdt,
+                career = myCareer,
+                excludedIds = excludedIds,
+                excludedEmpty =  excludedIds.isEmpty(),
+                dateLimit = dataLimit
+            )
+            if(firstTry.isNotEmpty()) {
+                return toCardRedisAfterPick(member.id, firstTry[0])
+            }
+        }
+        val picked = pickJobPostingOrFallback(excludedIds)
         return toCardRedisAfterPick(member.id, picked)
     }
 
     private fun pickJobPostingOrFallback(
-        firstTry: List<JobPosting>,
         excludedIds: Set<Long>
     ): JobPosting {
-        return if (firstTry.isNotEmpty()) {
-            firstTry.first()
-        } else {
-            jobPostingRepository.findOneLowestViewExcluding(
-                excludedIds = excludedIds,
-                excludedEmpty = excludedIds.isEmpty()
-            ).first()
-        }
+        return jobPostingRepository.findOneLowestViewExcluding(
+            excludedIds = excludedIds,
+            excludedEmpty = excludedIds.isEmpty()
+        ).first()
     }
 
     fun toCardRedisAfterPick(memberId: Long, picked: JobPosting): CardRedis {

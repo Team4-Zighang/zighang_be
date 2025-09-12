@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Repository
@@ -21,27 +20,17 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         """
     SELECT jp
     FROM JobPosting jp
-    WHERE jp.depthTwo IN :roles
+    WHERE (jp.depthTwo LIKE CONCAT(:role, ',%') or jp.depthTwo LIKE CONCAT('%,', :role) or jp.depthTwo LIKE CONCAT('%,', :role, ',%'))
       AND ( :excludedEmpty = true OR jp.id NOT IN :excludedIds )
       AND jp.uploadDate >= :dateLimit
       AND (
             (:career = 0 AND ( (jp.minCareer = 0 AND jp.maxCareer >= 0) OR jp.minCareer = -1 ))
-         OR (:career > 0 AND ( (jp.minCareer <= :career AND jp.maxCareer >= :career) OR jp.minCareer = -1 ))
+         OR (:career > 0 AND ( ((jp.minCareer <= :career AND jp.maxCareer >= :career) AND jp.minCareer != 0) OR jp.minCareer = -1 ))
       )
-    ORDER BY
-      CASE
-        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer = 0 THEN 0
-        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer > 0 THEN 1
-        WHEN :career > 0 AND (jp.minCareer <= :career AND jp.maxCareer >= :career) THEN 0
-        WHEN jp.minCareer = -1 THEN 9
-        ELSE 99
-      END,
-      jp.viewCount ASC,
-      jp.id DESC
     """
     )
     fun findRecentByRolesAndCareerExcluding(
-        @Param("roles") roles: List<String>,
+        @Param("role") role: String,
         @Param("career") career: Int,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
@@ -53,26 +42,18 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         """
     SELECT jp
     FROM JobPosting jp
-    WHERE jp.depthTwo IN :roles
+    WHERE (jp.depthTwo LIKE CONCAT(:role, ',%') or jp.depthTwo LIKE CONCAT('%,', :role) or jp.depthTwo LIKE CONCAT('%,', :role, ',%'))
       AND ( :excludedEmpty = true OR jp.id NOT IN :excludedIds )
       AND (
             (:career = 0 AND ( (jp.minCareer = 0 AND jp.maxCareer >= 0) OR jp.minCareer = -1 ))
          OR (:career > 0 AND ( (jp.minCareer <= :career AND jp.maxCareer >= :career) OR jp.minCareer = -1 ))
       )
-    ORDER BY
-      CASE
-        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer = 0 THEN 0        
-        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer > 0 THEN 1        
-        WHEN :career > 0 AND (jp.minCareer <= :career AND jp.maxCareer >= :career) THEN 0  
-        WHEN jp.minCareer = -1 THEN 9                                             
-        ELSE 99
-      END,
-      jp.applyCount ASC,
-      jp.id DESC
+      AND jp.applyCount <= 3
+    ORDER BY jp.applyCount ASC
     """
     )
     fun findOneByRolesAndCareerExcludingOrderedByApplyCount(
-        @Param("roles") roles: List<String>,
+        @Param("role") role: String,
         @Param("career") career: Int,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
@@ -83,26 +64,18 @@ interface JobPostingRepository : CrudRepository<JobPosting, Long> {
         """
     SELECT jp
     FROM JobPosting jp
-    WHERE jp.depthTwo IN :roles
+    WHERE (jp.depthTwo LIKE CONCAT(:role, ',%') or jp.depthTwo LIKE CONCAT('%,', :role) or jp.depthTwo LIKE CONCAT('%,', :role, ',%'))
       AND ( :excludedEmpty = true OR jp.id NOT IN :excludedIds )
       AND (
             (:career = 0 AND ( (jp.minCareer = 0 AND jp.maxCareer >= 0) OR jp.minCareer = -1 ))
          OR (:career > 0 AND ( (jp.minCareer <= :career AND jp.maxCareer >= :career) OR jp.minCareer = -1 ))
       )
-    ORDER BY
-      CASE
-        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer = 0 THEN 0        
-        WHEN :career = 0 AND jp.minCareer = 0 AND jp.maxCareer > 0 THEN 1        
-        WHEN :career > 0 AND (jp.minCareer <= :career AND jp.maxCareer >= :career) THEN 0  
-        WHEN jp.minCareer = -1 THEN 9                                             
-        ELSE 99
-      END,
-      jp.viewCount ASC,
-      jp.id DESC
+      AND jp.viewCount <= 500
+      ORDER BY jp.viewCount ASC
     """
     )
     fun findOneByRolesAndCareerExcludingOrderedByViewCount(
-        @Param("roles") roles: List<String>,
+        @Param("role") role: String,
         @Param("career") career: Int,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
