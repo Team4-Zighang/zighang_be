@@ -46,9 +46,9 @@ class CardFacade(
         val rightJob = jobPostingService.filterByCareerAndJobRoleAndLatest(member, jobRoleList, onboarding)
 
         val threeJobPosting = listOf(leftJob, centerJob, rightJob)
-        println(leftJob)
-        println(centerJob)
-        println(rightJob)
+//        println(leftJob)
+//        println(centerJob)
+//        println(rightJob)
         //이전 카드 초기화
         cardService.evict(member.id)
         //카드 3개 생성

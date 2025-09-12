@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import java.util.*
 
 interface ScrapRepository : JpaRepository<Scrap, Long> {
     fun findAllByMemberId(memberId : Long, pageable: Pageable) : Page<Scrap>
@@ -21,4 +22,6 @@ interface ScrapRepository : JpaRepository<Scrap, Long> {
     fun findMemberIdsWithMoreThanFourScraps(memberIds: List<Long>): List<Long>
 
     fun countByMemberId(memberId: Long) : Long
+
+    fun findByMemberIdAndJobPostingId(memberId: Long, jobPostingId: Long) : Optional<Scrap>
 }

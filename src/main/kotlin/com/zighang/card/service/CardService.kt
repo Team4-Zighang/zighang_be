@@ -8,6 +8,8 @@ import com.zighang.card.value.CardPosition
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.entity.JobPosting
+import com.zighang.jobposting.infrastructure.mapper.CompanyMapper
+import com.zighang.jobposting.service.JobPostingService
 import com.zighang.scrap.service.ScrapService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
@@ -20,7 +22,8 @@ import java.time.LocalDateTime
 class CardService(
     private val redisTemplate: RedisTemplate<String, String>,
     private val objectMapper: ObjectMapper,
-    private val scrapService: ScrapService
+    private val scrapService: ScrapService,
+    private val companyMapper : CompanyMapper,
 ) {
     private val prefix = "top3JobPosting:"
     private fun servedKey(memberId: Long) = "card:served:$memberId"
@@ -89,7 +92,18 @@ class CardService(
         // 4) 값 갱신
         val updated = list[index].copy(
             isOpen = true,
-            openDateTime = LocalDateTime.now()
+            openDateTime = LocalDateTime.now(),
+            cardJobPosting = CardJobPosting(
+                list[index].jobPostingId,
+                list[index].cardJobPosting!!.companyImageUrl,
+                list[index].cardJobPosting!!.companyName,
+                list[index].cardJobPosting!!.title,
+                list[index].cardJobPosting!!.career,
+                list[index].cardJobPosting!!.recruitmentType,
+                list[index].cardJobPosting!!.academicConditions,
+                list[index].cardJobPosting!!.address,
+                scrapService.isScrap(memberId, list[index].jobPostingId)
+            )
         )
         list[index] = updated
 
@@ -105,13 +119,14 @@ class CardService(
     }
 
     fun createCardJobPosting(jobPostingAnalysisDto: CardJobPostingAnalysisDto, jobPosting: JobPosting): CardJobPosting {
-        val mapper = jacksonObjectMapper()
-            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_SINGLE_QUOTES, true) // ' 허용 (있으면)
-        val fixedJson = jobPosting.company
-            .replace("'", "\"")                  // ' → "
-            .replace(Regex("""\bNone\b"""), "null") // None → null
-        val company: Company = mapper.readValue(fixedJson)
+//        val mapper = jacksonObjectMapper()
+//            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+//            .configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_SINGLE_QUOTES, true) // ' 허용 (있으면)
+//        println(jobPosting.company)
+        val company = companyMapper.toJsonDto(jobPosting.company)
+//        println(company)
+//        println(company.companyName)
+        val jobPostingId = jobPosting.id
         val title = jobPosting.title
         val career = parsingCareer(jobPosting.minCareer, jobPosting.maxCareer)
         val recruitmentType = jobPostingAnalysisDto.recruitmentType
@@ -119,13 +134,15 @@ class CardService(
         val address = jobPosting.recruitmentAddress
 
         return CardJobPosting.create(
-            imageHost + company.companyImageUrl,
+            jobPostingId!!,
+                    imageHost + company.companyImageUrl,
             company.companyName,
             title,
             career,
             recruitmentType,
             academicConditions,
-            address
+            address,
+            false
         )
     }
 
