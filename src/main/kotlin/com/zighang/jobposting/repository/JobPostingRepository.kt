@@ -70,7 +70,8 @@ LIMIT 1
 SELECT *
 FROM job_posting jp
 WHERE (
-       jp.depth_two LIKE CONCAT(:role, ',%')
+       jp.depth_two = :role
+    OR jp.depth_two LIKE CONCAT(:role, ',%')
     OR jp.depth_two LIKE CONCAT('%,', :role)
     OR jp.depth_two LIKE CONCAT('%,', :role, ',%')
 )
