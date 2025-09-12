@@ -1,6 +1,5 @@
 package com.zighang.scrap.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.zighang.core.application.ObjectStorageService
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
@@ -9,13 +8,10 @@ import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
-import com.zighang.jobposting.dto.event.JobAnalysisEvent
-import com.zighang.jobposting.dto.event.JobEnrichedEvent
 import com.zighang.jobposting.infrastructure.mapper.CompanyMapper
-import com.zighang.jobposting.infrastructure.mapper.ContentMapper
 import com.zighang.scrap.dto.request.UpsertScrapRequest
 import com.zighang.scrap.entity.Scrap
-import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
+import com.zighang.jobposting.service.JobPostingAnalysisService
 import com.zighang.scrap.dto.response.*
 import com.zighang.scrap.repository.ScrapRepository
 import com.zighang.scrap.value.FileType
@@ -39,11 +35,10 @@ class ScrapService(
     private val jobPostingRepository: JobPostingRepository,
     private val memoRepository: MemoRepository,
     private val objectStorageService: ObjectStorageService,
-    private val jobAnalysisEventProducer: JobAnalysisEventProducer,
+    private val jobPostingAnalysisService: JobPostingAnalysisService,
     private val redisTemplate: RedisTemplate<String, Any>,
     private val personalityAnalysisService: PersonalityAnalysisService,
     private val companyMapper: CompanyMapper,
-    private val contentMapper: ContentMapper,
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -59,9 +54,9 @@ class ScrapService(
                 object : TransactionSynchronization {
                     override fun afterCommit() {
                         if (jobPosting.ocrData.isNullOrBlank()) {
-                            handleContentEvent(jobPosting)
+                            jobPostingAnalysisService.handleContentEvent(jobPosting, null, false)
                         } else {
-                            publishAnalysisEvent(jobPosting.id!!, jobPosting.ocrData)
+                            jobPostingAnalysisService.publishAnalysisEvent(jobPosting.id!!, jobPosting.ocrData)
                         }
                     }
                 }
@@ -231,57 +226,4 @@ class ScrapService(
     @Transactional(readOnly = true)
     fun getScrapByScrapIdAndMemberId(scrapId: Long, memberId: Long)
         = findScrapByScrapIdAndMemberId(scrapId, memberId) ?: throw DomainException(GlobalErrorCode.NOT_EXIST_SCRAP)
-
-    private fun handleContentEvent(jobPosting: JobPosting) {
-        val content = jobPosting.content?.trimStart()
-
-        log.debug("Handling content event: id={}, contentPreview={}", jobPosting.id, content?.take(50))
-
-
-        // html의 경우 값 채워져있음 -> 이 경우는 분석 로직 안들어가게 2차 방어
-        if (content?.startsWith("<") == false) {
-            log.info("Content is plain text, mapping to JobEnrichedEvent. id={}", jobPosting.id)
-            val jobEnrichedEvent = toJobEnrichedEvent(jobPosting)
-            log.debug("JobEnrichedEvent result: {}", jobEnrichedEvent)
-            jobEnrichedEvent?.let { jobAnalysisEventProducer.publishEnriched(it) }
-        }
-    }
-
-    private fun publishAnalysisEvent(id: Long, data: String) {
-        val event = JobAnalysisEvent(id = id, ocrData = data)
-        jobAnalysisEventProducer.publishAnalysis(event)
-    }
-
-    private fun toJobEnrichedEvent(jobPosting: JobPosting): JobEnrichedEvent? {
-        log.debug("Mapping to JobEnrichedEvent: id={}", jobPosting.id)
-
-        val content = try {
-            contentMapper.toJsonDto(jobPosting.content!!)
-        } catch (ex: Exception) {
-            log.error("Failed to map content. id={}, error={}", jobPosting.id, ex.message, ex)
-            return null
-        }
-
-        log.debug("Parsed content: requirements={}, preferredPoints={}",
-            content.requirements, content.prefferedPoints)
-
-        val dto = content.requirements?.let { requirements ->
-            JobPostingAnalysisDto(
-                qualification = requirements,
-                preferentialTreatment = content.prefferedPoints ?: ""
-            )
-        }
-
-        if (dto == null) {
-            log.warn("No JobPostingAnalysisDto created. id={}, requirements={}, preferredPoints={}",
-                jobPosting.id, content.requirements, content.prefferedPoints)
-        }
-
-        return dto?.let {
-            JobEnrichedEvent(
-                id = jobPosting.id!!,
-                jobPostingAnalysisDto = it
-            )
-        }
-    }
 }

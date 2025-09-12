@@ -7,13 +7,11 @@ import com.zighang.card.value.CardPosition
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
 import com.zighang.jobposting.repository.JobPostingRepository
-import com.zighang.jobposting.dto.event.JobAnalysisEvent
 import com.zighang.jobposting.dto.response.JobPostingDetailResponseDto
 import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.exception.JobPostingErrorCode
 import com.zighang.jobposting.infrastructure.mapper.CompanyMapper
 import com.zighang.jobposting.infrastructure.mapper.ContentMapper
-import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
 import com.zighang.jobposting.util.*
 import com.zighang.member.entity.Member
 import com.zighang.member.entity.Onboarding
@@ -26,7 +24,7 @@ import java.time.LocalDateTime
 class JobPostingService(
     private val jobPostingRepository: JobPostingRepository,
     private val cardService: CardService,
-    private val jobAnalysisEventProducer: JobAnalysisEventProducer,
+    private val jobPostingAnalysisService: JobPostingAnalysisService,
     private val companyMapper: CompanyMapper,
     private val contentMapper: ContentMapper,
 ) {
@@ -95,9 +93,11 @@ class JobPostingService(
         cardService.addServedId(memberId, jobPostingId)
 
         // 2) 분석 이벤트 발행
-        jobAnalysisEventProducer.publishAnalysis(
-            JobAnalysisEvent(jobPostingId, memberId, picked.ocrData, true)
-        )
+        if (picked.ocrData.isNullOrBlank()) {
+            jobPostingAnalysisService.handleContentEvent(picked, memberId, true)
+        } else {
+            jobPostingAnalysisService.publishAnalysisEvent(picked.id!!, picked.ocrData)
+        }
 
         // 3) 카드용 DTO 생성 및 CardJobPosting 생성
         val cardJobPostingAnalysisDto = CardJobPostingAnalysisDto.create(
