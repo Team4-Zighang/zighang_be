@@ -16,71 +16,78 @@ import java.time.LocalDateTime
 @Repository
 interface JobPostingRepository : CrudRepository<JobPosting, Long> {
 
-    @Query(
-        """
-    SELECT jp
-    FROM JobPosting jp
-    WHERE (jp.depthTwo LIKE CONCAT(:role, ',%') or jp.depthTwo LIKE CONCAT('%,', :role) or jp.depthTwo LIKE CONCAT('%,', :role, ',%'))
-      AND ( :excludedEmpty = true OR jp.id NOT IN :excludedIds )
-      AND jp.uploadDate >= :dateLimit
-      AND (
-            (:career = 0 AND ( (jp.minCareer = 0 AND jp.maxCareer >= 0) OR jp.minCareer = -1 ))
-         OR (:career > 0 AND ( ((jp.minCareer <= :career AND jp.maxCareer >= :career) AND jp.minCareer != 0) OR jp.minCareer = -1 ))
-      )
-    """
-    )
+    @Query(value = """
+SELECT *
+FROM job_posting jp
+WHERE (
+       jp.depth_two LIKE CONCAT(:role, ',%')
+    OR jp.depth_two LIKE CONCAT('%,', :role)
+    OR jp.depth_two LIKE CONCAT('%,', :role, ',%')
+)
+AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
+AND jp.upload_date >= :dateLimit
+AND (
+      (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
+   OR (:career > 0 AND ( ((jp.min_career <= :career AND jp.max_career >= :career) AND jp.min_career != 0) OR jp.min_career = -1 ))
+)
+LIMIT 1
+""", nativeQuery = true)
     fun findRecentByRolesAndCareerExcluding(
         @Param("role") role: String,
         @Param("career") career: Int,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
         @Param("dateLimit") dateLimit: LocalDateTime,
-        pageable: Pageable = PageRequest.of(0, 1)
-    ): List<JobPosting>
+    ): JobPosting?
 
-    @Query(
-        """
-    SELECT jp
-    FROM JobPosting jp
-    WHERE (jp.depthTwo LIKE CONCAT(:role, ',%') or jp.depthTwo LIKE CONCAT('%,', :role) or jp.depthTwo LIKE CONCAT('%,', :role, ',%'))
-      AND ( :excludedEmpty = true OR jp.id NOT IN :excludedIds )
-      AND (
-            (:career = 0 AND ( (jp.minCareer = 0 AND jp.maxCareer >= 0) OR jp.minCareer = -1 ))
-         OR (:career > 0 AND ( (jp.minCareer <= :career AND jp.maxCareer >= :career) OR jp.minCareer = -1 ))
-      )
-      AND jp.applyCount <= 3
-    ORDER BY jp.applyCount ASC
-    """
+    @Query(value = """
+SELECT jp.*
+FROM job_posting jp
+WHERE (
+       jp.depth_two = :role
+    OR jp.depth_two LIKE CONCAT(:role, ',%')
+    OR jp.depth_two LIKE CONCAT('%,', :role, ',%')
+    OR jp.depth_two LIKE CONCAT('%,', :role)
+)
+AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
+AND (
+      (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
+   OR (:career > 0 AND ( (jp.min_career <= :career AND jp.max_career >= :career) OR jp.min_career = -1 ))
+)
+AND jp.apply_count <= 3
+LIMIT 1
+""", nativeQuery = true
     )
     fun findOneByRolesAndCareerExcludingOrderedByApplyCount(
         @Param("role") role: String,
         @Param("career") career: Int,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
-        pageable: Pageable = PageRequest.of(0, 1)
-    ): List<JobPosting>
+    ): JobPosting?
 
     @Query(
         """
-    SELECT jp
-    FROM JobPosting jp
-    WHERE (jp.depthTwo LIKE CONCAT(:role, ',%') or jp.depthTwo LIKE CONCAT('%,', :role) or jp.depthTwo LIKE CONCAT('%,', :role, ',%'))
-      AND ( :excludedEmpty = true OR jp.id NOT IN :excludedIds )
-      AND (
-            (:career = 0 AND ( (jp.minCareer = 0 AND jp.maxCareer >= 0) OR jp.minCareer = -1 ))
-         OR (:career > 0 AND ( (jp.minCareer <= :career AND jp.maxCareer >= :career) OR jp.minCareer = -1 ))
-      )
-      AND jp.viewCount <= 500
-      ORDER BY jp.viewCount ASC
-    """
-    )
+SELECT *
+FROM job_posting jp
+WHERE (
+       jp.depth_two LIKE CONCAT(:role, ',%')
+    OR jp.depth_two LIKE CONCAT('%,', :role)
+    OR jp.depth_two LIKE CONCAT('%,', :role, ',%')
+)
+AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
+AND (
+      (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
+   OR (:career > 0 AND ( (jp.min_career <= :career AND jp.max_career >= :career) OR jp.min_career = -1 ))
+)
+AND jp.view_count <= 500
+LIMIT 1
+""", nativeQuery = true)
     fun findOneByRolesAndCareerExcludingOrderedByViewCount(
         @Param("role") role: String,
         @Param("career") career: Int,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
-        pageable: Pageable = PageRequest.of(0, 1)
-    ): List<JobPosting>
+    ): JobPosting?
 
     @Query(
         """

@@ -44,8 +44,8 @@ class JobPostingService(
                 excludedIds = excludedIds,
                 excludedEmpty = excludedIds.isEmpty()
             )
-            if(firstTry.isNotEmpty()) {
-                return toCardRedisAfterPick(member.id, firstTry[0])
+            if(firstTry != null) {
+                return toCardRedisAfterPick(member.id, firstTry)
             }
         }
         val picked = pickJobPostingOrFallback(excludedIds)
@@ -63,8 +63,8 @@ class JobPostingService(
                 excludedIds = excludedIds,
                 excludedEmpty = excludedIds.isEmpty()
             )
-            if(firstTry.isNotEmpty()) {
-                return toCardRedisAfterPick(member.id, firstTry[0])
+            if(firstTry != null) {
+                return toCardRedisAfterPick(member.id, firstTry)
             }
         }
         val picked = pickJobPostingOrFallback(excludedIds)
@@ -84,8 +84,8 @@ class JobPostingService(
                 excludedEmpty =  excludedIds.isEmpty(),
                 dateLimit = dataLimit
             )
-            if(firstTry.isNotEmpty()) {
-                return toCardRedisAfterPick(member.id, firstTry[0])
+            if(firstTry != null) {
+                return toCardRedisAfterPick(member.id, firstTry)
             }
         }
         val picked = pickJobPostingOrFallback(excludedIds)
