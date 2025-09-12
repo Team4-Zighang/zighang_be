@@ -8,18 +8,15 @@ import com.zighang.jobposting.entity.JobPosting
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.memo.entity.Memo
 import com.zighang.memo.repository.MemoRepository
-import com.zighang.jobposting.dto.event.JobAnalysisEvent
 import com.zighang.jobposting.infrastructure.mapper.CompanyMapper
 import com.zighang.scrap.dto.request.UpsertScrapRequest
-import com.zighang.scrap.dto.response.DashboardResponse
-import com.zighang.scrap.dto.response.FileDeleteResponse
-import com.zighang.scrap.dto.response.FileResponse
-import com.zighang.scrap.dto.response.JobPostingResponse
 import com.zighang.scrap.entity.Scrap
-import com.zighang.jobposting.infrastructure.producer.JobAnalysisEventProducer
+import com.zighang.jobposting.service.JobPostingAnalysisService
+import com.zighang.scrap.dto.response.*
 import com.zighang.scrap.repository.ScrapRepository
 import com.zighang.scrap.value.FileType
 import lombok.extern.slf4j.Slf4j
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.PageRequest
@@ -38,11 +35,13 @@ class ScrapService(
     private val jobPostingRepository: JobPostingRepository,
     private val memoRepository: MemoRepository,
     private val objectStorageService: ObjectStorageService,
-    private val jobAnalysisEventProducer: JobAnalysisEventProducer,
+    private val jobPostingAnalysisService: JobPostingAnalysisService,
     private val redisTemplate: RedisTemplate<String, Any>,
     private val personalityAnalysisService: PersonalityAnalysisService,
-    private val companyMapper: CompanyMapper
+    private val companyMapper: CompanyMapper,
 ) {
+
+    private val log = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun upsert(customUserDetails: CustomUserDetails, upsertScrapRequest: UpsertScrapRequest) {
@@ -54,12 +53,11 @@ class ScrapService(
             TransactionSynchronizationManager.registerSynchronization(
                 object : TransactionSynchronization {
                     override fun afterCommit() {
-                        val ocrOrContent = if(jobPosting.ocrData.isBlank()) jobPosting.content else jobPosting.ocrData
-                        val event = JobAnalysisEvent(
-                            id = jobPosting.id!!,
-                            ocrData = ocrOrContent
-                        )
-                        jobAnalysisEventProducer.publishAnalysis(event)
+                        if (jobPosting.ocrData.isNullOrBlank()) {
+                            jobPostingAnalysisService.handleContentEvent(jobPosting, null, false)
+                        } else {
+                            jobPostingAnalysisService.publishAnalysisEvent(jobPosting.id!!, jobPosting.ocrData)
+                        }
                     }
                 }
             )
