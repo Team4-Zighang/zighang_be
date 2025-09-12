@@ -228,4 +228,9 @@ class ScrapService(
     @Transactional(readOnly = true)
     fun getScrapByScrapIdAndMemberId(scrapId: Long, memberId: Long)
         = findScrapByScrapIdAndMemberId(scrapId, memberId) ?: throw DomainException(GlobalErrorCode.NOT_EXIST_SCRAP)
+
+    @Transactional(readOnly = true)
+    fun isScrap(memberId : Long, jobPostingId : Long) : Boolean {
+        return scrapRepository.findByMemberIdAndJobPostingId(memberId, jobPostingId).isPresent
+    }
 }
