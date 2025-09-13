@@ -6,6 +6,7 @@ import com.zighang.card.service.CardService
 import com.zighang.card.value.CardPosition
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
+import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.jobposting.repository.JobPostingRepository
 import com.zighang.jobposting.dto.response.JobPostingDetailResponseDto
 import com.zighang.jobposting.entity.JobPosting
@@ -15,6 +16,7 @@ import com.zighang.jobposting.infrastructure.mapper.ContentMapper
 import com.zighang.jobposting.util.*
 import com.zighang.member.entity.Member
 import com.zighang.member.entity.Onboarding
+import com.zighang.scrap.repository.ScrapRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -27,6 +29,7 @@ class JobPostingService(
     private val jobPostingAnalysisService: JobPostingAnalysisService,
     private val companyMapper: CompanyMapper,
     private val contentMapper: ContentMapper,
+    private val scrapRepository: ScrapRepository,
 ) {
     @Value("\${cloudfront.url}")
     private lateinit var cloudfrontUrl: String
@@ -173,7 +176,10 @@ class JobPostingService(
         }
     }
 
-    fun getOneJobPosting(postingId: Long) : JobPostingDetailResponseDto {
+    fun getOneJobPosting(
+        postingId: Long,
+        customUserDetails: CustomUserDetails?
+    ) : JobPostingDetailResponseDto {
         val jobPosting = jobPostingRepository.findById(postingId)
             .orElseThrow { throw JobPostingErrorCode.NOT_EXISTS_JOB_POSTING.toException() }
 
@@ -218,6 +224,10 @@ class JobPostingService(
 
         jobPosting.updateViewCount()
 
+        val isSaved = customUserDetails?.getId()?.let { memberId ->
+            scrapRepository.existsByJobPostingIdAndMemberId(postingId, memberId)
+        } ?: false
+
         return JobPostingDetailResponseDto(
             postingId = jobPosting.id!!,
             title = jobPosting.title,
@@ -232,7 +242,8 @@ class JobPostingService(
             recruitmentContent = content,
             recruitmentOriginalUrl = jobPosting.recruitmentOriginalUrl,
             uploadDate = formatPostingDate(jobPosting.uploadDate, "start"),
-            expiredDate = formatPostingDate(jobPosting.recruitmentEndDate, "end")
+            expiredDate = formatPostingDate(jobPosting.recruitmentEndDate, "end"),
+            isSaved = isSaved
         )
     }
 }

@@ -45,6 +45,9 @@ data class JobPostingDetailResponseDto(
 
     @Schema(description = "마감일", example = "상시 or 9월 18일 23:00 마감")
     val expiredDate: String?,
+
+    @Schema(description = "해당 공고 스크랩 여부", example = "true")
+    val isSaved: Boolean
 ) {
 
 }
