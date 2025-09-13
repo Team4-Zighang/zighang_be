@@ -208,7 +208,10 @@ class CardService(
             .filter { it.isOpen }
             .filter { it.openDateTime != null && !it.openDateTime!!.isBefore(cutoff) && !it.openDateTime!!.isAfter(now) }
             .sortedByDescending { it.openDateTime } // 최신순
-            .map { CardContentResponse.from(it) }
+            .map {
+                val isScrap = scrapService.isScrap(memberId, it.cardJobPosting!!.jobPostingId)
+                it.cardJobPosting!!.isScrap = isScrap
+                CardContentResponse.from(it) }
             .toList()
     }
 

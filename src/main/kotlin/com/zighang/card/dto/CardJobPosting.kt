@@ -20,7 +20,7 @@ data class CardJobPosting(
     @Schema(description = "지역", example = "서울")
     val address : String?,
     @Schema(description = "스크랩 여부", example = "true")
-    val isScrap : Boolean
+    var isScrap : Boolean
 ) {
     companion object {
         fun create(
