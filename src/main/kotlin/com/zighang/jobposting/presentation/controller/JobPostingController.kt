@@ -56,11 +56,12 @@ class JobPostingController(
 
     @GetMapping("{postingId}")
     fun getDetailOfPosting(
+        @AuthenticationPrincipal customUserDetails: CustomUserDetails?,
         @PathVariable postingId: Long,
     ) : ResponseEntity<RestResponse<JobPostingDetailResponseDto>> {
         return ResponseEntity.ok(
             RestResponse<JobPostingDetailResponseDto>(
-                jobPostingService.getOneJobPosting(postingId)
+                jobPostingService.getOneJobPosting(postingId, customUserDetails)
             )
         )
     }
