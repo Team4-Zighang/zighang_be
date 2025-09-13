@@ -224,9 +224,12 @@ class JobPostingService(
 
         jobPosting.updateViewCount()
 
-        val isSaved = customUserDetails?.getId()?.let { memberId ->
-            scrapRepository.existsByJobPostingIdAndMemberId(postingId, memberId)
-        } ?: false
+        val scrap = customUserDetails?.getId()?.let { memberId ->
+            scrapRepository.findByJobPostingIdAndMemberId(jobPosting.id!!, memberId)
+        }
+
+        val isSaved = scrap != null
+        val scrapId = scrap?.id
 
         return JobPostingDetailResponseDto(
             postingId = jobPosting.id!!,
@@ -243,7 +246,8 @@ class JobPostingService(
             recruitmentOriginalUrl = jobPosting.recruitmentOriginalUrl,
             uploadDate = formatPostingDate(jobPosting.uploadDate, "start"),
             expiredDate = formatPostingDate(jobPosting.recruitmentEndDate, "end"),
-            isSaved = isSaved
+            isSaved = isSaved,
+            scrapId = scrapId
         )
     }
 }

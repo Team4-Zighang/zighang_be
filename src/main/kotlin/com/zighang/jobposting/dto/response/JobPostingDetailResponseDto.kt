@@ -47,7 +47,10 @@ data class JobPostingDetailResponseDto(
     val expiredDate: String?,
 
     @Schema(description = "해당 공고 스크랩 여부", example = "true")
-    val isSaved: Boolean
+    val isSaved: Boolean,
+
+    @Schema(description = "스크랩된 id", example = "1")
+    val scrapId: Long?
 ) {
 
 }
