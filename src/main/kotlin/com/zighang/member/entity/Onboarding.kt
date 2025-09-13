@@ -15,8 +15,12 @@ class Onboarding (
     var jobCategory : String,
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "career_year", nullable = false)
-    var careerYear : CareerYear,
+    @Column(name = "max_career_year", nullable = false)
+    var maxCareerYear : CareerYear,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "min_career_year", nullable = false)
+    var minCareerYear : CareerYear,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "region", nullable = false)
@@ -32,14 +36,16 @@ class Onboarding (
     companion object {
         fun create(
             jobCategory: String,
-            careerYear: CareerYear,
+            maxCareerYear: CareerYear,
+            minCareerYear: CareerYear,
             region: Region,
             school: School,
             major: String
         ): Onboarding {
             return Onboarding(
                 jobCategory = jobCategory,
-                careerYear = careerYear,
+                maxCareerYear = maxCareerYear,
+                minCareerYear = minCareerYear,
                 region = region,
                 school = school,
                 major = major
@@ -49,13 +55,15 @@ class Onboarding (
 
     fun update(
         jobCategory: String,
-        careerYear: CareerYear,
+        maxCareerYear: CareerYear,
+        minCareerYear: CareerYear,
         region: Region,
         school: School,
         major: String
     ) {
         this.jobCategory = jobCategory
-        this.careerYear = careerYear
+        this.maxCareerYear = maxCareerYear
+        this.minCareerYear = minCareerYear
         this.region = region
         this.school = school
         this.major = major

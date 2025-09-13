@@ -44,7 +44,9 @@ data class MemberInfo (
 data class OnboardingInfo (
     val jobCategory: String,
 
-    val careerYear: Int,
+    val maxCareerYear: Int,
+
+    val minCareerYear : Int,
 
     val region: String,
 
@@ -56,7 +58,8 @@ data class OnboardingInfo (
         fun create(onboarding: Onboarding): OnboardingInfo{
             return OnboardingInfo(
                 onboarding.jobCategory,
-                onboarding.careerYear.year,
+                onboarding.maxCareerYear.year,
+                onboarding.minCareerYear.year,
                 onboarding.region.regionName,
                 onboarding.school.schoolName,
                 onboarding.major

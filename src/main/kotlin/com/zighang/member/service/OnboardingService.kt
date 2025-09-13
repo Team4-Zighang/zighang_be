@@ -33,7 +33,8 @@ class OnboardingService(
         val onboarding = if (onboardingId == null) {
             val newOnboarding = Onboarding.create(
                 jobCategory = onboardingRequest.jobCategory,
-                careerYear = onboardingRequest.careerYear,
+                maxCareerYear = onboardingRequest.maxCareerYear,
+                minCareerYear = onboardingRequest.minCareerYear,
                 region = onboardingRequest.region,
                 school = School.fromSchoolName(onboardingRequest.school),
                 major = onboardingRequest.major
@@ -47,7 +48,8 @@ class OnboardingService(
 
             found.update(
                 jobCategory = onboardingRequest.jobCategory,
-                careerYear = onboardingRequest.careerYear,
+                maxCareerYear = onboardingRequest.maxCareerYear,
+                minCareerYear = onboardingRequest.minCareerYear,
                 region = onboardingRequest.region,
                 school = School.fromSchoolName(onboardingRequest.school),
                 major = onboardingRequest.major

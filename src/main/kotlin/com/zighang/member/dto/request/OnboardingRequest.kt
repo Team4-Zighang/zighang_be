@@ -10,7 +10,7 @@ data class OnboardingRequest(
     @Schema(description = "직무", example = "[\"백엔드\", \"프론트엔드\"]")
     val jobRole: List<String>,
 
-    @Schema(description = "연차", example = "YEAR_0(0),\n" +
+    @Schema(description = "최소 연차", example = "YEAR_0(0),\n" +
             "    YEAR_1(1),\n" +
             "    YEAR_2(2),\n" +
             "    YEAR_3(3),\n" +
@@ -21,7 +21,20 @@ data class OnboardingRequest(
             "    YEAR_8(8),\n" +
             "    YEAR_9(9),\n" +
             "    YEAR_10_PLUS(10),")
-    val careerYear: CareerYear,
+    val minCareerYear: CareerYear,
+
+    @Schema(description = "최대 연차", example = "YEAR_0(0),\n" +
+            "    YEAR_1(1),\n" +
+            "    YEAR_2(2),\n" +
+            "    YEAR_3(3),\n" +
+            "    YEAR_4(4),\n" +
+            "    YEAR_5(5),\n" +
+            "    YEAR_6(6),\n" +
+            "    YEAR_7(7),\n" +
+            "    YEAR_8(8),\n" +
+            "    YEAR_9(9),\n" +
+            "    YEAR_10_PLUS(10),")
+    val maxCareerYear: CareerYear,
 
     @Schema(description = "지역", example = "SEOUL(서울),\n" +
             "    GYEONGGI(경기),\n" +

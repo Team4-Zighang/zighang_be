@@ -33,12 +33,14 @@ class JobPostingService(
 
     fun filterByCareerAndJobRoleAndLowestView(member : Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
         val excludedIds = cardService.getServedIds(member.id)
-        val myCareer = onboarding.careerYear.year
+        val maxMyCareer = onboarding.maxCareerYear.year
+        val minMyCareer = onboarding.minCareerYear.year
         val shuffledDepthTwo = depthTwo.shuffled()
         for(sdt in shuffledDepthTwo) {
             val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByViewCount(
                 role = sdt,
-                career = myCareer,
+                maxCareer = maxMyCareer,
+                minCareer = minMyCareer,
                 excludedIds = excludedIds,
                 excludedEmpty = excludedIds.isEmpty()
             )
@@ -52,12 +54,14 @@ class JobPostingService(
 
     fun filterByCareerAndJobRoleAndLowestApply(member: Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
         val excludedIds = cardService.getServedIds(member.id)
-        val myCareer = onboarding.careerYear.year
+        val maxMyCareer = onboarding.maxCareerYear.year
+        val minMyCareer = onboarding.minCareerYear.year
         val shuffledDepthTwo = depthTwo.shuffled()
         for(sdt in shuffledDepthTwo) {
             val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByApplyCount(
                 role = sdt,
-                career = myCareer,
+                maxCareer = maxMyCareer,
+                minCareer = minMyCareer,
                 excludedIds = excludedIds,
                 excludedEmpty = excludedIds.isEmpty()
             )
@@ -72,12 +76,14 @@ class JobPostingService(
     fun filterByCareerAndJobRoleAndLatest(member: Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
         val dataLimit = LocalDateTime.now().minusMonths(2)
         val excludedIds = cardService.getServedIds(member.id)
-        val myCareer = onboarding.careerYear.year
+        val maxMyCareer = onboarding.maxCareerYear.year
+        val minMyCareer = onboarding.minCareerYear.year
         val shuffledDepthTwo = depthTwo.shuffled()
         for(sdt in shuffledDepthTwo) {
             val firstTry = jobPostingRepository.findRecentByRolesAndCareerExcluding(
                 role = sdt,
-                career = myCareer,
+                maxCareer = maxMyCareer,
+                minCareer = minMyCareer,
                 excludedIds = excludedIds,
                 excludedEmpty =  excludedIds.isEmpty(),
                 dateLimit = dataLimit

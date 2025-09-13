@@ -26,15 +26,13 @@ WHERE (
 )
 AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
 AND jp.upload_date >= :dateLimit
-AND (
-      (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
-   OR (:career > 0 AND ( ((jp.min_career <= :career AND jp.max_career >= :career) AND jp.min_career != 0) OR jp.min_career = -1 ))
-)
+AND ((jp.min_career = -1) OR (jp.min_career <= :maxCareer AND jp.max_career >= :minCareer) )
 LIMIT 1
 """, nativeQuery = true)
     fun findRecentByRolesAndCareerExcluding(
         @Param("role") role: String,
-        @Param("career") career: Int,
+        @Param("maxCareer") maxCareer: Int,
+        @Param("minCareer") minCareer: Int,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
         @Param("dateLimit") dateLimit: LocalDateTime,
@@ -50,17 +48,15 @@ WHERE (
     OR jp.depth_two LIKE CONCAT('%,', :role)
 )
 AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
-AND (
-      (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
-   OR (:career > 0 AND ( (jp.min_career <= :career AND jp.max_career >= :career) OR jp.min_career = -1 ))
-)
+AND ((jp.min_career = -1) OR (jp.min_career <= :maxCareer AND jp.max_career >= :minCareer) )
 AND jp.apply_count <= 3
 LIMIT 1
 """, nativeQuery = true
     )
     fun findOneByRolesAndCareerExcludingOrderedByApplyCount(
         @Param("role") role: String,
-        @Param("career") career: Int,
+        @Param("maxCareer") maxCareer: Int,
+        @Param("minCareer") minCareer: Int,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
     ): JobPosting?
@@ -76,16 +72,14 @@ WHERE (
     OR jp.depth_two LIKE CONCAT('%,', :role, ',%')
 )
 AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
-AND (
-      (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
-   OR (:career > 0 AND ( (jp.min_career <= :career AND jp.max_career >= :career) OR jp.min_career = -1 ))
-)
+AND ((jp.min_career = -1) OR (jp.min_career <= :maxCareer AND jp.max_career >= :minCareer) )
 AND jp.view_count <= 500
 LIMIT 1
 """, nativeQuery = true)
     fun findOneByRolesAndCareerExcludingOrderedByViewCount(
         @Param("role") role: String,
-        @Param("career") career: Int,
+        @Param("maxCareer") maxCareer: Int,
+        @Param("minCareer") minCareer: Int,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
     ): JobPosting?
