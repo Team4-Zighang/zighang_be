@@ -2,6 +2,7 @@ package com.zighang.member.presentation.controller
 
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.RestResponse
+import com.zighang.member.dto.request.MajorRequest
 import com.zighang.member.dto.request.OnboardingRequest
 import com.zighang.member.entity.value.School
 import com.zighang.member.facade.MemberFacade
@@ -23,6 +24,16 @@ class OnboardingController(
             RestResponse<List<String>>(School.allSchoolNames)
         );
     }
+
+    @PostMapping("/major")
+    override fun getMajor(
+        @RequestBody majorRequest : MajorRequest
+    ) : ResponseEntity<RestResponse<List<String>>> {
+        return ResponseEntity.ok(
+            RestResponse<List<String>>(memberFacade.getMajor(majorRequest))
+        )
+    }
+
 
     @PostMapping
     @Operation(summary = "온보딩 하기", description = "createMember")
