@@ -42,7 +42,7 @@ data class OnboardingRequest(
             "    JEJU(제주),\n" +
             "    OVERSEAS(해외),\n" +
             "    OTHERS(기타)")
-    val region: Region,
+    val region: List<Region>,
 
     @Schema(description = "학교", example = "건국대학교")
     val school: String,
