@@ -23,25 +23,7 @@ data class OnboardingRequest(
             "    YEAR_10_PLUS(10),")
     val careerYear: CareerYear,
 
-    @Schema(description = "지역", example = "SEOUL(서울),\n" +
-            "    GYEONGGI(경기),\n" +
-            "    INCHEON(인천),\n" +
-            "    BUSAN(부산),\n" +
-            "    DAEGU(대구),\n" +
-            "    GWANGJU(광주),\n" +
-            "    DAEJEON(대전),\n" +
-            "    ULSAN(울산),\n" +
-            "    SEJONG(세종),\n" +
-            "    GANGWON(강원),\n" +
-            "    GYEONGNAM(경남),\n" +
-            "    GYEONGBUK(경북),\n" +
-            "    JEONNAM(전남),\n" +
-            "    JEONBUK(전북),\n" +
-            "    CHUNGNAM(충남),\n" +
-            "    CHUNGBUK(충북),\n" +
-            "    JEJU(제주),\n" +
-            "    OVERSEAS(해외),\n" +
-            "    OTHERS(기타)")
+    @Schema(description = "지역", example = "[\"SEOUL\", \"GYEONGGI\"]")
     val region: List<Region>,
 
     @Schema(description = "학교", example = "건국대학교")
