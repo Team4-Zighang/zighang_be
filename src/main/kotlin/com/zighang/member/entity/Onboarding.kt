@@ -18,10 +18,6 @@ class Onboarding (
     @Column(name = "career_year", nullable = false)
     var careerYear : CareerYear,
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "region", nullable = false)
-    var region : Region,
-
     @Column(name = "school", nullable = false)
     @Enumerated(EnumType.STRING)
     var school : School,
@@ -33,14 +29,12 @@ class Onboarding (
         fun create(
             jobCategory: String,
             careerYear: CareerYear,
-            region: Region,
             school: School,
             major: String
         ): Onboarding {
             return Onboarding(
                 jobCategory = jobCategory,
                 careerYear = careerYear,
-                region = region,
                 school = school,
                 major = major
             )
@@ -50,13 +44,11 @@ class Onboarding (
     fun update(
         jobCategory: String,
         careerYear: CareerYear,
-        region: Region,
         school: School,
         major: String
     ) {
         this.jobCategory = jobCategory
         this.careerYear = careerYear
-        this.region = region
         this.school = school
         this.major = major
     }

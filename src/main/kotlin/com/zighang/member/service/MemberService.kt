@@ -9,6 +9,7 @@ import com.zighang.member.entity.Onboarding
 import com.zighang.member.repository.JobRoleRepository
 import com.zighang.member.repository.MemberRepository
 import com.zighang.member.repository.OnboardingRepository
+import com.zighang.member.repository.RegionEntityRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional
 class MemberService(
     private val memberRepository: MemberRepository,
     private val onboardingRepository: OnboardingRepository,
-    private val jobRoleRepository: JobRoleRepository
+    private val jobRoleRepository: JobRoleRepository,
+    private val regionEntityRepository: RegionEntityRepository
 ) {
     @Transactional(readOnly = true)
     fun findById(id : Long) : Member? {
@@ -38,12 +40,16 @@ class MemberService(
     fun getMemberInfo(customUserDetails: CustomUserDetails) : MemberDto {
         val member = getById(customUserDetails.getId())
 
-        val onboardingId = member.onboardingId ?: return MemberDto.create(member, null, null)
+        val onboardingId = member.onboardingId ?: return MemberDto.create(member, null, null, null)
 
         val onboarding = onboardingRepository.findById(onboardingId).orElse(null)
 
+        val regions = regionEntityRepository.findAllByOnboardingId(onboardingId).map {
+            regionEntity -> regionEntity.region
+        }
+
         val jobRole = if(onboarding == null) emptyList() else jobRoleRepository.findByOnboardingId(onboardingId)
 
-        return MemberDto.create(member, onboarding, jobRole)
+        return MemberDto.create(member, onboarding, jobRole, regions)
     }
 }

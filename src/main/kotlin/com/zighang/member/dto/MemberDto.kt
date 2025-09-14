@@ -3,18 +3,19 @@ package com.zighang.member.dto
 import com.zighang.member.entity.JobRole
 import com.zighang.member.entity.Member
 import com.zighang.member.entity.Onboarding
+import com.zighang.member.entity.value.Region
 
 data class MemberDto(
     val member: MemberInfo,
     val onboarding: OnboardingInfo?,
-    val jobRole: JobRoleInfo?
+    val jobRole: JobRoleInfo?,
 ) {
     companion object {
-        fun create(member: Member, onboarding: Onboarding?, jobRoles: List<JobRole>?): MemberDto {
+        fun create(member: Member, onboarding: Onboarding?, jobRoles: List<JobRole>?, regions : List<Region>?): MemberDto {
             return MemberDto(
                 member = MemberInfo.create(member),
-                onboarding = onboarding?.let { OnboardingInfo.create(it) },
-                jobRole = jobRoles?.let { JobRoleInfo.create(it) }
+                onboarding = onboarding?.let { OnboardingInfo.create(it, regions) },
+                jobRole = jobRoles?.let { JobRoleInfo.create(it) },
             )
         }
     }
@@ -46,18 +47,18 @@ data class OnboardingInfo (
 
     val careerYear: Int,
 
-    val region: String,
+    val region: List<Region>?,
 
     val school: String,
 
     val major: String
 ) {
     companion object{
-        fun create(onboarding: Onboarding): OnboardingInfo{
+        fun create(onboarding: Onboarding, regions : List<Region>?): OnboardingInfo{
             return OnboardingInfo(
                 onboarding.jobCategory,
                 onboarding.careerYear.year,
-                onboarding.region.regionName,
+                regions,
                 onboarding.school.schoolName,
                 onboarding.major
             )
