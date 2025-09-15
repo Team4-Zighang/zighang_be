@@ -3,6 +3,7 @@ package com.zighang.member.facade
 import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.member.dto.request.MajorRequest
 import com.zighang.member.dto.request.OnboardingRequest
+import com.zighang.member.entity.value.School
 import com.zighang.member.service.MajorService
 import com.zighang.member.service.MemberService
 import com.zighang.member.service.OnboardingService
@@ -21,8 +22,8 @@ class MemberFacade(
         onboardingService.upsertOnboarding(member, member.onboardingId, onboardingRequest)
     }
 
-    fun getMajor(majorRequest: MajorRequest): List<String> {
-        val majorList = majorService.getBySchool(majorRequest.school)
+    fun getMajor(school : School): List<String> {
+        val majorList = majorService.getBySchool(school)
         return majorList.map {
             major -> major.majorName
         }
