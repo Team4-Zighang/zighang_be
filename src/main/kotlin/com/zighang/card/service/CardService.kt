@@ -197,7 +197,7 @@ class CardService(
 
     fun getOpenCardList(memberId: Long): List<CardContentResponse> {
         val now = LocalDateTime.now()                  // 시스템 타임존
-        val cutoff = now.minusMinutes(15)
+        val cutoff = now.minusHours(6)
 
         // 1) 회원의 모든 카드 불러오기 (Top3만 쓰는 구조면 Top3, 별도 보관이 있으면 합쳐서 반환)
         val cards: List<CardRedis> = fetchAllCards(memberId)
