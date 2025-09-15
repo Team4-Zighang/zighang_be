@@ -76,7 +76,7 @@ class JobPostingService(
     }
 
     fun filterByCareerAndJobRoleAndLatest(member: Member, depthTwo: List<String>, onboarding: Onboarding, regions: List<String>) : CardRedis {
-        val dataLimit = LocalDateTime.now().minusMonths(2)
+        val dataLimit = LocalDateTime.now().minusDays(1)
         val excludedIds = cardService.getServedIds(member.id)
         val myCareer = onboarding.careerYear.year
         val shuffledDepthTwo = depthTwo.shuffled()
