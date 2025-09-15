@@ -26,6 +26,7 @@ WHERE (
 )
 AND ( jp.recruitment_region IN :regions)
 AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
+AND ( jp.education = 'BACHELOR' OR jp.education = 'IRRELEVANT')
 AND jp.upload_date >= :dateLimit
 AND (
       (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
@@ -53,6 +54,7 @@ WHERE (
 )
 AND ( jp.recruitment_region IN :regions)
 AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
+AND ( jp.education = 'BACHELOR' OR jp.education = 'IRRELEVANT')
 AND (
       (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
    OR (:career > 0 AND ( (jp.min_career <= :career AND jp.max_career >= :career) OR jp.min_career = -1 ))
@@ -81,6 +83,7 @@ WHERE (
 )
 AND ( jp.recruitment_region IN :regions)
 AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
+AND ( jp.education = 'BACHELOR' OR jp.education = 'IRRELEVANT')
 AND (
       (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
    OR (:career > 0 AND ( (jp.min_career <= :career AND jp.max_career >= :career) OR jp.min_career = -1 ))
