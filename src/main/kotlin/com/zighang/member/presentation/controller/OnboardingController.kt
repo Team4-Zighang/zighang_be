@@ -25,12 +25,12 @@ class OnboardingController(
         );
     }
 
-    @PostMapping("/major")
+    @GetMapping("/major/{school}")
     override fun getMajor(
-        @RequestBody majorRequest : MajorRequest
+        @PathVariable(name = "school") school: School
     ) : ResponseEntity<RestResponse<List<String>>> {
         return ResponseEntity.ok(
-            RestResponse<List<String>>(memberFacade.getMajor(majorRequest))
+            RestResponse<List<String>>(memberFacade.getMajor(school))
         )
     }
 

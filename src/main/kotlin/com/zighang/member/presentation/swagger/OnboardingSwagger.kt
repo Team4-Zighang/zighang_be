@@ -4,10 +4,12 @@ import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.core.presentation.RestResponse
 import com.zighang.member.dto.request.MajorRequest
 import com.zighang.member.dto.request.OnboardingRequest
+import com.zighang.member.entity.value.School
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestBody
 
 @Tag(name = "Onboarding", description = "온보딩 관련 컨트롤러")
@@ -23,10 +25,10 @@ interface OnboardingSwagger {
     @Operation(
         summary = "학과정보 불러오는 컨트롤러",
         description = "학과이름을 불러온다.",
-        operationId = "/onbording/major"
+        operationId = "/onbording/{school}"
     )
     fun getMajor(
-        @RequestBody majorRequest: MajorRequest
+        @PathVariable(name = "school") school: School
     ) : ResponseEntity<RestResponse<List<String>>>
 
     @Operation(
