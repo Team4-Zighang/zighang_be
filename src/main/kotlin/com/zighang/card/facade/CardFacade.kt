@@ -11,6 +11,7 @@ import com.zighang.jobposting.service.JobPostingService
 import com.zighang.member.service.JobRoleService
 import com.zighang.member.service.MemberService
 import com.zighang.member.service.OnboardingService
+import com.zighang.member.service.RegionEntityService
 import com.zighang.scrap.service.ScrapService
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -22,7 +23,8 @@ class CardFacade(
     private val onboardingService: OnboardingService,
     private val jobPostingService: JobPostingService,
     private val scrapService: ScrapService,
-    private val jobRoleService: JobRoleService
+    private val jobRoleService: JobRoleService,
+    private val regionEntityService: RegionEntityService
 ) {
     @Value("\${scrap.count_limit}")
     private lateinit var limitScrapCount: String
@@ -41,9 +43,13 @@ class CardFacade(
 
         val jobRoleList = jobRoleService.findAllByOnboardingId(onboarding.id)
             .map { jobRole -> jobRole.jobRole }
-        val leftJob = jobPostingService.filterByCareerAndJobRoleAndLowestView(member, jobRoleList, onboarding)
-        val centerJob = jobPostingService.filterByCareerAndJobRoleAndLowestApply(member, jobRoleList, onboarding)
-        val rightJob = jobPostingService.filterByCareerAndJobRoleAndLatest(member, jobRoleList, onboarding)
+
+        val regions = regionEntityService.findAllByOnboardingId(onboarding.id).map {
+            regionEntity -> regionEntity.region.name
+        }
+        val leftJob = jobPostingService.filterByCareerAndJobRoleAndLowestView(member, jobRoleList, onboarding, regions)
+        val centerJob = jobPostingService.filterByCareerAndJobRoleAndLowestApply(member, jobRoleList, onboarding, regions)
+        val rightJob = jobPostingService.filterByCareerAndJobRoleAndLatest(member, jobRoleList, onboarding, regions)
 
         val threeJobPosting = listOf(leftJob, centerJob, rightJob)
 //        println(leftJob)
@@ -69,7 +75,10 @@ class CardFacade(
         val onboarding = onboardingService.getById(member.onboardingId!!)
         val jobRoleList = jobRoleService.findAllByOnboardingId(onboarding.id)
             .map { jobRole -> jobRole.jobRole }
-        return jobPostingService.replace(member, jobRoleList, onboarding, position);
+        val regions = regionEntityService.findAllByOnboardingId(onboarding.id).map {
+            regionEntity -> regionEntity.region.name
+        }
+        return jobPostingService.replace(member, jobRoleList, onboarding, position, regions);
     }
 
     fun showOpenList(customUserDetails: CustomUserDetails): List<CardContentResponse> {

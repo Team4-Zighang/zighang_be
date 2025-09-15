@@ -1,5 +1,6 @@
 package com.zighang.scrap.service
 
+import com.zighang.card.service.CardService
 import com.zighang.core.application.ObjectStorageService
 import com.zighang.core.exception.DomainException
 import com.zighang.core.exception.GlobalErrorCode
@@ -39,6 +40,7 @@ class ScrapService(
     private val redisTemplate: RedisTemplate<String, Any>,
     private val personalityAnalysisService: PersonalityAnalysisService,
     private val companyMapper: CompanyMapper,
+    private val cardRedisTemplate : RedisTemplate<String, String>
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -169,6 +171,10 @@ class ScrapService(
         }
 
         deleteByIdList(idList)
+        val scrapCount = cardRedisTemplate.opsForValue().get("scrap:$memberId")?.toLong()
+        if(scrapCount != null) {
+            redisTemplate.opsForValue().set("scrap:$memberId", (scrapCount - idList.size))
+        }
     }
 
     @Transactional

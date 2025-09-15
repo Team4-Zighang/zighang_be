@@ -16,6 +16,7 @@ import com.zighang.jobposting.infrastructure.mapper.ContentMapper
 import com.zighang.jobposting.util.*
 import com.zighang.member.entity.Member
 import com.zighang.member.entity.Onboarding
+import com.zighang.member.repository.RegionEntityRepository
 import com.zighang.scrap.repository.ScrapRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.PageRequest
@@ -29,12 +30,12 @@ class JobPostingService(
     private val jobPostingAnalysisService: JobPostingAnalysisService,
     private val companyMapper: CompanyMapper,
     private val contentMapper: ContentMapper,
-    private val scrapRepository: ScrapRepository,
+    private val scrapRepository: ScrapRepository
 ) {
     @Value("\${cloudfront.url}")
     private lateinit var cloudfrontUrl: String
 
-    fun filterByCareerAndJobRoleAndLowestView(member : Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
+    fun filterByCareerAndJobRoleAndLowestView(member : Member, depthTwo: List<String>, onboarding: Onboarding, regions : List<String>) : CardRedis {
         val excludedIds = cardService.getServedIds(member.id)
         val myCareer = onboarding.careerYear.year
         val shuffledDepthTwo = depthTwo.shuffled()
@@ -42,6 +43,7 @@ class JobPostingService(
             val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByViewCount(
                 role = sdt,
                 career = myCareer,
+                regions = regions,
                 excludedIds = excludedIds,
                 excludedEmpty = excludedIds.isEmpty()
             )
@@ -53,7 +55,7 @@ class JobPostingService(
         return toCardRedisAfterPick(member.id, picked)
     }
 
-    fun filterByCareerAndJobRoleAndLowestApply(member: Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
+    fun filterByCareerAndJobRoleAndLowestApply(member: Member, depthTwo: List<String>, onboarding: Onboarding, regions : List<String>) : CardRedis {
         val excludedIds = cardService.getServedIds(member.id)
         val myCareer = onboarding.careerYear.year
         val shuffledDepthTwo = depthTwo.shuffled()
@@ -61,6 +63,7 @@ class JobPostingService(
             val firstTry = jobPostingRepository.findOneByRolesAndCareerExcludingOrderedByApplyCount(
                 role = sdt,
                 career = myCareer,
+                regions = regions,
                 excludedIds = excludedIds,
                 excludedEmpty = excludedIds.isEmpty()
             )
@@ -72,7 +75,7 @@ class JobPostingService(
         return toCardRedisAfterPick(member.id, picked)
     }
 
-    fun filterByCareerAndJobRoleAndLatest(member: Member, depthTwo: List<String>, onboarding: Onboarding) : CardRedis {
+    fun filterByCareerAndJobRoleAndLatest(member: Member, depthTwo: List<String>, onboarding: Onboarding, regions: List<String>) : CardRedis {
         val dataLimit = LocalDateTime.now().minusMonths(2)
         val excludedIds = cardService.getServedIds(member.id)
         val myCareer = onboarding.careerYear.year
@@ -81,6 +84,7 @@ class JobPostingService(
             val firstTry = jobPostingRepository.findRecentByRolesAndCareerExcluding(
                 role = sdt,
                 career = myCareer,
+                regions = regions,
                 excludedIds = excludedIds,
                 excludedEmpty =  excludedIds.isEmpty(),
                 dateLimit = dataLimit
@@ -131,12 +135,12 @@ class JobPostingService(
         )
     }
 
-    fun replace(member: Member, depthTwo: List<String>, onboarding: Onboarding, position: CardPosition) : Boolean{
+    fun replace(member: Member, depthTwo: List<String>, onboarding: Onboarding, position: CardPosition, regions: List<String>) : Boolean{
         val top3 = cardService.getTop3Ids(member.id).toMutableList()
         val retryCard = when (position) {
-            CardPosition.LEFT -> filterByCareerAndJobRoleAndLowestView(member, depthTwo, onboarding)
-            CardPosition.CENTER -> filterByCareerAndJobRoleAndLowestApply(member, depthTwo, onboarding)
-            CardPosition.RIGHT -> filterByCareerAndJobRoleAndLatest(member, depthTwo, onboarding)
+            CardPosition.LEFT -> filterByCareerAndJobRoleAndLowestView(member, depthTwo, onboarding, regions)
+            CardPosition.CENTER -> filterByCareerAndJobRoleAndLowestApply(member, depthTwo, onboarding, regions)
+            CardPosition.RIGHT -> filterByCareerAndJobRoleAndLatest(member, depthTwo, onboarding, regions)
             else -> throw DomainException(GlobalErrorCode.INVALID_POSITION_CARD)
         }
         top3[cardService.idx(position)] = retryCard
