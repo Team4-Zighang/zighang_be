@@ -24,6 +24,7 @@ WHERE (
     OR jp.depth_two LIKE CONCAT('%,', :role)
     OR jp.depth_two LIKE CONCAT('%,', :role, ',%')
 )
+AND ( jp.recruitment_region IN :regions)
 AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
 AND jp.upload_date >= :dateLimit
 AND (
@@ -35,6 +36,7 @@ LIMIT 1
     fun findRecentByRolesAndCareerExcluding(
         @Param("role") role: String,
         @Param("career") career: Int,
+        @Param("regions") regions : List<String>,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
         @Param("dateLimit") dateLimit: LocalDateTime,
@@ -49,6 +51,7 @@ WHERE (
     OR jp.depth_two LIKE CONCAT('%,', :role, ',%')
     OR jp.depth_two LIKE CONCAT('%,', :role)
 )
+AND ( jp.recruitment_region IN :regions)
 AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
 AND (
       (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
@@ -61,6 +64,7 @@ LIMIT 1
     fun findOneByRolesAndCareerExcludingOrderedByApplyCount(
         @Param("role") role: String,
         @Param("career") career: Int,
+        @Param("regions") regions : List<String>,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
     ): JobPosting?
@@ -75,6 +79,7 @@ WHERE (
     OR jp.depth_two LIKE CONCAT('%,', :role)
     OR jp.depth_two LIKE CONCAT('%,', :role, ',%')
 )
+AND ( jp.recruitment_region IN :regions)
 AND ( :excludedEmpty = true OR jp.id NOT IN (:excludedIds) )
 AND (
       (:career = 0 AND ( (jp.min_career = 0 AND jp.max_career >= 0) OR jp.min_career = -1 ))
@@ -86,6 +91,7 @@ LIMIT 1
     fun findOneByRolesAndCareerExcludingOrderedByViewCount(
         @Param("role") role: String,
         @Param("career") career: Int,
+        @Param("regions") regions : List<String>,
         @Param("excludedIds") excludedIds: Set<Long>,
         @Param("excludedEmpty") excludedEmpty: Boolean,
     ): JobPosting?
