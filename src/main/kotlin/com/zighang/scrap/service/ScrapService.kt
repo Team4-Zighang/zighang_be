@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionSynchronization
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile
+import java.util.*
 
 @Service
 @Slf4j
@@ -242,4 +243,10 @@ class ScrapService(
     fun isScrap(memberId : Long, jobPostingId : Long) : Boolean {
         return scrapRepository.findByMemberIdAndJobPostingId(memberId, jobPostingId).isPresent
     }
+
+    @Transactional(readOnly = true)
+    fun findByMemberIdAndJobPostingId(memberId: Long, jobPostingId: Long) : Optional<Scrap> {
+        return scrapRepository.findByMemberIdAndJobPostingId(memberId, jobPostingId)
+    }
+
 }

@@ -20,7 +20,9 @@ data class CardJobPosting(
     @Schema(description = "지역", example = "서울")
     val address : String?,
     @Schema(description = "스크랩 여부", example = "true")
-    var isScrap : Boolean
+    var isScrap : Boolean,
+    @Schema(description = "스크랩 아이디", example = "1")
+    val scrapId: Long?
 ) {
     companion object {
         fun create(
@@ -33,9 +35,10 @@ data class CardJobPosting(
             academicConditions: String?,
             address: String?,
             isScrap: Boolean,
+            scrapId : Long?
         ) : CardJobPosting{
             return CardJobPosting(
-                jobPostingId, companyImageUrl, companyName, title, career, recruitmentType, academicConditions, address, isScrap
+                jobPostingId, companyImageUrl, companyName, title, career, recruitmentType, academicConditions, address, isScrap, scrapId
             )
         }
     }
