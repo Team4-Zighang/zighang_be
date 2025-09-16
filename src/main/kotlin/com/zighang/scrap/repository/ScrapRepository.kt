@@ -8,7 +8,27 @@ import org.springframework.data.jpa.repository.Query
 import java.util.*
 
 interface ScrapRepository : JpaRepository<Scrap, Long> {
-    fun findAllByMemberId(memberId : Long, pageable: Pageable) : Page<Scrap>
+
+    @Query(
+        value = """
+        SELECT scrap.*
+        FROM scrap
+        JOIN job_posting ON job_posting.id = scrap.posting_id
+        WHERE scrap.member_id = :memberId
+        ORDER BY
+          CASE WHEN job_posting.recruitment_end_date < CURDATE() THEN 1 ELSE 0 END,
+          scrap.created_at DESC,
+          scrap.id DESC
+        """,
+        countQuery = """
+        SELECT COUNT(*)
+        FROM scrap 
+        JOIN job_posting ON job_posting.id = scrap.posting_id
+        WHERE scrap.member_id = :memberId
+        """,
+        nativeQuery = true
+    )
+    fun findAllByMemberId(memberId: Long, pageable: Pageable) : Page<Scrap>
 
     fun findByJobPostingIdAndMemberId(jobPostingId : Long, memberId : Long) : Scrap?
 
