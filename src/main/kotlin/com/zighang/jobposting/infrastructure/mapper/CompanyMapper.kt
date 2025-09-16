@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 class CompanyMapper(objectMapper: ObjectMapper) : AbstractObjectMapper<Company>(objectMapper) {
 
     fun toJsonDto(json: String): Company {
-        println(json)
         val mapper = objectMapper.copy().apply {
             configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true)
             configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true)

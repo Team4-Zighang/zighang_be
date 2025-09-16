@@ -43,8 +43,8 @@ class AlumniService(
 
         val jobRole = jobRoleRepository.findByOnboardingId(onboarding.id).map { it.jobRole }
 
-        val myScrappedJobPostingIds =
-            scrapRepository.findByMemberId(getMemberId(customUserDetails)).map { it.jobPostingId }
+        val myScraps = scrapRepository.findByMemberId(getMemberId(customUserDetails))
+        val myScrapMap = myScraps.associateBy({ it.jobPostingId }, { it.id })
 
         val jobPostingList = jobPostingRepository.findTop3ScrappedJobPostingsBySimilarUsers(
             onboarding.school,
@@ -57,8 +57,10 @@ class AlumniService(
                     if(it.startsWith("http")) it else cloudfrontUrl + it
                 }
             }
-            val isSaved = myScrappedJobPostingIds.contains(jobPosting.id)
-            AlumniTop3JobPostingScrapResponseDto.create(jobPosting, company, isSaved)
+            val scrapId = myScrapMap[jobPosting.id]
+            val isSaved = scrapId != null
+
+            AlumniTop3JobPostingScrapResponseDto.create(jobPosting, company, isSaved, scrapId)
         }
     }
 
@@ -138,8 +140,8 @@ class AlumniService(
 
         val jobRole = jobRoleRepository.findByOnboardingId(onboarding.id).map { it.jobRole }
 
-        val myScrappedJobPostingIds =
-            scrapRepository.findByMemberId(getMemberId(customUserDetails)).map { it.jobPostingId }
+        val myScraps = scrapRepository.findByMemberId(getMemberId(customUserDetails))
+        val myScrapMap = myScraps.associateBy({ it.jobPostingId }, { it.id })
 
         val jobPostingsPage = jobPostingRepository.findAllScrappedJobPostingsBySimilarUsers(
             onboarding.school,
@@ -153,8 +155,9 @@ class AlumniService(
                     if(it.startsWith("http")) it else cloudfrontUrl + it
                 }
             }
-            val isSaved = myScrappedJobPostingIds.contains(jobPosting.id)
-            AlumniSimiliarJobPostingResponseDto.create(jobPosting, company, isSaved)
+            val scrapId = myScrapMap[jobPosting.id]
+            val isSaved = scrapId != null
+            AlumniSimiliarJobPostingResponseDto.create(jobPosting, company, isSaved, scrapId)
         }
     }
 
@@ -238,8 +241,8 @@ class AlumniService(
         val jobPostingId = scrapRepository.findByMemberId(memberId).map { it.jobPostingId }
         val jobPostingList = jobPostingRepository.findAllById(jobPostingId)
 
-        val myScrappedJobPostingIds =
-            scrapRepository.findByMemberId(customUserDetails.getId()).map { it.jobPostingId }
+        val myScraps = scrapRepository.findByMemberId(getMemberId(customUserDetails))
+        val myScrapMap = myScraps.associateBy({ it.jobPostingId }, { it.id })
 
         val postingDtoList = jobPostingList.map { jobPosting ->
             val company = companyMapper.toJsonDto(jobPosting.company).apply {
@@ -247,8 +250,9 @@ class AlumniService(
                     if(it.startsWith("http")) it else cloudfrontUrl + it
                 }
             }
-            val isSaved = myScrappedJobPostingIds.contains(jobPosting.id)
-            AlumniSimiliarJobPostingResponseDto.create(jobPosting, company, isSaved)
+            val scrapId = myScrapMap[jobPosting.id]
+            val isSaved = scrapId != null
+            AlumniSimiliarJobPostingResponseDto.create(jobPosting, company, isSaved, scrapId)
         }
 
         return SimilarAlumniDetailResponseDto.create(member, onboarding, jobRole, postingDtoList)

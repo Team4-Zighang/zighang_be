@@ -47,10 +47,13 @@ data class AlumniSimiliarJobPostingResponseDto(
 
     // 내가 저장한 여부
     @Schema(description = "저장 여부", example = "false")
-    val isSaved: Boolean
+    val isSaved: Boolean,
+
+    @Schema(description = "내가 저장한 스크랩 식별자", example = "1")
+    val scrapId: Long? = null,
 ) {
     companion object {
-        fun create(jobPosting: JobPosting, company: Company, isSaved: Boolean): AlumniSimiliarJobPostingResponseDto {
+        fun create(jobPosting: JobPosting, company: Company, isSaved: Boolean, scrapId: Long?): AlumniSimiliarJobPostingResponseDto {
             return AlumniSimiliarJobPostingResponseDto(
                 jobPosting.id,
                 jobPosting.title,
@@ -63,6 +66,7 @@ data class AlumniSimiliarJobPostingResponseDto(
                 jobPosting.viewCount,
                 dDayFactory(jobPosting),
                 isSaved = isSaved,
+                scrapId = scrapId
             )
         }
     }
