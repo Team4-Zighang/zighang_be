@@ -214,8 +214,9 @@ class CardService(
             .filter { it.openDateTime != null && !it.openDateTime!!.isBefore(cutoff) && !it.openDateTime!!.isAfter(now) }
             .sortedByDescending { it.openDateTime } // 최신순
             .map {
-                val isScrap = scrapService.isScrap(memberId, it.cardJobPosting!!.jobPostingId)
-                it.cardJobPosting!!.isScrap = isScrap
+                val scrap = scrapService.findByMemberIdAndJobPostingId(memberId, it.jobPostingId)
+                it.cardJobPosting!!.isScrap = scrap.isPresent
+                it.cardJobPosting!!.scrapId = scrap.map { it.id }.orElse(null)
                 CardContentResponse.from(it) }
             .toList()
     }
