@@ -209,20 +209,15 @@ class JobPostingService(
         val content = jobPosting.content
             .ifBlank { null }
             ?.let {
-                val match = htmlTagRegex.find(it)
-                val tagName = match?.value
-                    ?.removePrefix("<")
-                    ?.takeWhile { ch -> ch.isLetterOrDigit() }
-                    ?.lowercase()
-
-                if (match != null && tagName != "main") {
+                if (htmlTagRegex.containsMatchIn(it)) {
+                    // HTML 태그로 시작하는 경우 -> 필요한 항목들 렌더링 가능하게 보내주기
                     listOf(
                         jobPosting.content,
                         jobPosting.jobDescription,
                         jobPosting.qualification,
                         jobPosting.preferentialTreatment,
                         jobPosting.recruitmentProcess
-                    ).mapNotNull { s -> s.takeIf { !it.isNullOrBlank() } }
+                    ).mapNotNull { it.takeIf { s -> !s.isNullOrBlank() } }
                         .joinToString("<br>")
                 } else {
                     // 일반 텍스트
