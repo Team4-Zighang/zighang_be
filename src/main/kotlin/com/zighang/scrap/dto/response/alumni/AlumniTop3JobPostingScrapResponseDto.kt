@@ -22,7 +22,7 @@ data class AlumniTop3JobPostingScrapResponseDto(
     val companyImageUrl: String?,
 
     @Schema(description = "직무", example = "백엔드")
-    val depthTwo: String,
+    val depthTwo: String?,
 
     @Schema(description = "채용 정보", example = "정규직")
     val recruitmentType: String,
@@ -36,6 +36,9 @@ data class AlumniTop3JobPostingScrapResponseDto(
     @Schema(description = "내가 스크랩한 공고인가 여부", example = "true")
     val isSaved: Boolean,
 
+    @Schema(description = "내가 저장한 스크랩 식별자", example = "1")
+    val scrapId: Long? = null,
+
     @Schema(description = "전일 대비 순위 등락 값", example = "1")
     val changeRankValue: Int,
 
@@ -44,7 +47,7 @@ data class AlumniTop3JobPostingScrapResponseDto(
 ) {
 
     companion object {
-        fun create(jobPosting: JobPosting, company: Company, isSaved: Boolean): AlumniTop3JobPostingScrapResponseDto {
+        fun create(jobPosting: JobPosting, company: Company, isSaved: Boolean, scrapId: Long?): AlumniTop3JobPostingScrapResponseDto {
             return AlumniTop3JobPostingScrapResponseDto(
                 jobPosting.id!!,
                 jobPosting.title,
@@ -55,6 +58,7 @@ data class AlumniTop3JobPostingScrapResponseDto(
                 getCareer(jobPosting),
                 dDayFactory(jobPosting),
                 isSaved = isSaved,
+                scrapId = scrapId,
                 jobPosting.lastRank - jobPosting.currentRank,
                 changeRankStatus =
                     if (jobPosting.lastRank == 0) RankChange.NEW.name else jobPosting.rankChange.name
