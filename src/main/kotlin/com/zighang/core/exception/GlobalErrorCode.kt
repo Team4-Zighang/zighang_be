@@ -25,7 +25,8 @@ enum class GlobalErrorCode(
     NOT_EXIST_MEMBER_CARD(HttpStatus.BAD_REQUEST, "이 멤버는 카드를 지니고 있지 않습니다. 카드 갱신/생성을 하세요"),
     NOT_FOUND_CARD(HttpStatus.NOT_FOUND, "해당 카드 공고는 존재하지 않습니다."),
     LIMIT_CARD(HttpStatus.BAD_REQUEST, "공고 스크랩 수가 부족합니다."),
-    INVALID_POSITION_CARD(HttpStatus.BAD_REQUEST, "잘못된 카드 위치입니다.");
+    INVALID_POSITION_CARD(HttpStatus.BAD_REQUEST, "잘못된 카드 위치입니다."),
+    ALREADY_EXIST_SCRAP(HttpStatus.BAD_REQUEST, "이미 스크랩된 공고입니다.");
 
     override fun toException(): DomainException {
         return DomainException(this)
