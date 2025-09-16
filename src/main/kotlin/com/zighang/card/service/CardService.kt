@@ -89,6 +89,9 @@ class CardService(
         val index = list.indexOfFirst { it.position == position }
         if (index == -1) throw DomainException(GlobalErrorCode.NOT_FOUND_CARD)
 
+
+        val scrap = scrapService.findByMemberIdAndJobPostingId(memberId, list[index].jobPostingId)
+
         // 4) 값 갱신
         val updated = list[index].copy(
             isOpen = true,
@@ -102,7 +105,8 @@ class CardService(
                 list[index].cardJobPosting!!.recruitmentType,
                 list[index].cardJobPosting!!.academicConditions,
                 list[index].cardJobPosting!!.address,
-                scrapService.isScrap(memberId, list[index].jobPostingId)
+                scrap.isPresent,
+                scrap.map { it.id }.orElse(null)
             )
         )
         list[index] = updated
@@ -142,7 +146,8 @@ class CardService(
             recruitmentType,
             academicConditions,
             address,
-            false
+            false,
+            null
         )
     }
 
