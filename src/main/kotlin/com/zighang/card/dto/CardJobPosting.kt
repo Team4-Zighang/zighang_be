@@ -22,7 +22,7 @@ data class CardJobPosting(
     @Schema(description = "스크랩 여부", example = "true")
     var isScrap : Boolean,
     @Schema(description = "스크랩 아이디", example = "1")
-    val scrapId: Long?
+    var scrapId: Long?
 ) {
     companion object {
         fun create(
