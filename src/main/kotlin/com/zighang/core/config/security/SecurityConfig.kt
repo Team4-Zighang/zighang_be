@@ -45,6 +45,7 @@ class SecurityConfig(
                     "/v3/api-docs/**",
                     "/webjars/**",
                     "/onboarding/school",
+                    "/onboarding/major/**",
                     "/posting/**"
                 ).permitAll()
                 .anyRequest().authenticated()
