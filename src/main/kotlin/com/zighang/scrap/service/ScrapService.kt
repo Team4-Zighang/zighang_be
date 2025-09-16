@@ -72,12 +72,18 @@ class ScrapService(
                 if (it.memberId != memberId){
                     throw DomainException(GlobalErrorCode.NOT_EXIST_SCRAP)
                 }
+                if(scrapRepository.findByMemberIdAndJobPostingId(it.memberId, upsertScrapRequest.jobPostingId).isPresent) {
+                    throw DomainException(GlobalErrorCode.ALREADY_EXIST_SCRAP)
+                }
             }.apply {
                 jobPostingId = upsertScrapRequest.jobPostingId
             }.let {
                 savedScrap -> save(savedScrap)
             }
         } ?: run {
+            if(scrapRepository.findByMemberIdAndJobPostingId(customUserDetails.getId(), upsertScrapRequest.jobPostingId).isPresent) {
+                throw DomainException(GlobalErrorCode.ALREADY_EXIST_SCRAP)
+            }
             TransactionSynchronizationManager.registerSynchronization(
                 object : TransactionSynchronization {
                     override fun afterCommit() {
@@ -91,7 +97,6 @@ class ScrapService(
                     }
                 }
             )
-
             save(
                 Scrap.create(
                     upsertScrapRequest.jobPostingId,
