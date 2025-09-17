@@ -7,6 +7,7 @@ import com.zighang.jobposting.util.getCareer
 import com.zighang.jobposting.util.getWorkType
 import com.zighang.scrap.util.dDayFactory
 import io.swagger.v3.oas.annotations.media.Schema
+import kotlin.math.abs
 
 data class AlumniTop3JobPostingScrapResponseDto(
     @Schema(description = "공고 식별자", example = "1")
@@ -59,7 +60,7 @@ data class AlumniTop3JobPostingScrapResponseDto(
                 dDayFactory(jobPosting),
                 isSaved = isSaved,
                 scrapId = scrapId,
-                jobPosting.lastRank - jobPosting.currentRank,
+                abs(jobPosting.lastRank - jobPosting.currentRank),
                 changeRankStatus =
                     if (jobPosting.lastRank == 0) RankChange.NEW.name else jobPosting.rankChange.name
             )
