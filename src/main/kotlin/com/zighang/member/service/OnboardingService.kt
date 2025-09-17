@@ -73,7 +73,7 @@ class OnboardingService(
         jobRoleRepository.deleteByOnboardingId(onboarding.id)
 
         val rolesToSave = onboardingRequest.jobRole
-            .map { it.trim() }
+            .map { it.replace(" ", "") }
             .filter { it.isNotEmpty() }
             .distinct()
             .map { role -> JobRole.create(onboardingId = onboarding.id, jobRole = role) }
