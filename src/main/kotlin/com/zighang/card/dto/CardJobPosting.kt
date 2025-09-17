@@ -1,5 +1,8 @@
 package com.zighang.card.dto
 
+import com.zighang.jobposting.entity.JobPosting
+import com.zighang.jobposting.entity.value.RecruitmentType
+import com.zighang.jobposting.util.getWorkType
 import io.swagger.v3.oas.annotations.media.Schema
 
 data class CardJobPosting(
@@ -38,8 +41,21 @@ data class CardJobPosting(
             scrapId : Long?
         ) : CardJobPosting{
             return CardJobPosting(
-                jobPostingId, companyImageUrl, companyName, title, career, recruitmentType, academicConditions, address, isScrap, scrapId
+                jobPostingId, companyImageUrl, companyName, title, career, getWorkType(recruitmentType), academicConditions, address, isScrap, scrapId
             )
+        }
+
+        fun getWorkType(recruitmentType: String?): String {
+            val workTypes = recruitmentType?.split(",")
+                ?.mapNotNull { RecruitmentType.entries.find { enumVal -> enumVal.name == it } }
+
+            if (workTypes != null) {
+                return workTypes.joinToString(", ") {
+                    it.displayName
+                }
+            } else{
+                return "무관"
+            }
         }
     }
 }
