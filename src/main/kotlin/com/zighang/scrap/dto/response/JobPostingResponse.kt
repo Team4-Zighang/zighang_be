@@ -32,7 +32,7 @@ data class JobPostingResponse(
                 jobPosting.title,
                 company.companyName,
                 jobPosting.expiredDate,
-                computeDday(jobPosting.expiredDate),
+                computeDday(jobPosting.recruitmentEndDate),
                 jobPosting.qualification,
                 jobPosting.preferentialTreatment
             )
