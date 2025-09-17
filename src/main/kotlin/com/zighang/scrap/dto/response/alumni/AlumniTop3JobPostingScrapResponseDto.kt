@@ -60,7 +60,7 @@ data class AlumniTop3JobPostingScrapResponseDto(
                 dDayFactory(jobPosting),
                 isSaved = isSaved,
                 scrapId = scrapId,
-                abs(jobPosting.lastRank - jobPosting.currentRank),
+                if (jobPosting.lastRank == 0) 0 else abs(jobPosting.lastRank - jobPosting.currentRank),
                 changeRankStatus =
                     if (jobPosting.lastRank == 0) RankChange.NEW.name else jobPosting.rankChange.name
             )
