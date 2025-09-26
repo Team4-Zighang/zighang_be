@@ -43,3 +43,6 @@ out/
 src/main/resources/application.yml
 
 .env
+
+### db-Seed Drizzle
+db-seed/node_modules

@@ -12,6 +12,7 @@ import com.zighang.core.jwt.TokenService
 import com.zighang.core.presentation.RestResponse
 import com.zighang.member.repository.MemberRepository
 import io.swagger.v3.oas.annotations.Operation
+import org.springframework.context.annotation.Profile
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -83,6 +84,7 @@ class TestController(
         description = "테스트 용으로 토큰을 발급합니다. 해당 API를 실행한뒤 /member/me를 통해 유저 정보를 불러옵니다.",
         operationId = "/test/token"
     )
+    @Profile("local")
     fun token(
         @RequestParam memberId: Long
     ): ResponseEntity<RestResponse<String>> {
