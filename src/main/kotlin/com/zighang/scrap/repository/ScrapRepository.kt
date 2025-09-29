@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import java.util.*
 
 interface ScrapRepository : JpaRepository<Scrap, Long> {
@@ -44,4 +45,17 @@ interface ScrapRepository : JpaRepository<Scrap, Long> {
     fun countByMemberId(memberId: Long) : Long
 
     fun findByMemberIdAndJobPostingId(memberId: Long, jobPostingId: Long) : Optional<Scrap>
+
+    @Query(
+        value = """
+            select s.* from (
+                select *, ROW_NUMBER() OVER(partition by member_id order by id desc) as rn
+                from scrap
+                where member_id in :memberIds
+            ) s
+            where s.rn <= :limit
+        """,
+        nativeQuery = true
+    )
+    fun findTopNScrapsPerMember(@Param("memberIds") memberIds: List<Long>, @Param("limit") limit: Int): List<Scrap>
 }

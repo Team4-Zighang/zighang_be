@@ -48,7 +48,6 @@ class AlumniServiceTest : BehaviorSpec({
         jobRoleRepository
     )
 
-    // @Value 필드인 cloudfrontUrl을 수동으로 주입합니다.
     beforeSpec {
         ReflectionTestUtils.setField(alumniService, "cloudfrontUrl", "https://test.cloudfront.net/")
     }
@@ -66,49 +65,46 @@ class AlumniServiceTest : BehaviorSpec({
         val currentUserOnboarding = Onboarding(id = currentUserOnboardingId, school = School.SEOUL, major = "컴퓨터공학과", jobCategory = "IT", careerYear = CareerYear.YEAR_0)
         val currentUserJobRoles = listOf(JobRoleEntity(onboardingId = currentUserOnboardingId, jobRole = "백엔드 개발자"))
 
-        // 유사 동문 1 (모든 조건 만족)
         val similarAlumni1 = Member(id = 2L, name = "김동문", email = "kim@test.com", onboardingId = 11L, profileImageUrl = "http://", role = Role.MEMBER)
         val similarOnboarding1 = Onboarding(id = 11L, school = School.SEOUL, major = "컴퓨터공학과", jobCategory = "IT", careerYear = CareerYear.YEAR_0)
         val similarAlumni1JobRoles = listOf(JobRoleEntity(onboardingId = 11L, jobRole = "백엔드 개발자"))
-        val similarAlumni1Scraps = (1..5).map { Scrap(memberId = 2L, jobPostingId = it.toLong(), resumeUrl = null, portfolioUrl = null) } // 5개 스크랩
 
-        // 유사 동문 2 (스크랩 4개 미만으로 필터링될 대상)
+        val similarAlumni1Top4Scraps = (1..4).map { Scrap(memberId = 2L, jobPostingId = it.toLong(), resumeUrl = null, portfolioUrl = null) }
+
         val similarAlumni2 = Member(id = 3L, name = "박동문", email = "park@test.com", onboardingId = 12L, profileImageUrl = "http://", role = Role.MEMBER)
         val similarOnboarding2 = Onboarding(id = 12L, school = School.SEOUL, major = "소프트웨어학과", jobCategory = "IT", careerYear = CareerYear.YEAR_0)
-        val similarAlumni2Scraps = (1..3).map { Scrap(memberId = 3L, jobPostingId = (10 + it).toLong(), resumeUrl = null, portfolioUrl = null) } // 3개 스크랩
 
-        // 스크랩된 공고 데이터
-        val jobPostings = (1..5).map {
+        val jobPostings = (1..4).map {
             mockk<JobPosting>().apply {
                 every { id } returns it.toLong()
-                every { company } returns """{"companyName":"회사${it}","companyImageUrl":null}"""
+                every { company } returns """{"companyName":"회사${it}","companyImageUrl":"http://www.cloudfront.com/image${it}.png"}"""
             }
         }
-        val companyDtos = (1..5).map { Company("회사$it", null) }
+        val companyDtos = (1..4).map { Company("회사$it", "http://www.cloudfront.com/image$it.png") }
 
-        // Mock 설정: 각 Repository가 호출될 때 반환할 값을 지정합니다.
         every { currentUserDetails.getId() } returns currentUserId
         every { memberRepository.findByIdOrNull(currentUserId) } returns currentUser
         every { onboardingRepository.findByIdOrNull(currentUserOnboardingId) } returns currentUserOnboarding
         every { jobRoleRepository.findByOnboardingId(currentUserOnboardingId) } returns currentUserJobRoles
 
-        // 유사 동문 조회 로직 Mocking
         every {
             onboardingRepository.findBySchoolAndJobRoleIn(School.SEOUL, listOf("백엔드 개발자"))
-        } returns listOf(currentUserOnboarding, similarOnboarding1, similarOnboarding2) // 나 자신도 포함
+        } returns listOf(currentUserOnboarding, similarOnboarding1, similarOnboarding2)
 
         every {
-            memberRepository.findByOnboardingIdIn(listOf(11L, 12L)) // 자기 자신(10L)은 필터링됨
+            memberRepository.findByOnboardingIdIn(listOf(11L, 12L))
         } returns listOf(similarAlumni1, similarAlumni2)
 
         When("스크랩을 4개 이상 한 유사 동문 목록을 조회하면") {
-            // Mock 설정 (When 블록에 특화된 설정)
-            every { scrapRepository.findMemberIdsWithMoreThanFourScraps(listOf(2L, 3L)) } returns listOf(2L) // 김동문(id=2)만 필터링
+            every { scrapRepository.findMemberIdsWithMoreThanFourScraps(listOf(2L, 3L)) } returns listOf(2L)
             every { memberRepository.findAllById(listOf(2L)) } returns listOf(similarAlumni1)
             every { onboardingRepository.findAllById(listOf(11L)) } returns listOf(similarOnboarding1)
-            every { scrapRepository.findByMemberIdIn(listOf(2L)) } returns similarAlumni1Scraps
-            every { jobPostingRepository.findAllById(setOf(1L, 2L, 3L, 4L, 5L)) } returns jobPostings
-            every { jobRoleRepository.findByOnboardingId(11L) } returns similarAlumni1JobRoles // N+1 쿼리 Mock
+
+            every { jobRoleRepository.findByOnboardingIdIn(listOf(11L)) } returns similarAlumni1JobRoles
+
+            every { scrapRepository.findTopNScrapsPerMember(listOf(2L), 4) } returns similarAlumni1Top4Scraps
+
+            every { jobPostingRepository.findAllById(setOf(1L, 2L, 3L, 4L)) } returns jobPostings
 
             every { companyMapper.toJsonDto(any()) } returnsMany companyDtos
 
@@ -123,10 +119,18 @@ class AlumniServiceTest : BehaviorSpec({
                 result[0].jobRole shouldBe listOf("백엔드 개발자")
                 result[0].companyLists shouldHaveSize 4
                 result[0].companyLists[0].companyName shouldBe "회사1"
+                result[0].companyLists[3].companyName shouldBe "회사4"
 
                 // 주요 메소드들이 정확한 인자와 함께 호출되었는지 검증
                 verify(exactly = 1) { scrapRepository.findMemberIdsWithMoreThanFourScraps(listOf(2L, 3L)) }
-                verify(exactly = 1) { jobRoleRepository.findByOnboardingId(11L) }
+                verify(exactly = 1) { scrapRepository.findTopNScrapsPerMember(listOf(2L), 4) }
+                verify(exactly = 1) { jobRoleRepository.findByOnboardingIdIn(listOf(11L)) }
+                verify {
+                    companyMapper.toJsonDto("""{"companyName":"회사1","companyImageUrl":"http://www.cloudfront.com/image1.png"}""")
+                    companyMapper.toJsonDto("""{"companyName":"회사2","companyImageUrl":"http://www.cloudfront.com/image2.png"}""")
+                    companyMapper.toJsonDto("""{"companyName":"회사3","companyImageUrl":"http://www.cloudfront.com/image3.png"}""")
+                    companyMapper.toJsonDto("""{"companyName":"회사4","companyImageUrl":"http://www.cloudfront.com/image4.png"}""")
+                }
             }
         }
 
@@ -144,11 +148,10 @@ class AlumniServiceTest : BehaviorSpec({
     Given("로그인한 사용자의 온보딩 정보가 없을 때") {
         val currentUserDetails = mockk<CustomUserDetails>()
         val currentUserId = 1L
-        val currentUser = Member(id = currentUserId, name = "나", email = "me@test.com", onboardingId = null, profileImageUrl = null, role = Role.MEMBER) // onboardingId가 null
+        val currentUser = Member(id = currentUserId, name = "나", email = "me@test.com", onboardingId = null, profileImageUrl = null, role = Role.MEMBER)
 
         every { currentUserDetails.getId() } returns currentUserId
         every { memberRepository.findByIdOrNull(currentUserId) } returns currentUser
-        // onboardingRepository.findByIdOrNull 은 호출되지 않거나 null을 반환해야 함
 
         When("동문 목록 조회를 시도하면") {
             Then("OnboardingErrorCode.NOT_EXIST_ONBOARDING 예외가 발생해야 한다.") {

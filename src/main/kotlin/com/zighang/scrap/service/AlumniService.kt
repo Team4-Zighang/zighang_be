@@ -179,6 +179,73 @@ class AlumniService(
         ).filter { it.id != onboarding.id }
             .map { it.id }
 
+        if(similarOnboardingIds.isEmpty()) return emptyList()
+
+        val allSimilarMemberIds = memberRepository.findByOnboardingIdIn(similarOnboardingIds).map { it.id }
+
+        // 스크랩 공고가 4개 이상인 멤버 ID만 추리기
+        val filteredMemberIds = scrapRepository.findMemberIdsWithMoreThanFourScraps(allSimilarMemberIds)
+
+        if(filteredMemberIds.isEmpty()) return emptyList()
+
+        val similarMembersById = memberRepository.findAllById(filteredMemberIds).associateBy { it.id }
+        val relevantOnboardingIds = similarMembersById.values.mapNotNull { it.onboardingId }
+        val similarOnboardingIdsById = onboardingRepository.findAllById(relevantOnboardingIds).associateBy { it.id }
+
+        val jobRolesByOnboardingId = jobRoleRepository.findByOnboardingIdIn(relevantOnboardingIds)
+            .groupBy({ it.onboardingId }, { it.jobRole })
+
+        val topScraps = scrapRepository.findTopNScrapsPerMember(filteredMemberIds, 4)
+        val topJobPostingIds = topScraps.map{it.jobPostingId}.toSet()
+        val topJobPostingsById = jobPostingRepository.findAllById(topJobPostingIds).associateBy { it.id }
+
+        return filteredMemberIds.mapNotNull { memberId ->
+            val member = similarMembersById[memberId]
+            val memberOnboarding = member?.onboardingId?.let { similarOnboardingIdsById[it] }
+
+            if(member == null || memberOnboarding == null) return@mapNotNull null
+
+            val jobRoles = jobRolesByOnboardingId[memberOnboarding.id] ?: emptyList()
+
+            val companyImages = topScraps.filter{ it.memberId == memberId }
+                .mapNotNull { scrap -> topJobPostingsById[scrap.jobPostingId] }
+                .map{ jobPosting ->
+                    companyMapper.toJsonDto(jobPosting.company).apply {
+                        companyImageUrl = companyImageUrl?.let {url ->
+                            if(url.startsWith("http")) url else cloudfrontUrl + url
+                        }
+                    }
+                }
+
+            SimilarAlumniResponseDto(
+                memberId = member.id,
+                memberName = member.name,
+                school = memberOnboarding.school.schoolName,
+                major = memberOnboarding.major,
+                jobRole = jobRoles,
+                companyLists = companyImages
+            )
+        }
+    }
+
+    // 예전 서비스 코드
+    @Transactional(readOnly = true)
+    fun preGetAlumniBySimilarUsers(
+        customUserDetails: CustomUserDetails
+    ) : List<SimilarAlumniResponseDto> {
+
+        val onboarding = getMemberInfo(customUserDetails).onboardingId?.let {
+            onboardingRepository.findByIdOrNull(it)
+        } ?: throw OnboardingErrorCode.NOT_EXIST_ONBOARDING.toException()
+        val jobRole = jobRoleRepository.findByOnboardingId(onboarding.id).map { it.jobRole }
+
+        // 같은 학교, 같은 직무를 가진 동문 ID 리스트 가져오기
+        val similarOnboardingIds = onboardingRepository.findBySchoolAndJobRoleIn(
+            onboarding.school,
+            jobRole
+        ).filter { it.id != onboarding.id }
+            .map { it.id }
+
         val allSimilarMemberIds = memberRepository.findByOnboardingIdIn(similarOnboardingIds).map { it.id }
 
         // 스크랩 공고가 4개 이상인 멤버 ID만 추리기
@@ -199,12 +266,12 @@ class AlumniService(
             val scrappedJobPostingCompanys = allScraps
                 .filter { it.memberId == filteredMemberId }
                 .mapNotNull { scrap -> jobPostings[scrap.jobPostingId]?.company?.let {
-                        companyMapper.toJsonDto(it).apply {
-                            companyImageUrl = companyImageUrl?.let {
-                                if(it.startsWith("http")) it else cloudfrontUrl + it
-                            }
+                    companyMapper.toJsonDto(it).apply {
+                        companyImageUrl = companyImageUrl?.let {
+                            if(it.startsWith("http")) it else cloudfrontUrl + it
                         }
                     }
+                }
                 }
                 .take(4) // 상위 4개만 가져옴
             val currentJobRoles = jobRoleRepository.findByOnboardingId(currentOnboarding.id).map{it.jobRole}

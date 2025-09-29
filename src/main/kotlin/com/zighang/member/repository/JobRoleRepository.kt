@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface JobRoleRepository : JpaRepository<JobRole, Long> {
     fun deleteByOnboardingId(onboardingId : Long)
     fun findByOnboardingId(onboardingId: Long) : List<JobRole>
+    fun findByOnboardingIdIn(onboardingIds: List<Long>): List<JobRole>
 }
