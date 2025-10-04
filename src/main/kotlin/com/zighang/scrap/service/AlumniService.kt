@@ -4,6 +4,7 @@ import com.zighang.core.infrastructure.CustomUserDetails
 import com.zighang.jobposting.entity.value.Company
 import com.zighang.jobposting.infrastructure.mapper.CompanyMapper
 import com.zighang.jobposting.repository.JobPostingRepository
+import com.zighang.jobposting.service.RankingService
 import com.zighang.member.exception.MemberErrorCode
 import com.zighang.member.exception.OnboardingErrorCode
 import com.zighang.member.repository.JobRoleRepository
@@ -25,7 +26,8 @@ class AlumniService(
     private val jobPostingRepository: JobPostingRepository,
     private val companyMapper: CompanyMapper,
     private val scrapRepository: ScrapRepository,
-    private val jobRoleRepository: JobRoleRepository
+    private val jobRoleRepository: JobRoleRepository,
+    private val rankingService: RankingService
 ) {
 
     @Value("\${cloudfront.url}")
@@ -41,18 +43,22 @@ class AlumniService(
             onboardingRepository.findByIdOrNull(it)
         } ?: throw OnboardingErrorCode.NOT_EXIST_ONBOARDING.toException()
 
-        val jobRole = jobRoleRepository.findByOnboardingId(onboarding.id).map { it.jobRole }
+        val jobRoles = jobRoleRepository.findByOnboardingId(onboarding.id)
+
+        val rankingKey = RankingService.getSimilarUserRankingKey(onboarding.school, jobRoles)
+
+        val top3JoPostingIds = rankingService.getTopRankedJobPostingIds(rankingKey, 3)
+
+        if(top3JoPostingIds.isEmpty()) return emptyList()
+
+        val jobPostingsById = jobPostingRepository.findAllById(top3JoPostingIds).associateBy { it.id }
+        val jobPostingList = top3JoPostingIds.mapNotNull { jobPostingsById[it] }
 
         val myScraps = scrapRepository.findByMemberId(getMemberId(customUserDetails))
-        val myScrapMap = myScraps.associateBy({ it.jobPostingId }, { it.id })
-
-        val jobPostingList = jobPostingRepository.findTop3ScrappedJobPostingsBySimilarUsers(
-            onboarding.school,
-            jobRole
-        )
+        val myScrapMap = myScraps.associateBy({it.jobPostingId}, {it.id})
 
         return jobPostingList.map { jobPosting ->
-            val company = companyMapper.toJsonDto(jobPosting.company).apply {
+            val company = companyMapper.toJsonDto(jobPosting.company).apply{
                 companyImageUrl = companyImageUrl?.let {
                     if(it.startsWith("http")) it else cloudfrontUrl + it
                 }
